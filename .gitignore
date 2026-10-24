@@ -8,3 +8,6 @@ out/
 .DS_Store
 *.log
 kotlin-js-store/
+.kotlin/
+.env.local
+node_modules/

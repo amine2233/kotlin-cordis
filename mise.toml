@@ -1,0 +1,83 @@
+# Shared mise template for Kotlin/Gradle libraries.
+#
+# Copy this to `mise.toml` at the root of a library repo. The CI in
+# `amine2233/kotlin-ci-shared` does not re-implement build/test/docs/release
+# steps — it installs mise (which provisions the [tools] below) and runs these
+# tasks via `mise run <task>`. Keep task NAMES stable so the shared workflows
+# keep working; change task BODIES per project as needed.
+
+[tools]
+java = "temurin-17"
+node = "22"
+ktlint = "1.8.0"
+
+[env]
+_.file = { path = ".env.local", redact = true }
+
+[tasks.build]
+description = "Compile everything and run all checks."
+run = "./gradlew build --no-daemon"
+
+[tasks.test]
+description = "Run the unit tests."
+run = "./gradlew test --no-daemon"
+
+[tasks.test-coverage]
+description = "Run the unit tests with a Kover coverage report (requires the org.jetbrains.kotlinx.kover plugin)."
+run = "./gradlew test koverHtmlReport koverVerify --no-daemon"
+
+[tasks.format]
+description = "Format Kotlin sources with ktlint."
+run = "ktlint --format '**/*.kt' '**/*.kts' '!**/build/**'"
+
+[tasks.check_code]
+description = "Lint Kotlin sources with ktlint."
+run = "ktlint '**/*.kt' '**/*.kts' '!**/build/**' --reporter=plain"
+
+# Convenience aggregate used by CI's lint job: `mise run lint`.
+[tasks.lint]
+description = "Run all static checks."
+depends = ["check_code"]
+
+# Used by CI's title-check job; PR_TITLE comes from the workflow.
+[tasks.check_merge_request_title]
+description = "Check the pull request title follows Conventional Commits."
+run = 'echo "${PR_TITLE?}" | npx --yes -p @commitlint/cli -p @commitlint/config-conventional commitlint --extends @commitlint/config-conventional'
+
+[tasks.build_documentations]
+description = "Build the API documentation with Dokka into build/dokka/html (requires the org.jetbrains.dokka plugin)."
+run = "./gradlew dokkaHtml --no-daemon"
+
+# Called by semantic-release (@semantic-release/exec publishCmd in .releaserc.json).
+[tasks.publish]
+description = "Publish the library to GitHub Packages. Needs GITHUB_ACTOR / GITHUB_TOKEN."
+usage = '''
+flag "--version <version>" help="Version to publish (e.g. 1.2.3)" required=#true
+'''
+run = './gradlew publish -Pversion="${usage_version?}" --no-daemon'
+
+[tasks.release]
+description = "Run semantic-release. Use --dry-run to preview without publishing."
+usage = '''
+flag "-d --dry-run" help="Preview the release without publishing (no tag, no commit, no GitHub Release)"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+
+dry_run_opt=""
+if [[ "${usage_dry_run:-}" == "true" ]]; then
+    dry_run_opt="--dry-run"
+fi
+
+# conventionalcommits is pinned to 8: commit-analyzer@13 / release-notes-generator@14
+# bundle conventional-changelog-writer@8, which cannot load the preset shape of 9+/10+
+# (release notes generation fails with an unpinned latest).
+npx --yes \
+    -p semantic-release \
+    -p @semantic-release/changelog \
+    -p @semantic-release/exec \
+    -p @semantic-release/git \
+    -p conventional-changelog-conventionalcommits@8 \
+    semantic-release $dry_run_opt
+'''
