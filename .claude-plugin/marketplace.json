@@ -1,0 +1,11 @@
+{
+  "name": "kotlin-cordis",
+  "owner": { "name": "Amine Bensalah", "url": "https://github.com/amine2233" },
+  "plugins": [
+    {
+      "name": "kotlin-cordis",
+      "source": "./",
+      "description": "Skill for building with kotlin-cordis (Kotlin Multiplatform plugin kernel), incl. Android, Ktor and CLI recipes."
+    }
+  ]
+}

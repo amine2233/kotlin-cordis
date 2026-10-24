@@ -111,6 +111,46 @@ Any side effect registered inside `Plugin.apply` (event listeners, provided serv
 
 ---
 
+## Usage Reference
+
+Full cheat sheet: [`skills/kotlin-cordis/SKILL.md`](skills/kotlin-cordis/SKILL.md).
+Worked examples: [simple / medium / hard](skills/kotlin-cordis/references/examples.md).
+Platform recipes: [Android / Compose](skills/kotlin-cordis/references/android.md) ·
+[Ktor](skills/kotlin-cordis/references/ktor.md) · [CLI](skills/kotlin-cordis/references/cli.md).
+
+```kotlin
+val app = Context.root()
+
+// Lambda plugin: no object needed for one-off features
+app.plugin("metrics", Inject.of(required = listOf(LoggerKey))) { ctx ->
+    ctx.on<UserSignedUp> { ctx.require(LoggerKey).info("New registration: ${it.name}") }
+    ctx.launch { /* cancelled and joined when the plugin unloads, restarts or fails */ }
+}
+
+// Flows: UI binding (e.g. Compose: collectAsState)
+val signups: Flow<UserSignedUp> = app.events<UserSignedUp>()
+val db: Flow<Database?> = app.serviceFlow(DatabaseKey)   // current value, then each provide/withdraw
+
+// Await a plugin that may still be waiting for dependencies
+val status = app.plugin(Repo).awaitActive()              // Active | Failed | Disposed
+
+// Type-safe load plan (cordis-loader)
+val plan = loadPlan {
+    plugin("database", config = DbConfig("postgres://..."), serializer = DbConfig.serializer())
+    plugin("analytics", name = "custom-analytics")
+}
+val outcomes = app.load(plan, registry)
+```
+
+`ctx[Key]` is lock-free (copy-on-write registry), so it is safe to call from any thread.
+
+### Claude / skills.sh
+
+The repo is a Claude Code plugin and ships an agent skill: `/plugin marketplace add amine2233/kotlin-cordis` or
+`npx skills add amine2233/kotlin-cordis`. Details: [`docs/CLAUDE-INTEGRATION.md`](docs/CLAUDE-INTEGRATION.md).
+
+---
+
 ## Build & Test
 
 ```bash

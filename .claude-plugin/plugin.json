@@ -1,0 +1,10 @@
+{
+  "name": "kotlin-cordis",
+  "description": "Skill for building with kotlin-cordis, the Kotlin Multiplatform plugin kernel: services, reactive plugins, flows, load plans, with Android, Ktor and CLI recipes.",
+  "version": "0.1.0",
+  "author": { "name": "Amine Bensalah", "url": "https://github.com/amine2233" },
+  "homepage": "https://github.com/amine2233/kotlin-cordis",
+  "repository": "https://github.com/amine2233/kotlin-cordis",
+  "license": "MIT",
+  "keywords": ["kotlin", "kotlin-multiplatform", "plugin", "dependency-injection", "ktor", "android"]
+}
