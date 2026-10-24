@@ -1,0 +1,4 @@
+[tools]
+java = "temurin-21.0.11+10.0.LTS"
+gradle = "8.14.5"
+ktlint = "1.8.0"
