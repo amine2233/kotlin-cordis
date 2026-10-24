@@ -12,7 +12,7 @@ typealias LoaderAction = suspend (Context) -> Fork.Status
  * Maps string resolve keys to plugin types; the only place strings name plugins.
  */
 class PluginRegistry(
-    val json: Json = Json { ignoreUnknownKeys = true }
+    val json: Json = Json { ignoreUnknownKeys = true },
 ) {
     private val makers = mutableMapOf<String, (String?) -> LoaderAction>()
 
@@ -22,7 +22,7 @@ class PluginRegistry(
     fun <C> register(
         plugin: Plugin<C>,
         key: String,
-        serializer: KSerializer<C>
+        serializer: KSerializer<C>,
     ) {
         register(plugin, key) { rawConfig ->
             if (rawConfig == null) {
@@ -38,7 +38,7 @@ class PluginRegistry(
     fun <C> register(
         plugin: Plugin<C>,
         key: String,
-        decode: (String?) -> C
+        decode: (String?) -> C,
     ) {
         makers[key] = { rawConfig ->
             val config = decode(rawConfig)
@@ -52,14 +52,17 @@ class PluginRegistry(
      */
     fun register(
         plugin: Plugin<Unit>,
-        key: String
+        key: String,
     ) {
         register(plugin, key) { Unit }
     }
 
     fun isRegistered(key: String): Boolean = makers.containsKey(key)
 
-    fun loader(key: String, config: String?): LoaderAction? {
+    fun loader(
+        key: String,
+        config: String?,
+    ): LoaderAction? {
         val maker = makers[key] ?: return null
         return maker(config)
     }

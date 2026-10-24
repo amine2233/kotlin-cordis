@@ -17,25 +17,32 @@ interface Logger {
 
 interface Database {
     val label: String
-    fun save(key: String, value: String)
+
+    fun save(
+        key: String,
+        value: String,
+    )
+
     fun load(key: String): String?
 }
 
-class UserRepository(private val db: Database) {
+class UserRepository(
+    private val db: Database,
+) {
     fun create(name: String) {
         db.save("user:$name", name)
     }
 
-    fun find(name: String): String? {
-        return db.load("user:$name")
-    }
+    fun find(name: String): String? = db.load("user:$name")
 
     val backend: String
         get() = db.label
 }
 
 object LoggerKey : ServiceKey<Logger>
+
 object DatabaseKey : ServiceKey<Database>
+
 object UserRepositoryKey : ServiceKey<UserRepository>
 
 // Cordis-style mixins: ctx.logger, ctx.database, ctx.users
@@ -50,7 +57,9 @@ val Context.users: UserRepository?
 
 // MARK: - Plugins (implementations)
 
-class ConsoleLogger(private val prefix: String) : Logger {
+class ConsoleLogger(
+    private val prefix: String,
+) : Logger {
     override fun info(message: String) {
         println("$prefix $message")
     }
@@ -59,21 +68,25 @@ class ConsoleLogger(private val prefix: String) : Logger {
 object ConsoleLoggerPlugin : ServicePlugin<LoggerKey, Logger, String> {
     override val key = LoggerKey
 
-    override suspend fun make(ctx: Context, config: String): Logger {
-        return ConsoleLogger(prefix = config)
-    }
+    override suspend fun make(
+        ctx: Context,
+        config: String,
+    ): Logger = ConsoleLogger(prefix = config)
 }
 
-class InMemoryDatabase(override val label: String) : Database {
+class InMemoryDatabase(
+    override val label: String,
+) : Database {
     private val storage = mutableMapOf<String, String>()
 
-    override fun save(key: String, value: String) {
+    override fun save(
+        key: String,
+        value: String,
+    ) {
         storage[key] = value
     }
 
-    override fun load(key: String): String? {
-        return storage[key]
-    }
+    override fun load(key: String): String? = storage[key]
 }
 
 /**
@@ -83,7 +96,10 @@ object InMemoryDatabasePlugin : ServicePlugin<DatabaseKey, Database, String> {
     override val key = DatabaseKey
     override val inject = Inject.of(optional = listOf(LoggerKey))
 
-    override suspend fun make(ctx: Context, config: String): Database {
+    override suspend fun make(
+        ctx: Context,
+        config: String,
+    ): Database {
         ctx.logger?.info("🔌 DB '$config' connected")
         ctx.onDispose { ctx.logger?.info("🔌 DB '$config' closed") }
         return InMemoryDatabase(label = config)
@@ -94,30 +110,40 @@ object InMemoryDatabasePlugin : ServicePlugin<DatabaseKey, Database, String> {
  * Domain service built on top of another service.
  */
 object UserRepositoryPlugin : Plugin<Unit> {
-    override val inject = Inject.of(
-        required = listOf(DatabaseKey),
-        optional = listOf(LoggerKey)
-    )
+    override val inject =
+        Inject.of(
+            required = listOf(DatabaseKey),
+            optional = listOf(LoggerKey),
+        )
 
-    override suspend fun apply(ctx: Context, config: Unit) {
+    override suspend fun apply(
+        ctx: Context,
+        config: Unit,
+    ) {
         val db = ctx.require(DatabaseKey)
         ctx.provide(UserRepositoryKey, UserRepository(db = db))
         ctx.logger?.info("👤 UserRepository ready on '${db.label}'")
     }
 }
 
-data class UserSignedUp(val name: String) : CordisEvent
+data class UserSignedUp(
+    val name: String,
+) : CordisEvent
 
 /**
  * A feature: reacts to events, uses services, cleans up by itself.
  */
 object WelcomeFeature : Plugin<Unit> {
-    override val inject = Inject.of(
-        required = listOf(UserRepositoryKey),
-        optional = listOf(LoggerKey)
-    )
+    override val inject =
+        Inject.of(
+            required = listOf(UserRepositoryKey),
+            optional = listOf(LoggerKey),
+        )
 
-    override suspend fun apply(ctx: Context, config: Unit) {
+    override suspend fun apply(
+        ctx: Context,
+        config: Unit,
+    ) {
         val users = ctx.require(UserRepositoryKey)
         ctx.on<UserSignedUp> { event ->
             users.create(event.name)
@@ -154,9 +180,10 @@ suspend fun runDemo() {
 
     println("\n5) Space: two isolated tenants, each with its own DB, same plugins")
     for (tenant in listOf("acme", "globex")) {
-        val scoped = app
-            .isolate(DatabaseKey, label = tenant)
-            .isolate(UserRepositoryKey, label = tenant)
+        val scoped =
+            app
+                .isolate(DatabaseKey, label = tenant)
+                .isolate(UserRepositoryKey, label = tenant)
         scoped.plugin(InMemoryDatabasePlugin, "db-$tenant")
         scoped.plugin(UserRepositoryPlugin)
     }
@@ -169,6 +196,7 @@ suspend fun runDemo() {
     app.dispose()
 }
 
-fun main() = runBlocking {
-    runDemo()
-}
+fun main() =
+    runBlocking {
+        runDemo()
+    }

@@ -19,16 +19,14 @@ interface ServiceKey<T : Any> {
  */
 data class ServiceId(
     val raw: Any,
-    val description: String = (raw as? KClass<*>)?.simpleName ?: raw.toString()
+    val description: String = (raw as? KClass<*>)?.simpleName ?: raw.toString(),
 ) {
     override fun toString(): String = description
 
     companion object {
-        fun of(kClass: KClass<*>): ServiceId =
-            ServiceId(kClass, kClass.simpleName ?: "AnonymousKey")
+        fun of(kClass: KClass<*>): ServiceId = ServiceId(kClass, kClass.simpleName ?: "AnonymousKey")
 
-        fun of(key: ServiceKey<*>): ServiceId =
-            key.serviceId
+        fun of(key: ServiceKey<*>): ServiceId = key.serviceId
     }
 }
 
@@ -39,7 +37,7 @@ data class ServiceId(
  */
 data class Inject(
     val required: List<ServiceId> = emptyList(),
-    val optional: List<ServiceId> = emptyList()
+    val optional: List<ServiceId> = emptyList(),
 ) {
     val all: List<ServiceId> get() = required + optional
 
@@ -48,11 +46,12 @@ data class Inject(
 
         fun of(
             required: List<ServiceKey<*>> = emptyList(),
-            optional: List<ServiceKey<*>> = emptyList()
-        ): Inject = Inject(
-            required = required.map { it.serviceId },
-            optional = optional.map { it.serviceId }
-        )
+            optional: List<ServiceKey<*>> = emptyList(),
+        ): Inject =
+            Inject(
+                required = required.map { it.serviceId },
+                optional = optional.map { it.serviceId },
+            )
     }
 }
 
@@ -62,10 +61,9 @@ data class Inject(
  */
 data class Slot(
     val service: ServiceId,
-    val realm: String = SHARED_REALM
+    val realm: String = SHARED_REALM,
 ) {
-    override fun toString(): String =
-        if (realm == SHARED_REALM) service.toString() else "$service@$realm"
+    override fun toString(): String = if (realm == SHARED_REALM) service.toString() else "$service@$realm"
 
     companion object {
         const val SHARED_REALM = "shared"
@@ -75,18 +73,23 @@ data class Slot(
 /**
  * Errors thrown by Cordis operations.
  */
-sealed class CordisException(message: String) : Exception(message) {
-    class MissingService(val service: ServiceId) :
-        CordisException("Service $service is not available in this context")
+sealed class CordisException(
+    message: String,
+) : Exception(message) {
+    class MissingService(
+        val service: ServiceId,
+    ) : CordisException("Service $service is not available in this context")
 
-    class ServiceConflict(val slot: Slot, val existingOwner: String) :
-        CordisException("Service $slot is already provided by $existingOwner")
+    class ServiceConflict(
+        val slot: Slot,
+        val existingOwner: String,
+    ) : CordisException("Service $slot is already provided by $existingOwner")
 
-    class Disposed :
-        CordisException("Context has been disposed")
+    class Disposed : CordisException("Context has been disposed")
 
-    class NotPublished(val slot: Slot) :
-        CordisException("Service $slot is not published by this context")
+    class NotPublished(
+        val slot: Slot,
+    ) : CordisException("Service $slot is not published by this context")
 }
 
 // MARK: - Events
@@ -101,7 +104,7 @@ interface CordisEvent
  */
 data class ServiceChanged(
     val slot: Slot,
-    val isAvailable: Boolean
+    val isAvailable: Boolean,
 ) : CordisEvent
 
 /**
@@ -109,7 +112,7 @@ data class ServiceChanged(
  */
 data class PluginFailed(
     val plugin: String,
-    val error: Throwable
+    val error: Throwable,
 ) : CordisEvent
 
 /**
@@ -118,7 +121,7 @@ data class PluginFailed(
  */
 data class TeardownFailed(
     val plugin: String,
-    val error: Throwable
+    val error: Throwable,
 ) : CordisEvent
 
 /**
@@ -126,5 +129,5 @@ data class TeardownFailed(
  */
 data class PluginStatusChanged(
     val plugin: String,
-    val status: Fork.Status
+    val status: Fork.Status,
 ) : CordisEvent

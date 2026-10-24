@@ -15,7 +15,7 @@ typealias Disposer = suspend () -> Unit
  */
 class Disposable(
     private var action: Disposer?,
-    private val failureHandler: suspend (Throwable) -> Unit = {}
+    private val failureHandler: suspend (Throwable) -> Unit = {},
 ) {
     val isDisposed: Boolean
         get() = action == null
@@ -38,7 +38,7 @@ class Disposable(
  */
 class Scope(
     private val failureHandler: suspend (Throwable) -> Unit = {},
-    private val coroutineScope: CoroutineScope? = null
+    private val coroutineScope: CoroutineScope? = null,
 ) {
     private val handles = mutableMapOf<Int, Disposable>()
     private var counter = 0
@@ -52,13 +52,14 @@ class Scope(
     fun collect(teardown: Disposer): Disposable {
         counter++
         val id = counter
-        val handle = Disposable(
-            action = {
-                handles.remove(id)
-                teardown()
-            },
-            failureHandler = failureHandler
-        )
+        val handle =
+            Disposable(
+                action = {
+                    handles.remove(id)
+                    teardown()
+                },
+                failureHandler = failureHandler,
+            )
 
         if (isDisposed) {
             val scope = coroutineScope ?: CoroutineScope(Dispatchers.Default)
@@ -73,9 +74,10 @@ class Scope(
         if (isDisposed) return
         isDisposed = true
 
-        val ordered = handles.entries
-            .sortedByDescending { it.key }
-            .map { it.value }
+        val ordered =
+            handles.entries
+                .sortedByDescending { it.key }
+                .map { it.value }
         handles.clear()
 
         for (handle in ordered) {

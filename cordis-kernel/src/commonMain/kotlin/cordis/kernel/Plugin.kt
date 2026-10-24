@@ -1,5 +1,10 @@
 package cordis.kernel
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+
 /**
  * Everything is a plugin: features, services, adapters, even the app shell.
  *
@@ -21,7 +26,10 @@ interface Plugin<C> {
     val name: String get() = this::class.simpleName ?: "Plugin"
     val inject: Inject get() = Inject.NONE
 
-    suspend fun apply(ctx: Context, config: C)
+    suspend fun apply(
+        ctx: Context,
+        config: C,
+    )
 
     /**
      * Checks the shape of a config before `update` tears anything down; throw to reject it.
@@ -37,7 +45,9 @@ sealed class UpdateOutcome {
     data object Applied : UpdateOutcome()
 
     /** Validation threw; the running instance was left untouched. */
-    data class Rejected(val error: Throwable) : UpdateOutcome()
+    data class Rejected(
+        val error: Throwable,
+    ) : UpdateOutcome()
 
     /** The plugin is active and the config equals the last applied one, so nothing was restarted. */
     data object Unchanged : UpdateOutcome()
@@ -53,26 +63,33 @@ class Fork(
     val inject: Inject,
     val parent: Context,
     private var config: Any? = null,
-    private var body: suspend (Context) -> Unit
+    private var body: suspend (Context) -> Unit,
 ) {
     sealed class Status {
         data object Pending : Status()
+
         data object Loading : Status()
+
         data object Active : Status()
-        data class Failed(val reason: String) : Status()
+
+        data class Failed(
+            val reason: String,
+        ) : Status()
+
         data object Disposed : Status()
     }
 
     val id: PluginId = PluginId(this)
-    var status: Status = Status.Pending
-        private set
+    private val statusState = MutableStateFlow<Status>(Status.Pending)
+    val statusFlow: StateFlow<Status> = statusState.asStateFlow()
+    val status: Status get() = statusState.value
 
     private val registry: Registry = parent.registry
     private var appliedConfig: Any? = null
 
     private data class Runtime(
         val context: Context,
-        val snapshot: Map<Slot, OccurrenceId?>
+        val snapshot: Map<Slot, OccurrenceId?>,
     )
 
     private var runtime: Runtime? = null
@@ -83,9 +100,7 @@ class Fork(
     // MARK: Reactive core
 
     /** Does this fork react to changes on [slot]? */
-    fun dependsOn(slot: Slot): Boolean {
-        return inject.all.any { parent.slot(it) == slot }
-    }
+    fun dependsOn(slot: Slot): Boolean = inject.all.any { parent.slot(it) == slot }
 
     /**
      * Current occurrences of every injected slot, or null if a required one is missing.
@@ -131,13 +146,16 @@ class Fork(
             current == null && wanted == null -> {
                 setStatus(Status.Pending)
             }
+
             current == null && wanted != null -> {
                 start(wanted)
             }
+
             current != null && wanted == null -> {
                 stop()
                 setStatus(Status.Pending)
             }
+
             current != null && wanted != null -> {
                 if (forceRestart || current.snapshot != wanted) {
                     stop()
@@ -149,21 +167,23 @@ class Fork(
     }
 
     private suspend fun start(snapshot: Map<Slot, OccurrenceId?>) {
-        val scope = Scope(
-            failureHandler = { error ->
-                registry.emit(TeardownFailed(plugin = name, error = error))
-            },
-            coroutineScope = registry.coroutineScope
-        )
-        val ctx = Context(
-            registry = registry,
-            parent = parent,
-            fork = this,
-            scope = scope,
-            realms = parent.realms,
-            layers = parent.layers,
-            zoneId = parent.zoneId
-        )
+        val scope =
+            Scope(
+                failureHandler = { error ->
+                    registry.emit(TeardownFailed(plugin = name, error = error))
+                },
+                coroutineScope = registry.coroutineScope,
+            )
+        val ctx =
+            Context(
+                registry = registry,
+                parent = parent,
+                fork = this,
+                scope = scope,
+                realms = parent.realms,
+                layers = parent.layers,
+                zoneId = parent.zoneId,
+            )
         runtime = Runtime(context = ctx, snapshot = snapshot)
         setStatus(Status.Loading)
         try {
@@ -187,7 +207,7 @@ class Fork(
 
     private suspend fun setStatus(newStatus: Status) {
         if (newStatus == status) return
-        status = newStatus
+        statusState.value = newStatus
         parent.emit(PluginStatusChanged(plugin = name, status = newStatus))
     }
 
@@ -199,7 +219,7 @@ class Fork(
      */
     suspend fun reconfigure(
         config: Any?,
-        body: suspend (Context) -> Unit
+        body: suspend (Context) -> Unit,
     ): Boolean {
         if (status == Status.Active && appliedConfig != null && appliedConfig == config) {
             return false
@@ -224,10 +244,16 @@ class Fork(
  */
 class PluginHandle<C>(
     val fork: Fork,
-    private val plugin: Plugin<C>
+    private val plugin: Plugin<C>,
 ) {
     val status: Fork.Status
         get() = fork.status
+
+    /**
+     * Suspends until the plugin leaves Pending / Loading; returns Active, Failed or Disposed.
+     * Must not be called from the plugin's own `apply`, which would wait on itself.
+     */
+    suspend fun awaitActive(): Fork.Status = fork.statusFlow.first { it !is Fork.Status.Pending && it !is Fork.Status.Loading }
 
     /**
      * Hot-reconfigure: validates the config, then tears the plugin down and re-applies it.
@@ -239,9 +265,10 @@ class PluginHandle<C>(
         } catch (t: Throwable) {
             return UpdateOutcome.Rejected(t)
         }
-        val restarted = fork.reconfigure(config) { ctx ->
-            plugin.apply(ctx, config)
-        }
+        val restarted =
+            fork.reconfigure(config) { ctx ->
+                plugin.apply(ctx, config)
+            }
         return if (restarted) UpdateOutcome.Applied else UpdateOutcome.Unchanged
     }
 

@@ -1,14 +1,15 @@
 package cordis.kernel
 
+import kotlinx.coroutines.delay
 import kotlin.time.Duration
 import kotlin.time.TimeSource
-import kotlinx.coroutines.delay
 
 /**
  * Clock abstraction used by timer effects ([Context.after], [Context.every]).
  */
 interface CordisClock {
     val now: Duration
+
     suspend fun delay(duration: Duration)
 }
 

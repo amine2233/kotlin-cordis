@@ -14,16 +14,13 @@ import kotlin.reflect.KClass
 class RecordedEvents {
     val all = mutableListOf<CordisEvent>()
 
-    inline fun <reified E : CordisEvent> ofType(): List<E> {
-        return all.filterIsInstance<E>()
-    }
+    inline fun <reified E : CordisEvent> ofType(): List<E> = all.filterIsInstance<E>()
 
-    fun <E : CordisEvent> ofType(type: KClass<E>): List<E> {
-        return all.filter { type.isInstance(it) }.map {
+    fun <E : CordisEvent> ofType(type: KClass<E>): List<E> =
+        all.filter { type.isInstance(it) }.map {
             @Suppress("UNCHECKED_CAST")
             it as E
         }
-    }
 
     val failures: List<CordisEvent>
         get() = all.filter { it is PluginFailed || it is TeardownFailed }
@@ -36,9 +33,7 @@ class RecordedEvents {
 /**
  * Runs [body] against a fresh root context, always disposes it, and returns the recorded events.
  */
-suspend fun withTestApp(
-    body: suspend (Context, RecordedEvents) -> Unit
-): RecordedEvents {
+suspend fun withTestApp(body: suspend (Context, RecordedEvents) -> Unit): RecordedEvents {
     val ctx = Context.root()
     val events = RecordedEvents()
     ctx.on<PluginFailed> { events.record(it) }

@@ -3,7 +3,9 @@ package cordis.kernel
 /**
  * Opaque identity of a plugin application within one snapshot-able graph.
  */
-data class PluginId(val raw: Any) {
+data class PluginId(
+    val raw: Any,
+) {
     override fun toString(): String = "PluginId($raw)"
 }
 
@@ -14,7 +16,7 @@ data class PluginInfo(
     val id: PluginId,
     val name: String,
     val status: Fork.Status,
-    val parent: PluginId?
+    val parent: PluginId?,
 )
 
 /**
@@ -24,7 +26,7 @@ data class SlotInfo(
     val service: String,
     val realm: String,
     val provider: PluginId?,
-    val generation: Int
+    val generation: Int,
 )
 
 /**
@@ -33,5 +35,5 @@ data class SlotInfo(
  */
 data class RuntimeSnapshot(
     val plugins: List<PluginInfo>,
-    val slots: List<SlotInfo>
+    val slots: List<SlotInfo>,
 )

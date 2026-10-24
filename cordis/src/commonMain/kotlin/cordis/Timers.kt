@@ -4,11 +4,11 @@ import cordis.kernel.Context
 import cordis.kernel.CordisClock
 import cordis.kernel.DefaultClock
 import cordis.kernel.Disposable
-import kotlin.coroutines.coroutineContext
-import kotlin.time.Duration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.coroutines.coroutineContext
+import kotlin.time.Duration
 
 /**
  * Runs [body] once after [delay]; cancelled when this context is disposed.
@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 suspend fun Context.after(
     delay: Duration,
     clock: CordisClock = DefaultClock,
-    body: suspend () -> Unit
+    body: suspend () -> Unit,
 ): Disposable {
     return ownTask {
         try {
@@ -36,7 +36,7 @@ suspend fun Context.after(
 suspend fun Context.every(
     interval: Duration,
     clock: CordisClock = DefaultClock,
-    body: suspend () -> Unit
+    body: suspend () -> Unit,
 ): Disposable {
     return ownTask {
         while (coroutineContext.isActive) {
@@ -51,13 +51,12 @@ suspend fun Context.every(
     }
 }
 
-private suspend fun Context.ownTask(
-    run: suspend CoroutineScope.() -> Unit
-): Disposable {
+private suspend fun Context.ownTask(run: suspend CoroutineScope.() -> Unit): Disposable {
     return effect {
-        val job = registry.coroutineScope.launch {
-            run()
-        }
+        val job =
+            registry.coroutineScope.launch {
+                run()
+            }
         return@effect {
             job.cancel()
             job.join()
