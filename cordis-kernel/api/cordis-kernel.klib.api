@@ -112,9 +112,6 @@ final class cordis.kernel/Fork { // cordis.kernel/Fork|null[0]
         final fun <get-statusFlow>(): kotlinx.coroutines.flow/StateFlow<cordis.kernel/Fork.Status> // cordis.kernel/Fork.statusFlow.<get-statusFlow>|<get-statusFlow>(){}[0]
 
     final fun dependsOn(cordis.kernel/Slot): kotlin/Boolean // cordis.kernel/Fork.dependsOn|dependsOn(cordis.kernel.Slot){}[0]
-    final suspend fun dispose() // cordis.kernel/Fork.dispose|dispose(){}[0]
-    final suspend fun reconfigure(kotlin/Any?, kotlin.coroutines/SuspendFunction1<cordis.kernel/Context, kotlin/Unit>): kotlin/Boolean // cordis.kernel/Fork.reconfigure|reconfigure(kotlin.Any?;kotlin.coroutines.SuspendFunction1<cordis.kernel.Context,kotlin.Unit>){}[0]
-    final suspend fun refresh() // cordis.kernel/Fork.refresh|refresh(){}[0]
 
     sealed class Status { // cordis.kernel/Fork.Status|null[0]
         final class Failed : cordis.kernel/Fork.Status { // cordis.kernel/Fork.Status.Failed|null[0]

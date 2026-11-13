@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 
 /**
  * Everything is a plugin: features, services, adapters, even the app shell.
@@ -124,7 +125,7 @@ class Fork(
     }
 
     /** Serialized, re-entrancy-safe reconciliation. */
-    suspend fun refresh() {
+    internal suspend fun refresh() {
         if (isReconciling) {
             needsReconcile = true
             return
@@ -217,7 +218,7 @@ class Fork(
      * Replaces the plugin body (new config) and restarts if running,
      * unless the config equals the last applied one.
      */
-    suspend fun reconfigure(
+    internal suspend fun reconfigure(
         config: Any?,
         body: suspend (Context) -> Unit,
     ): Boolean {
@@ -231,7 +232,7 @@ class Fork(
         return true
     }
 
-    suspend fun dispose() {
+    internal suspend fun dispose() {
         if (status == Status.Disposed) return
         stop()
         setStatus(Status.Disposed)
@@ -266,8 +267,10 @@ class PluginHandle<C>(
             return UpdateOutcome.Rejected(t)
         }
         val restarted =
-            fork.reconfigure(config) { ctx ->
-                plugin.apply(ctx, config)
+            withContext(fork.parent.registry.dispatcher) {
+                fork.reconfigure(config) { ctx ->
+                    plugin.apply(ctx, config)
+                }
             }
         return if (restarted) UpdateOutcome.Applied else UpdateOutcome.Unchanged
     }
@@ -276,6 +279,8 @@ class PluginHandle<C>(
      * Hot-unload: every side effect of this plugin (and its sub-plugins) is rolled back.
      */
     suspend fun dispose() {
-        fork.dispose()
+        withContext(fork.parent.registry.dispatcher) {
+            fork.dispose()
+        }
     }
 }
