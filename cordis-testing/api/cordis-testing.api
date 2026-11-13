@@ -1,0 +1,25 @@
+public final class cordis/testing/ManualClock : cordis/kernel/CordisClock {
+	public synthetic fun <init> (JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (JLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun advance-LRDsOJo (J)V
+	public fun delay-VtjQ1oo (JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getNow-UwyO8pc ()J
+	public final fun getSleeperCount ()I
+}
+
+public final class cordis/testing/RecordedEvents {
+	public fun <init> ()V
+	public final fun getAll ()Ljava/util/List;
+	public final fun getFailures ()Ljava/util/List;
+	public final fun ofType (Lkotlin/reflect/KClass;)Ljava/util/List;
+	public final fun record (Lcordis/kernel/CordisEvent;)V
+}
+
+public final class cordis/testing/RecordedEventsKt {
+	public static final fun withTestApp (Lkotlin/jvm/functions/Function3;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class cordis/testing/SettleKt {
+	public static final fun settle (Lkotlin/jvm/functions/Function0;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+

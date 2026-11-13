@@ -1,0 +1,35 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, macosX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.amine2233:cordis-testing>
+final class cordis.testing/ManualClock : cordis.kernel/CordisClock { // cordis.testing/ManualClock|null[0]
+    constructor <init>(kotlin.time/Duration = ...) // cordis.testing/ManualClock.<init>|<init>(kotlin.time.Duration){}[0]
+
+    final val now // cordis.testing/ManualClock.now|{}now[0]
+        final fun <get-now>(): kotlin.time/Duration // cordis.testing/ManualClock.now.<get-now>|<get-now>(){}[0]
+    final val sleeperCount // cordis.testing/ManualClock.sleeperCount|{}sleeperCount[0]
+        final fun <get-sleeperCount>(): kotlin/Int // cordis.testing/ManualClock.sleeperCount.<get-sleeperCount>|<get-sleeperCount>(){}[0]
+
+    final fun advance(kotlin.time/Duration) // cordis.testing/ManualClock.advance|advance(kotlin.time.Duration){}[0]
+    final suspend fun delay(kotlin.time/Duration) // cordis.testing/ManualClock.delay|delay(kotlin.time.Duration){}[0]
+}
+
+final class cordis.testing/RecordedEvents { // cordis.testing/RecordedEvents|null[0]
+    constructor <init>() // cordis.testing/RecordedEvents.<init>|<init>(){}[0]
+
+    final val all // cordis.testing/RecordedEvents.all|{}all[0]
+        final fun <get-all>(): kotlin.collections/MutableList<cordis.kernel/CordisEvent> // cordis.testing/RecordedEvents.all.<get-all>|<get-all>(){}[0]
+    final val failures // cordis.testing/RecordedEvents.failures|{}failures[0]
+        final fun <get-failures>(): kotlin.collections/List<cordis.kernel/CordisEvent> // cordis.testing/RecordedEvents.failures.<get-failures>|<get-failures>(){}[0]
+
+    final fun <#A1: cordis.kernel/CordisEvent> ofType(kotlin.reflect/KClass<#A1>): kotlin.collections/List<#A1> // cordis.testing/RecordedEvents.ofType|ofType(kotlin.reflect.KClass<0:0>){0§<cordis.kernel.CordisEvent>}[0]
+    final fun record(cordis.kernel/CordisEvent) // cordis.testing/RecordedEvents.record|record(cordis.kernel.CordisEvent){}[0]
+    final inline fun <#A1: reified cordis.kernel/CordisEvent> ofType(): kotlin.collections/List<#A1> // cordis.testing/RecordedEvents.ofType|ofType(){0§<cordis.kernel.CordisEvent>}[0]
+}
+
+final suspend fun cordis.testing/settle(kotlin/Function0<kotlin/Boolean>): kotlin/Boolean // cordis.testing/settle|settle(kotlin.Function0<kotlin.Boolean>){}[0]
+final suspend fun cordis.testing/withTestApp(kotlin.coroutines/SuspendFunction2<cordis.kernel/Context, cordis.testing/RecordedEvents, kotlin/Unit>): cordis.testing/RecordedEvents // cordis.testing/withTestApp|withTestApp(kotlin.coroutines.SuspendFunction2<cordis.kernel.Context,cordis.testing.RecordedEvents,kotlin.Unit>){}[0]

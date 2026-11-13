@@ -1,0 +1,23 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, macosX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.amine2233:cordis>
+abstract interface <#A: cordis.kernel/ServiceKey<#B>, #B: kotlin/Any, #C: kotlin/Any?> cordis/ServicePlugin : cordis.kernel/Plugin<#C> { // cordis/ServicePlugin|null[0]
+    abstract val key // cordis/ServicePlugin.key|{}key[0]
+        abstract fun <get-key>(): #A // cordis/ServicePlugin.key.<get-key>|<get-key>(){}[0]
+
+    abstract suspend fun make(cordis.kernel/Context, #C): #B // cordis/ServicePlugin.make|make(cordis.kernel.Context;1:2){}[0]
+    open suspend fun apply(cordis.kernel/Context, #C) // cordis/ServicePlugin.apply|apply(cordis.kernel.Context;1:2){}[0]
+}
+
+abstract interface <#A: cordis.kernel/ServiceKey<#B>, #B: kotlin/Any> cordis/UnitServicePlugin : cordis/ServicePlugin<#A, #B, kotlin/Unit> { // cordis/UnitServicePlugin|null[0]
+    abstract suspend fun make(cordis.kernel/Context): #B // cordis/UnitServicePlugin.make|make(cordis.kernel.Context){}[0]
+    open suspend fun make(cordis.kernel/Context, kotlin/Unit): #B // cordis/UnitServicePlugin.make|make(cordis.kernel.Context;kotlin.Unit){}[0]
+}
+
+final suspend fun (cordis.kernel/Context).cordis/after(kotlin.time/Duration, cordis.kernel/CordisClock = ..., kotlin.coroutines/SuspendFunction0<kotlin/Unit>): cordis.kernel/Disposable // cordis/after|after@cordis.kernel.Context(kotlin.time.Duration;cordis.kernel.CordisClock;kotlin.coroutines.SuspendFunction0<kotlin.Unit>){}[0]
+final suspend fun (cordis.kernel/Context).cordis/every(kotlin.time/Duration, cordis.kernel/CordisClock = ..., kotlin.coroutines/SuspendFunction0<kotlin/Unit>): cordis.kernel/Disposable // cordis/every|every@cordis.kernel.Context(kotlin.time.Duration;cordis.kernel.CordisClock;kotlin.coroutines.SuspendFunction0<kotlin.Unit>){}[0]
