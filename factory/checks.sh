@@ -19,4 +19,4 @@ if [ -z "$KTLINT" ] || ! "$KTLINT" --version >/dev/null 2>&1; then
 fi
 "$KTLINT" '**/*.kt' '**/*.kts' '!**/build/**' '!**/.worktrees/**' --reporter=plain
 
-./gradlew jvmTest macosArm64Test build -x check --console=plain
+./gradlew jvmTest macosArm64Test apiCheck build -x check --console=plain
