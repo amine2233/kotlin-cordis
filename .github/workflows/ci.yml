@@ -1,5 +1,3 @@
-# Copy into the consumer repo at: .github/workflows/ci.yml
-# Requires a mise.toml with `test` and `lint` tasks (see templates/mise.toml).
 name: CI
 
 on:
@@ -16,5 +14,4 @@ jobs:
     uses: amine2233/kotlin-ci-shared/.github/workflows/ci.yml@1.0.1
     with:
       enable-lint: true
-      enable-coverage: false
       enable-title-check: true
