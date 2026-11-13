@@ -21,14 +21,17 @@ class DefaultClockTimerTests {
     fun afterFiresExactlyOnce() =
         runTest {
             val app = Context.root()
-            val fires = Channel<Unit>(Channel.UNLIMITED)
-            app.after(interval) { fires.trySend(Unit) }
-            withContext(Dispatchers.Default) {
-                withTimeout(waitLimit) {
-                    fires.receive()
-                    delay(quietWindow)
+            try {
+                val fires = Channel<Unit>(Channel.UNLIMITED)
+                app.after(interval) { fires.trySend(Unit) }
+                withContext(Dispatchers.Default) {
+                    withTimeout(waitLimit) {
+                        fires.receive()
+                        delay(quietWindow)
+                    }
                 }
                 assertTrue(fires.tryReceive().isFailure, "after fired more than once")
+            } finally {
                 app.dispose()
             }
         }
@@ -37,13 +40,16 @@ class DefaultClockTimerTests {
     fun everyFiresRepeatedly() =
         runTest {
             val app = Context.root()
-            val fires = Channel<Unit>(Channel.UNLIMITED)
-            app.every(interval) { fires.trySend(Unit) }
-            withContext(Dispatchers.Default) {
-                withTimeout(waitLimit) {
-                    fires.receive()
-                    fires.receive()
+            try {
+                val fires = Channel<Unit>(Channel.UNLIMITED)
+                app.every(interval) { fires.trySend(Unit) }
+                withContext(Dispatchers.Default) {
+                    withTimeout(waitLimit) {
+                        fires.receive()
+                        fires.receive()
+                    }
                 }
+            } finally {
                 app.dispose()
             }
         }
@@ -52,16 +58,21 @@ class DefaultClockTimerTests {
     fun everyStopsAfterDispose() =
         runTest {
             val app = Context.root()
-            val fires = Channel<Unit>(Channel.UNLIMITED)
-            val timer = app.every(interval) { fires.trySend(Unit) }
-            withContext(Dispatchers.Default) {
-                withTimeout(waitLimit) {
-                    fires.receive()
-                    timer()
-                    while (fires.tryReceive().isSuccess) Unit
-                    delay(quietWindow)
+            try {
+                val fires = Channel<Unit>(Channel.UNLIMITED)
+                val timer = app.every(interval) { fires.trySend(Unit) }
+                withContext(Dispatchers.Default) {
+                    withTimeout(waitLimit) {
+                        fires.receive()
+                        timer()
+                        while (fires.tryReceive().isSuccess) {
+                            continue
+                        }
+                        delay(quietWindow)
+                    }
                 }
                 assertTrue(fires.tryReceive().isFailure, "every fired after dispose")
+            } finally {
                 app.dispose()
             }
         }
