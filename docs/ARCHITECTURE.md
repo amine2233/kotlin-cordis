@@ -5,7 +5,9 @@
 ## 1. Concurrency and Serial Execution
 
 In Swift, concurrency was managed via a single `@CordisActor`. In Kotlin Multiplatform:
-- Every graph mutation (`provide`, `withdraw`, `plugin`, `update`, `dispose`, `emit`) is scheduled on a dedicated serial dispatcher (`Dispatchers.Default.limitedParallelism(1)` by default, configurable in `Context.root(dispatcher)`).
+- **Dispatcher-confined**: `Context.provide`, `Context.update` (in place), `Context.replaceValue`, `Context.plugin`, `Context.effect`, `Context.emit`, `Context.dispose`, `PluginHandle.update` and `PluginHandle.dispose` run on a dedicated serial dispatcher (`Dispatchers.Default.limitedParallelism(1)` by default, configurable in `Context.root(dispatcher)`). Withdrawals and fork reconciliation happen inside these calls, so they are serialized too.
+- **Lock-guarded, callable from any thread**: the non-suspending `Context.on`, `Context.onDispose` and `Context.launch`, `Disposable.invoke` (its action runs exactly once, however many callers race) and the `Scope.collect` / `Scope.dispose` bookkeeping. They take a short internal lock (`Registry` listeners, `Scope` handles) that never suspends nor runs user code; teardowns and handlers run after it is released.
+- `Context.zone` and `Context.isolate` are not yet thread-safe: call them from the dispatcher (for example inside `apply`) or from a single thread.
 - Because `withContext(dispatcher)` enters immediately when already running on that dispatcher, nested calls (such as a plugin calling `ctx.provide()` inside `apply()`) run without thread-switching or queueing delays.
 - Heavy asynchronous workloads belong inside the services themselves, not in the plugin registration kernel.
 
@@ -13,7 +15,7 @@ In Swift, concurrency was managed via a single `@CordisActor`. In Kotlin Multipl
 
 | File / Component | Type | Role |
 |---|---|---|
-| `Scope.kt` | `Scope`, `Disposable`, `Disposer` | LIFO, idempotent teardown. Represents the time axis. |
+| `Scope.kt` | `Scope`, `Disposable`, `Disposer` | LIFO, idempotent teardown. Represents the time axis. `Disposable` is atomic: concurrent `invoke()` calls run its action once. |
 | `Service.kt` | `ServiceKey`, `ServiceId`, `Slot`, `Inject`, events, `CordisException` | Typed service identity and plugin dependency specifications. |
 | `Registry.kt` | `Registry` | Per-graph state: slots with generation counters, live forks, event listeners, zones. |
 | `Plugin.kt` | `Plugin`, `Fork`, `PluginHandle`, `UpdateOutcome` | Plugin definition and its reactive lifecycle (`Pending`, `Loading`, `Active`, `Failed`, `Disposed`). |

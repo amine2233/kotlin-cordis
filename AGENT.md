@@ -22,7 +22,7 @@ with spatiotemporal composability), ported from `swift-cordis`.
 
 ## Conventions
 - Kotlin Multiplatform (JVM, macOS Arm64/X64, iOS Arm64/X64/Simulator, Linux Arm64/X64, JS/Node.js).
-- Concurrency: All graph mutations run on a serialized single-threaded CoroutineDispatcher (`Context.root()`).
+- Concurrency: `provide`/`update`/`replaceValue`/`plugin`/`effect`/`emit`/`dispose` and `PluginHandle.update`/`dispose` run on the graph's serialized single-threaded CoroutineDispatcher (`Context.root()`); `on`/`onDispose`/`launch`, `Disposable` and `Scope` bookkeeping are lock-guarded and callable from any thread; `zone`/`isolate` are not yet thread-safe (see `docs/ARCHITECTURE.md`).
 - Modules:
   - `cordis-kernel`: Zero-dependency kernel (pure Kotlin + kotlinx-coroutines).
   - `cordis`: Public convenience API, `ServicePlugin`, timer effects (`after`, `every`).

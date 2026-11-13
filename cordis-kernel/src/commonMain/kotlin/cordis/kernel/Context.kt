@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
@@ -316,11 +318,7 @@ class Context internal constructor(
      * Cold flow of events of type [type]; the listener lives only while the flow is collected
      * (and no longer than this context).
      */
-    fun <E : CordisEvent> events(type: KClass<E>): Flow<E> =
-        callbackFlow {
-            val subscription = on(type) { trySend(it) }
-            awaitClose { registry.coroutineScope.launch { subscription() } }
-        }.buffer(Channel.UNLIMITED)
+    fun <E : CordisEvent> events(type: KClass<E>): Flow<E> = scopedFlow(type, zone = zoneId) { trySend(it) }
 
     inline fun <reified E : CordisEvent> events(): Flow<E> = events(E::class)
 
@@ -328,15 +326,36 @@ class Context internal constructor(
      * Emits the current value of [key] (null when unavailable), then again each time the slot is
      * provided or withdrawn. In-place [update] / [replaceValue] emit nothing, like `ServiceChanged`.
      */
-    fun <T : Any> serviceFlow(key: ServiceKey<T>): Flow<T?> =
+    fun <T : Any> serviceFlow(key: ServiceKey<T>): Flow<T?> {
+        val target = slot(key.serviceId)
+        return scopedFlow(
+            ServiceChanged::class,
+            zone = null,
+            onStart = { trySend(get(key)) },
+        ) {
+            if (it.slot == target) trySend(get(key))
+        }
+    }
+
+    /**
+     * Listens to [type] while collected; the listener is removed and the flow completes when
+     * either the collector stops or this context is disposed.
+     */
+    private fun <E : CordisEvent, R> scopedFlow(
+        type: KClass<E>,
+        zone: ZoneId?,
+        onStart: ProducerScope<R>.() -> Unit = {},
+        onEvent: ProducerScope<R>.(E) -> Unit,
+    ): Flow<R> =
         callbackFlow {
-            val target = slot(key.serviceId)
-            val id =
-                registry.on(ServiceChanged::class, zone = null) {
-                    if (it.slot == target) trySend(get(key))
+            val id = registry.on(type, zone = zone) { onEvent(it) }
+            val subscription =
+                scope.collect {
+                    registry.off(type, id)
+                    close()
                 }
-            trySend(get(key))
-            awaitClose { registry.off(ServiceChanged::class, id) }
+            onStart()
+            awaitClose { registry.coroutineScope.launch { subscription() } }
         }.buffer(Channel.UNLIMITED)
 
     /**
@@ -348,10 +367,11 @@ class Context internal constructor(
         block: suspend CoroutineScope.() -> Unit,
     ): Job {
         if (scope.isDisposed) throw CordisException.Disposed()
-        val job = registry.coroutineScope.launch(context, block = block)
+        val marker = LaunchMarker()
+        val job = registry.coroutineScope.launch(context + marker, block = block)
         val teardown =
             scope.collect {
-                if (currentCoroutineContext()[Job] !== job) {
+                if (currentCoroutineContext()[LaunchMarker] !== marker) {
                     job.cancel()
                     job.join()
                 }
@@ -359,4 +379,9 @@ class Context internal constructor(
         job.invokeOnCompletion { registry.coroutineScope.launch { teardown() } }
         return job
     }
+}
+
+/** Identifies one `Context.launch` coroutine, surviving `withContext`, so its teardown can skip a self-join. */
+private class LaunchMarker : AbstractCoroutineContextElement(LaunchMarker) {
+    companion object Key : CoroutineContext.Key<LaunchMarker>
 }

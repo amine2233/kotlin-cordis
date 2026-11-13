@@ -1,11 +1,14 @@
 package cordis.kernel
 
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
+import kotlin.coroutines.ContinuationInterceptor
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -173,5 +176,72 @@ class ReactiveApiTests {
 
             assertEquals(listOf(null, "z"), seen.await())
             app.dispose()
+        }
+
+    @Test
+    fun pluginHandleUpdateRunsOnRegistryDispatcher() =
+        runTest {
+            val app = Context.root()
+            val interceptors = mutableListOf<ContinuationInterceptor?>()
+            val plugin =
+                object : Plugin<Int> {
+                    override suspend fun apply(
+                        ctx: Context,
+                        config: Int,
+                    ) {
+                        interceptors += currentCoroutineContext()[ContinuationInterceptor]
+                    }
+                }
+            val handle = app.plugin(plugin, 1)
+            interceptors.clear()
+
+            assertEquals(UpdateOutcome.Applied, handle.update(2))
+
+            assertEquals(listOf<ContinuationInterceptor?>(app.registry.dispatcher), interceptors)
+            app.dispose()
+        }
+
+    @Test
+    fun pluginHandleDisposeRunsTeardownOnRegistryDispatcher() =
+        runTest {
+            val app = Context.root()
+            var interceptor: ContinuationInterceptor? = null
+            val handle =
+                app.plugin("teardown") { ctx ->
+                    ctx.onDispose { interceptor = currentCoroutineContext()[ContinuationInterceptor] }
+                }
+
+            handle.dispose()
+
+            assertEquals<ContinuationInterceptor?>(app.registry.dispatcher, interceptor)
+            app.dispose()
+        }
+
+    @Test
+    fun flowsCompleteWhenContextIsDisposed() =
+        runTest {
+            val app = Context.root()
+            val services = async { app.serviceFlow(ValueKey).toList() }
+            val events = async { app.events<FlowPing>().toList() }
+            while (app.registry.listenerCount(ServiceChanged::class) == 0 ||
+                app.registry.listenerCount(FlowPing::class) == 0
+            ) {
+                kotlinx.coroutines.yield()
+            }
+
+            app.dispose()
+
+            assertEquals(listOf(null), services.await())
+            assertEquals(emptyList(), events.await())
+        }
+
+    @Test
+    fun flowsOnDisposedContextComplete() =
+        runTest {
+            val app = Context.root()
+            app.dispose()
+
+            app.serviceFlow(ValueKey).toList()
+            assertEquals(emptyList(), app.events<FlowPing>().toList())
         }
 }

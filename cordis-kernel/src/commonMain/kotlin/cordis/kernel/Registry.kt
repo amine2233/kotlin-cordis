@@ -57,6 +57,8 @@ class Registry(
     private var forkOrder: Map<PluginId, Int> = emptyMap()
     private var forkCounter = 0
 
+    private val lock = Lock()
+
     @Volatile
     private var listeners: Map<KClass<out CordisEvent>, List<Listener>> = emptyMap()
     private var generation = 0
@@ -227,32 +229,35 @@ class Registry(
         type: KClass<E>,
         zone: ZoneId?,
         handler: suspend (E) -> Unit,
-    ): Int {
-        listenerCounter += 1
-        val listener =
-            Listener(id = listenerCounter, zone = zone) { any ->
-                if (type.isInstance(any)) {
-                    @Suppress("UNCHECKED_CAST")
-                    handler(any as E)
+    ): Int =
+        lock.withLock {
+            listenerCounter += 1
+            val listener =
+                Listener(id = listenerCounter, zone = zone) { any ->
+                    if (type.isInstance(any)) {
+                        @Suppress("UNCHECKED_CAST")
+                        handler(any as E)
+                    }
                 }
-            }
-        val newListeners = listeners.toMutableMap()
-        val list = (newListeners[type] ?: emptyList()).toMutableList()
-        list.add(listener)
-        newListeners[type] = list
-        listeners = newListeners
-        return listenerCounter
-    }
+            val newListeners = listeners.toMutableMap()
+            val list = (newListeners[type] ?: emptyList()).toMutableList()
+            list.add(listener)
+            newListeners[type] = list
+            listeners = newListeners
+            listenerCounter
+        }
 
     fun off(
         type: KClass<out CordisEvent>,
         id: Int,
     ) {
-        val existing = listeners[type] ?: return
-        val filtered = existing.filter { it.id != id }
-        val newListeners = listeners.toMutableMap()
-        newListeners[type] = filtered
-        listeners = newListeners
+        lock.withLock {
+            val existing = listeners[type] ?: return@withLock
+            val filtered = existing.filter { it.id != id }
+            val newListeners = listeners.toMutableMap()
+            newListeners[type] = filtered
+            listeners = newListeners
+        }
     }
 
     fun zone(
