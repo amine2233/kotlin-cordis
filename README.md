@@ -169,7 +169,9 @@ The repo is a Claude Code plugin and ships an agent skill: `/plugin marketplace 
 CI and releases come from [kotlin-ci-shared](https://github.com/amine2233/kotlin-ci-shared).
 All logic lives in `mise.toml`:
 
-- `mise run test` / `mise run lint` — what the `CI` workflow runs on pull requests.
+- `mise run test` (`./gradlew allTests`) / `mise run lint` — what the `CI` workflow runs on pull requests.
+  CI runs on Linux (`ubuntu-latest`) only, covering JVM, Linux native and JS; the macOS/iOS targets
+  are verified locally on a Mac (`./gradlew macosArm64Test` and a build that compiles the Apple targets).
 - **Actions → Release → Run workflow** runs semantic-release (or automatically
   on every push to `main` when the repo variable `AUTO_RELEASE=true` is set): it tags
   `vX.Y.Z`, updates `CHANGELOG.md`, publishes `io.github.amine2233:cordis-kernel`, `cordis`,

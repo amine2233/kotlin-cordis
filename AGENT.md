@@ -13,6 +13,10 @@ with spatiotemporal composability), ported from `swift-cordis`.
 - Native macOS tests: `./gradlew :cordis-kernel:macosArm64Test :cordis:macosArm64Test :cordis-testing:macosArm64Test :cordis-loader:macosArm64Test`
 - Interactive Demo: `./gradlew :cordis-demo:run`
 
+## CI
+- CI (GitHub Actions via `kotlin-ci-shared`) runs `mise run lint` and `mise run test` (`./gradlew allTests`) on `ubuntu-latest` only, covering JVM, Linux native and JS.
+- The macOS and iOS targets are not built or tested in CI. Verify them locally on a Mac with `./gradlew macosArm64Test` (also run by `factory/checks.sh`) and a build that compiles the Apple targets (e.g. `./gradlew build -x check`).
+
 ## Conventions
 - Kotlin Multiplatform (JVM, macOS Arm64/X64, iOS Arm64/X64/Simulator, Linux Arm64/X64, JS/Node.js).
 - Concurrency: All graph mutations run on a serialized single-threaded CoroutineDispatcher (`Context.root()`).
