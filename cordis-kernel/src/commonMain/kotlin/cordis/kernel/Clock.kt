@@ -1,6 +1,5 @@
 package cordis.kernel
 
-import kotlinx.coroutines.delay
 import kotlin.time.Duration
 import kotlin.time.TimeSource
 
@@ -23,6 +22,6 @@ object DefaultClock : CordisClock {
         get() = startMark.elapsedNow()
 
     override suspend fun delay(duration: Duration) {
-        delay(duration)
+        kotlinx.coroutines.delay(duration)
     }
 }
