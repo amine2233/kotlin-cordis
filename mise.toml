@@ -1,11 +1,3 @@
-# Shared mise template for Kotlin/Gradle libraries.
-#
-# Copy this to `mise.toml` at the root of a library repo. The CI in
-# `amine2233/kotlin-ci-shared` does not re-implement build/test/docs/release
-# steps — it installs mise (which provisions the [tools] below) and runs these
-# tasks via `mise run <task>`. Keep task NAMES stable so the shared workflows
-# keep working; change task BODIES per project as needed.
-
 [tools]
 java = "temurin-17"
 node = "22"
@@ -19,12 +11,8 @@ description = "Compile everything and run all checks."
 run = "./gradlew build --no-daemon"
 
 [tasks.test]
-description = "Run the unit tests."
-run = "./gradlew test --no-daemon"
-
-[tasks.test-coverage]
-description = "Run the unit tests with a Kover coverage report (requires the org.jetbrains.kotlinx.kover plugin)."
-run = "./gradlew test koverHtmlReport koverVerify --no-daemon"
+description = "Run the KMP tests for every target the host can execute."
+run = "./gradlew allTests --no-daemon"
 
 [tasks.format]
 description = "Format Kotlin sources with ktlint."
@@ -43,10 +31,6 @@ depends = ["check_code"]
 [tasks.check_merge_request_title]
 description = "Check the pull request title follows Conventional Commits."
 run = 'echo "${PR_TITLE?}" | npx --yes -p @commitlint/cli -p @commitlint/config-conventional commitlint --extends @commitlint/config-conventional'
-
-[tasks.build_documentations]
-description = "Build the API documentation with Dokka into build/dokka/html (requires the org.jetbrains.dokka plugin)."
-run = "./gradlew dokkaHtml --no-daemon"
 
 # Called by semantic-release (@semantic-release/exec publishCmd in .releaserc.json).
 [tasks.publish]

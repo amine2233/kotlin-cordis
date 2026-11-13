@@ -1,7 +1,3 @@
-# Copy into the consumer repo at: .github/workflows/release.yml
-# Requires a mise.toml with `release` and `publish` tasks (see templates/mise.toml)
-# and a .releaserc.json (see templates/.releaserc.json).
-#
 # Manual by default (Actions → Release → Run workflow). To release automatically
 # on every push to main, set the repository variable AUTO_RELEASE=true.
 name: Release
