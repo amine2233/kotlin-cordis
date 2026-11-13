@@ -1,0 +1,514 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, macosX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.amine2233:cordis-kernel>
+abstract interface <#A: kotlin/Any> cordis.kernel/ServiceKey { // cordis.kernel/ServiceKey|null[0]
+    open val serviceId // cordis.kernel/ServiceKey.serviceId|{}serviceId[0]
+        open fun <get-serviceId>(): cordis.kernel/ServiceId // cordis.kernel/ServiceKey.serviceId.<get-serviceId>|<get-serviceId>(){}[0]
+}
+
+abstract interface <#A: kotlin/Any?> cordis.kernel/Plugin { // cordis.kernel/Plugin|null[0]
+    open val inject // cordis.kernel/Plugin.inject|{}inject[0]
+        open fun <get-inject>(): cordis.kernel/Inject // cordis.kernel/Plugin.inject.<get-inject>|<get-inject>(){}[0]
+    open val name // cordis.kernel/Plugin.name|{}name[0]
+        open fun <get-name>(): kotlin/String // cordis.kernel/Plugin.name.<get-name>|<get-name>(){}[0]
+
+    abstract suspend fun apply(cordis.kernel/Context, #A) // cordis.kernel/Plugin.apply|apply(cordis.kernel.Context;1:0){}[0]
+    open fun validate(#A) // cordis.kernel/Plugin.validate|validate(1:0){}[0]
+}
+
+abstract interface cordis.kernel/CordisClock { // cordis.kernel/CordisClock|null[0]
+    abstract val now // cordis.kernel/CordisClock.now|{}now[0]
+        abstract fun <get-now>(): kotlin.time/Duration // cordis.kernel/CordisClock.now.<get-now>|<get-now>(){}[0]
+
+    abstract suspend fun delay(kotlin.time/Duration) // cordis.kernel/CordisClock.delay|delay(kotlin.time.Duration){}[0]
+}
+
+abstract interface cordis.kernel/CordisEvent // cordis.kernel/CordisEvent|null[0]
+
+final class <#A: kotlin/Any?> cordis.kernel/PluginHandle { // cordis.kernel/PluginHandle|null[0]
+    constructor <init>(cordis.kernel/Fork, cordis.kernel/Plugin<#A>) // cordis.kernel/PluginHandle.<init>|<init>(cordis.kernel.Fork;cordis.kernel.Plugin<1:0>){}[0]
+
+    final val fork // cordis.kernel/PluginHandle.fork|{}fork[0]
+        final fun <get-fork>(): cordis.kernel/Fork // cordis.kernel/PluginHandle.fork.<get-fork>|<get-fork>(){}[0]
+    final val status // cordis.kernel/PluginHandle.status|{}status[0]
+        final fun <get-status>(): cordis.kernel/Fork.Status // cordis.kernel/PluginHandle.status.<get-status>|<get-status>(){}[0]
+
+    final suspend fun awaitActive(): cordis.kernel/Fork.Status // cordis.kernel/PluginHandle.awaitActive|awaitActive(){}[0]
+    final suspend fun dispose() // cordis.kernel/PluginHandle.dispose|dispose(){}[0]
+    final suspend fun update(#A): cordis.kernel/UpdateOutcome // cordis.kernel/PluginHandle.update|update(1:0){}[0]
+}
+
+final class cordis.kernel/Context { // cordis.kernel/Context|null[0]
+    final val fork // cordis.kernel/Context.fork|{}fork[0]
+        final fun <get-fork>(): cordis.kernel/Fork? // cordis.kernel/Context.fork.<get-fork>|<get-fork>(){}[0]
+    final val name // cordis.kernel/Context.name|{}name[0]
+        final fun <get-name>(): kotlin/String // cordis.kernel/Context.name.<get-name>|<get-name>(){}[0]
+    final val parent // cordis.kernel/Context.parent|{}parent[0]
+        final fun <get-parent>(): cordis.kernel/Context? // cordis.kernel/Context.parent.<get-parent>|<get-parent>(){}[0]
+    final val registry // cordis.kernel/Context.registry|{}registry[0]
+        final fun <get-registry>(): cordis.kernel/Registry // cordis.kernel/Context.registry.<get-registry>|<get-registry>(){}[0]
+    final val scope // cordis.kernel/Context.scope|{}scope[0]
+        final fun <get-scope>(): cordis.kernel/Scope // cordis.kernel/Context.scope.<get-scope>|<get-scope>(){}[0]
+    final val zoneId // cordis.kernel/Context.zoneId|{}zoneId[0]
+        final fun <get-zoneId>(): cordis.kernel/ZoneId? // cordis.kernel/Context.zoneId.<get-zoneId>|<get-zoneId>(){}[0]
+
+    final fun <#A1: cordis.kernel/CordisEvent> events(kotlin.reflect/KClass<#A1>): kotlinx.coroutines.flow/Flow<#A1> // cordis.kernel/Context.events|events(kotlin.reflect.KClass<0:0>){0§<cordis.kernel.CordisEvent>}[0]
+    final fun <#A1: cordis.kernel/CordisEvent> on(kotlin.reflect/KClass<#A1>, kotlin.coroutines/SuspendFunction1<#A1, kotlin/Unit>): cordis.kernel/Disposable // cordis.kernel/Context.on|on(kotlin.reflect.KClass<0:0>;kotlin.coroutines.SuspendFunction1<0:0,kotlin.Unit>){0§<cordis.kernel.CordisEvent>}[0]
+    final fun <#A1: kotlin/Any> get(cordis.kernel/ServiceKey<#A1>): #A1? // cordis.kernel/Context.get|get(cordis.kernel.ServiceKey<0:0>){0§<kotlin.Any>}[0]
+    final fun <#A1: kotlin/Any> intercept(cordis.kernel/ServiceKey<#A1>, kotlin/Function1<#A1, #A1>): cordis.kernel/Context // cordis.kernel/Context.intercept|intercept(cordis.kernel.ServiceKey<0:0>;kotlin.Function1<0:0,0:0>){0§<kotlin.Any>}[0]
+    final fun <#A1: kotlin/Any> require(cordis.kernel/ServiceKey<#A1>): #A1 // cordis.kernel/Context.require|require(cordis.kernel.ServiceKey<0:0>){0§<kotlin.Any>}[0]
+    final fun <#A1: kotlin/Any> serviceFlow(cordis.kernel/ServiceKey<#A1>): kotlinx.coroutines.flow/Flow<#A1?> // cordis.kernel/Context.serviceFlow|serviceFlow(cordis.kernel.ServiceKey<0:0>){0§<kotlin.Any>}[0]
+    final fun isolate(cordis.kernel/ServiceKey<*>, kotlin/String? = ...): cordis.kernel/Context // cordis.kernel/Context.isolate|isolate(cordis.kernel.ServiceKey<*>;kotlin.String?){}[0]
+    final fun launch(kotlin.coroutines/CoroutineContext = ..., kotlin.coroutines/SuspendFunction1<kotlinx.coroutines/CoroutineScope, kotlin/Unit>): kotlinx.coroutines/Job // cordis.kernel/Context.launch|launch(kotlin.coroutines.CoroutineContext;kotlin.coroutines.SuspendFunction1<kotlinx.coroutines.CoroutineScope,kotlin.Unit>){}[0]
+    final fun onDispose(kotlin.coroutines/SuspendFunction0<kotlin/Unit>): cordis.kernel/Disposable // cordis.kernel/Context.onDispose|onDispose(kotlin.coroutines.SuspendFunction0<kotlin.Unit>){}[0]
+    final fun slot(cordis.kernel/ServiceId): cordis.kernel/Slot // cordis.kernel/Context.slot|slot(cordis.kernel.ServiceId){}[0]
+    final fun snapshot(): cordis.kernel/RuntimeSnapshot // cordis.kernel/Context.snapshot|snapshot(){}[0]
+    final fun zone(kotlin/String): cordis.kernel/Context // cordis.kernel/Context.zone|zone(kotlin.String){}[0]
+    final inline fun <#A1: reified cordis.kernel/CordisEvent> events(): kotlinx.coroutines.flow/Flow<#A1> // cordis.kernel/Context.events|events(){0§<cordis.kernel.CordisEvent>}[0]
+    final inline fun <#A1: reified cordis.kernel/CordisEvent> on(noinline kotlin.coroutines/SuspendFunction1<#A1, kotlin/Unit>): cordis.kernel/Disposable // cordis.kernel/Context.on|on(kotlin.coroutines.SuspendFunction1<0:0,kotlin.Unit>){0§<cordis.kernel.CordisEvent>}[0]
+    final suspend fun <#A1: kotlin/Any> provide(cordis.kernel/ServiceKey<#A1>, #A1) // cordis.kernel/Context.provide|provide(cordis.kernel.ServiceKey<0:0>;0:0){0§<kotlin.Any>}[0]
+    final suspend fun <#A1: kotlin/Any> replaceValue(cordis.kernel/ServiceKey<#A1>, kotlin/Function1<#A1, #A1>) // cordis.kernel/Context.replaceValue|replaceValue(cordis.kernel.ServiceKey<0:0>;kotlin.Function1<0:0,0:0>){0§<kotlin.Any>}[0]
+    final suspend fun <#A1: kotlin/Any> update(cordis.kernel/ServiceKey<#A1>, kotlin/Function1<#A1, kotlin/Unit>) // cordis.kernel/Context.update|update(cordis.kernel.ServiceKey<0:0>;kotlin.Function1<0:0,kotlin.Unit>){0§<kotlin.Any>}[0]
+    final suspend fun <#A1: kotlin/Any?> plugin(cordis.kernel/Plugin<#A1>, #A1): cordis.kernel/PluginHandle<#A1> // cordis.kernel/Context.plugin|plugin(cordis.kernel.Plugin<0:0>;0:0){0§<kotlin.Any?>}[0]
+    final suspend fun dispose() // cordis.kernel/Context.dispose|dispose(){}[0]
+    final suspend fun effect(kotlin.coroutines/SuspendFunction0<kotlin.coroutines/SuspendFunction0<kotlin/Unit>>): cordis.kernel/Disposable // cordis.kernel/Context.effect|effect(kotlin.coroutines.SuspendFunction0<kotlin.coroutines.SuspendFunction0<kotlin.Unit>>){}[0]
+    final suspend fun emit(cordis.kernel/CordisEvent) // cordis.kernel/Context.emit|emit(cordis.kernel.CordisEvent){}[0]
+    final suspend fun plugin(cordis.kernel/Plugin<kotlin/Unit>): cordis.kernel/PluginHandle<kotlin/Unit> // cordis.kernel/Context.plugin|plugin(cordis.kernel.Plugin<kotlin.Unit>){}[0]
+    final suspend fun plugin(kotlin/String, cordis.kernel/Inject = ..., kotlin.coroutines/SuspendFunction1<cordis.kernel/Context, kotlin/Unit>): cordis.kernel/PluginHandle<kotlin/Unit> // cordis.kernel/Context.plugin|plugin(kotlin.String;cordis.kernel.Inject;kotlin.coroutines.SuspendFunction1<cordis.kernel.Context,kotlin.Unit>){}[0]
+
+    final object Companion { // cordis.kernel/Context.Companion|null[0]
+        final fun root(kotlinx.coroutines/CoroutineDispatcher = ...): cordis.kernel/Context // cordis.kernel/Context.Companion.root|root(kotlinx.coroutines.CoroutineDispatcher){}[0]
+    }
+}
+
+final class cordis.kernel/Disposable { // cordis.kernel/Disposable|null[0]
+    constructor <init>(kotlin.coroutines/SuspendFunction0<kotlin/Unit>?, kotlin.coroutines/SuspendFunction1<kotlin/Throwable, kotlin/Unit> = ...) // cordis.kernel/Disposable.<init>|<init>(kotlin.coroutines.SuspendFunction0<kotlin.Unit>?;kotlin.coroutines.SuspendFunction1<kotlin.Throwable,kotlin.Unit>){}[0]
+
+    final val isDisposed // cordis.kernel/Disposable.isDisposed|{}isDisposed[0]
+        final fun <get-isDisposed>(): kotlin/Boolean // cordis.kernel/Disposable.isDisposed.<get-isDisposed>|<get-isDisposed>(){}[0]
+
+    final suspend fun invoke() // cordis.kernel/Disposable.invoke|invoke(){}[0]
+}
+
+final class cordis.kernel/Fork { // cordis.kernel/Fork|null[0]
+    constructor <init>(kotlin/String, cordis.kernel/Inject, cordis.kernel/Context, kotlin/Any? = ..., kotlin.coroutines/SuspendFunction1<cordis.kernel/Context, kotlin/Unit>) // cordis.kernel/Fork.<init>|<init>(kotlin.String;cordis.kernel.Inject;cordis.kernel.Context;kotlin.Any?;kotlin.coroutines.SuspendFunction1<cordis.kernel.Context,kotlin.Unit>){}[0]
+
+    final val id // cordis.kernel/Fork.id|{}id[0]
+        final fun <get-id>(): cordis.kernel/PluginId // cordis.kernel/Fork.id.<get-id>|<get-id>(){}[0]
+    final val inject // cordis.kernel/Fork.inject|{}inject[0]
+        final fun <get-inject>(): cordis.kernel/Inject // cordis.kernel/Fork.inject.<get-inject>|<get-inject>(){}[0]
+    final val name // cordis.kernel/Fork.name|{}name[0]
+        final fun <get-name>(): kotlin/String // cordis.kernel/Fork.name.<get-name>|<get-name>(){}[0]
+    final val parent // cordis.kernel/Fork.parent|{}parent[0]
+        final fun <get-parent>(): cordis.kernel/Context // cordis.kernel/Fork.parent.<get-parent>|<get-parent>(){}[0]
+    final val status // cordis.kernel/Fork.status|{}status[0]
+        final fun <get-status>(): cordis.kernel/Fork.Status // cordis.kernel/Fork.status.<get-status>|<get-status>(){}[0]
+    final val statusFlow // cordis.kernel/Fork.statusFlow|{}statusFlow[0]
+        final fun <get-statusFlow>(): kotlinx.coroutines.flow/StateFlow<cordis.kernel/Fork.Status> // cordis.kernel/Fork.statusFlow.<get-statusFlow>|<get-statusFlow>(){}[0]
+
+    final fun dependsOn(cordis.kernel/Slot): kotlin/Boolean // cordis.kernel/Fork.dependsOn|dependsOn(cordis.kernel.Slot){}[0]
+    final suspend fun dispose() // cordis.kernel/Fork.dispose|dispose(){}[0]
+    final suspend fun reconfigure(kotlin/Any?, kotlin.coroutines/SuspendFunction1<cordis.kernel/Context, kotlin/Unit>): kotlin/Boolean // cordis.kernel/Fork.reconfigure|reconfigure(kotlin.Any?;kotlin.coroutines.SuspendFunction1<cordis.kernel.Context,kotlin.Unit>){}[0]
+    final suspend fun refresh() // cordis.kernel/Fork.refresh|refresh(){}[0]
+
+    sealed class Status { // cordis.kernel/Fork.Status|null[0]
+        final class Failed : cordis.kernel/Fork.Status { // cordis.kernel/Fork.Status.Failed|null[0]
+            constructor <init>(kotlin/String) // cordis.kernel/Fork.Status.Failed.<init>|<init>(kotlin.String){}[0]
+
+            final val reason // cordis.kernel/Fork.Status.Failed.reason|{}reason[0]
+                final fun <get-reason>(): kotlin/String // cordis.kernel/Fork.Status.Failed.reason.<get-reason>|<get-reason>(){}[0]
+
+            final fun component1(): kotlin/String // cordis.kernel/Fork.Status.Failed.component1|component1(){}[0]
+            final fun copy(kotlin/String = ...): cordis.kernel/Fork.Status.Failed // cordis.kernel/Fork.Status.Failed.copy|copy(kotlin.String){}[0]
+            final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/Fork.Status.Failed.equals|equals(kotlin.Any?){}[0]
+            final fun hashCode(): kotlin/Int // cordis.kernel/Fork.Status.Failed.hashCode|hashCode(){}[0]
+            final fun toString(): kotlin/String // cordis.kernel/Fork.Status.Failed.toString|toString(){}[0]
+        }
+
+        final object Active : cordis.kernel/Fork.Status { // cordis.kernel/Fork.Status.Active|null[0]
+            final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/Fork.Status.Active.equals|equals(kotlin.Any?){}[0]
+            final fun hashCode(): kotlin/Int // cordis.kernel/Fork.Status.Active.hashCode|hashCode(){}[0]
+            final fun toString(): kotlin/String // cordis.kernel/Fork.Status.Active.toString|toString(){}[0]
+        }
+
+        final object Disposed : cordis.kernel/Fork.Status { // cordis.kernel/Fork.Status.Disposed|null[0]
+            final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/Fork.Status.Disposed.equals|equals(kotlin.Any?){}[0]
+            final fun hashCode(): kotlin/Int // cordis.kernel/Fork.Status.Disposed.hashCode|hashCode(){}[0]
+            final fun toString(): kotlin/String // cordis.kernel/Fork.Status.Disposed.toString|toString(){}[0]
+        }
+
+        final object Loading : cordis.kernel/Fork.Status { // cordis.kernel/Fork.Status.Loading|null[0]
+            final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/Fork.Status.Loading.equals|equals(kotlin.Any?){}[0]
+            final fun hashCode(): kotlin/Int // cordis.kernel/Fork.Status.Loading.hashCode|hashCode(){}[0]
+            final fun toString(): kotlin/String // cordis.kernel/Fork.Status.Loading.toString|toString(){}[0]
+        }
+
+        final object Pending : cordis.kernel/Fork.Status { // cordis.kernel/Fork.Status.Pending|null[0]
+            final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/Fork.Status.Pending.equals|equals(kotlin.Any?){}[0]
+            final fun hashCode(): kotlin/Int // cordis.kernel/Fork.Status.Pending.hashCode|hashCode(){}[0]
+            final fun toString(): kotlin/String // cordis.kernel/Fork.Status.Pending.toString|toString(){}[0]
+        }
+    }
+}
+
+final class cordis.kernel/Inject { // cordis.kernel/Inject|null[0]
+    constructor <init>(kotlin.collections/List<cordis.kernel/ServiceId> = ..., kotlin.collections/List<cordis.kernel/ServiceId> = ...) // cordis.kernel/Inject.<init>|<init>(kotlin.collections.List<cordis.kernel.ServiceId>;kotlin.collections.List<cordis.kernel.ServiceId>){}[0]
+
+    final val all // cordis.kernel/Inject.all|{}all[0]
+        final fun <get-all>(): kotlin.collections/List<cordis.kernel/ServiceId> // cordis.kernel/Inject.all.<get-all>|<get-all>(){}[0]
+    final val optional // cordis.kernel/Inject.optional|{}optional[0]
+        final fun <get-optional>(): kotlin.collections/List<cordis.kernel/ServiceId> // cordis.kernel/Inject.optional.<get-optional>|<get-optional>(){}[0]
+    final val required // cordis.kernel/Inject.required|{}required[0]
+        final fun <get-required>(): kotlin.collections/List<cordis.kernel/ServiceId> // cordis.kernel/Inject.required.<get-required>|<get-required>(){}[0]
+
+    final fun component1(): kotlin.collections/List<cordis.kernel/ServiceId> // cordis.kernel/Inject.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/List<cordis.kernel/ServiceId> // cordis.kernel/Inject.component2|component2(){}[0]
+    final fun copy(kotlin.collections/List<cordis.kernel/ServiceId> = ..., kotlin.collections/List<cordis.kernel/ServiceId> = ...): cordis.kernel/Inject // cordis.kernel/Inject.copy|copy(kotlin.collections.List<cordis.kernel.ServiceId>;kotlin.collections.List<cordis.kernel.ServiceId>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/Inject.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // cordis.kernel/Inject.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // cordis.kernel/Inject.toString|toString(){}[0]
+
+    final object Companion { // cordis.kernel/Inject.Companion|null[0]
+        final val NONE // cordis.kernel/Inject.Companion.NONE|{}NONE[0]
+            final fun <get-NONE>(): cordis.kernel/Inject // cordis.kernel/Inject.Companion.NONE.<get-NONE>|<get-NONE>(){}[0]
+
+        final fun of(kotlin.collections/List<cordis.kernel/ServiceKey<*>> = ..., kotlin.collections/List<cordis.kernel/ServiceKey<*>> = ...): cordis.kernel/Inject // cordis.kernel/Inject.Companion.of|of(kotlin.collections.List<cordis.kernel.ServiceKey<*>>;kotlin.collections.List<cordis.kernel.ServiceKey<*>>){}[0]
+    }
+}
+
+final class cordis.kernel/OccurrenceId { // cordis.kernel/OccurrenceId|null[0]
+    constructor <init>(kotlin/Int) // cordis.kernel/OccurrenceId.<init>|<init>(kotlin.Int){}[0]
+
+    final val rawValue // cordis.kernel/OccurrenceId.rawValue|{}rawValue[0]
+        final fun <get-rawValue>(): kotlin/Int // cordis.kernel/OccurrenceId.rawValue.<get-rawValue>|<get-rawValue>(){}[0]
+
+    final fun component1(): kotlin/Int // cordis.kernel/OccurrenceId.component1|component1(){}[0]
+    final fun copy(kotlin/Int = ...): cordis.kernel/OccurrenceId // cordis.kernel/OccurrenceId.copy|copy(kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/OccurrenceId.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // cordis.kernel/OccurrenceId.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // cordis.kernel/OccurrenceId.toString|toString(){}[0]
+}
+
+final class cordis.kernel/PluginFailed : cordis.kernel/CordisEvent { // cordis.kernel/PluginFailed|null[0]
+    constructor <init>(kotlin/String, kotlin/Throwable) // cordis.kernel/PluginFailed.<init>|<init>(kotlin.String;kotlin.Throwable){}[0]
+
+    final val error // cordis.kernel/PluginFailed.error|{}error[0]
+        final fun <get-error>(): kotlin/Throwable // cordis.kernel/PluginFailed.error.<get-error>|<get-error>(){}[0]
+    final val plugin // cordis.kernel/PluginFailed.plugin|{}plugin[0]
+        final fun <get-plugin>(): kotlin/String // cordis.kernel/PluginFailed.plugin.<get-plugin>|<get-plugin>(){}[0]
+
+    final fun component1(): kotlin/String // cordis.kernel/PluginFailed.component1|component1(){}[0]
+    final fun component2(): kotlin/Throwable // cordis.kernel/PluginFailed.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/Throwable = ...): cordis.kernel/PluginFailed // cordis.kernel/PluginFailed.copy|copy(kotlin.String;kotlin.Throwable){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/PluginFailed.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // cordis.kernel/PluginFailed.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // cordis.kernel/PluginFailed.toString|toString(){}[0]
+}
+
+final class cordis.kernel/PluginId { // cordis.kernel/PluginId|null[0]
+    constructor <init>(kotlin/Any) // cordis.kernel/PluginId.<init>|<init>(kotlin.Any){}[0]
+
+    final val raw // cordis.kernel/PluginId.raw|{}raw[0]
+        final fun <get-raw>(): kotlin/Any // cordis.kernel/PluginId.raw.<get-raw>|<get-raw>(){}[0]
+
+    final fun component1(): kotlin/Any // cordis.kernel/PluginId.component1|component1(){}[0]
+    final fun copy(kotlin/Any = ...): cordis.kernel/PluginId // cordis.kernel/PluginId.copy|copy(kotlin.Any){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/PluginId.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // cordis.kernel/PluginId.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // cordis.kernel/PluginId.toString|toString(){}[0]
+}
+
+final class cordis.kernel/PluginInfo { // cordis.kernel/PluginInfo|null[0]
+    constructor <init>(cordis.kernel/PluginId, kotlin/String, cordis.kernel/Fork.Status, cordis.kernel/PluginId?) // cordis.kernel/PluginInfo.<init>|<init>(cordis.kernel.PluginId;kotlin.String;cordis.kernel.Fork.Status;cordis.kernel.PluginId?){}[0]
+
+    final val id // cordis.kernel/PluginInfo.id|{}id[0]
+        final fun <get-id>(): cordis.kernel/PluginId // cordis.kernel/PluginInfo.id.<get-id>|<get-id>(){}[0]
+    final val name // cordis.kernel/PluginInfo.name|{}name[0]
+        final fun <get-name>(): kotlin/String // cordis.kernel/PluginInfo.name.<get-name>|<get-name>(){}[0]
+    final val parent // cordis.kernel/PluginInfo.parent|{}parent[0]
+        final fun <get-parent>(): cordis.kernel/PluginId? // cordis.kernel/PluginInfo.parent.<get-parent>|<get-parent>(){}[0]
+    final val status // cordis.kernel/PluginInfo.status|{}status[0]
+        final fun <get-status>(): cordis.kernel/Fork.Status // cordis.kernel/PluginInfo.status.<get-status>|<get-status>(){}[0]
+
+    final fun component1(): cordis.kernel/PluginId // cordis.kernel/PluginInfo.component1|component1(){}[0]
+    final fun component2(): kotlin/String // cordis.kernel/PluginInfo.component2|component2(){}[0]
+    final fun component3(): cordis.kernel/Fork.Status // cordis.kernel/PluginInfo.component3|component3(){}[0]
+    final fun component4(): cordis.kernel/PluginId? // cordis.kernel/PluginInfo.component4|component4(){}[0]
+    final fun copy(cordis.kernel/PluginId = ..., kotlin/String = ..., cordis.kernel/Fork.Status = ..., cordis.kernel/PluginId? = ...): cordis.kernel/PluginInfo // cordis.kernel/PluginInfo.copy|copy(cordis.kernel.PluginId;kotlin.String;cordis.kernel.Fork.Status;cordis.kernel.PluginId?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/PluginInfo.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // cordis.kernel/PluginInfo.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // cordis.kernel/PluginInfo.toString|toString(){}[0]
+}
+
+final class cordis.kernel/PluginStatusChanged : cordis.kernel/CordisEvent { // cordis.kernel/PluginStatusChanged|null[0]
+    constructor <init>(kotlin/String, cordis.kernel/Fork.Status) // cordis.kernel/PluginStatusChanged.<init>|<init>(kotlin.String;cordis.kernel.Fork.Status){}[0]
+
+    final val plugin // cordis.kernel/PluginStatusChanged.plugin|{}plugin[0]
+        final fun <get-plugin>(): kotlin/String // cordis.kernel/PluginStatusChanged.plugin.<get-plugin>|<get-plugin>(){}[0]
+    final val status // cordis.kernel/PluginStatusChanged.status|{}status[0]
+        final fun <get-status>(): cordis.kernel/Fork.Status // cordis.kernel/PluginStatusChanged.status.<get-status>|<get-status>(){}[0]
+
+    final fun component1(): kotlin/String // cordis.kernel/PluginStatusChanged.component1|component1(){}[0]
+    final fun component2(): cordis.kernel/Fork.Status // cordis.kernel/PluginStatusChanged.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., cordis.kernel/Fork.Status = ...): cordis.kernel/PluginStatusChanged // cordis.kernel/PluginStatusChanged.copy|copy(kotlin.String;cordis.kernel.Fork.Status){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/PluginStatusChanged.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // cordis.kernel/PluginStatusChanged.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // cordis.kernel/PluginStatusChanged.toString|toString(){}[0]
+}
+
+final class cordis.kernel/Registry { // cordis.kernel/Registry|null[0]
+    constructor <init>(kotlinx.coroutines/CoroutineDispatcher = ...) // cordis.kernel/Registry.<init>|<init>(kotlinx.coroutines.CoroutineDispatcher){}[0]
+
+    final val coroutineScope // cordis.kernel/Registry.coroutineScope|{}coroutineScope[0]
+        final fun <get-coroutineScope>(): kotlinx.coroutines/CoroutineScope // cordis.kernel/Registry.coroutineScope.<get-coroutineScope>|<get-coroutineScope>(){}[0]
+    final val dispatcher // cordis.kernel/Registry.dispatcher|{}dispatcher[0]
+        final fun <get-dispatcher>(): kotlinx.coroutines/CoroutineDispatcher // cordis.kernel/Registry.dispatcher.<get-dispatcher>|<get-dispatcher>(){}[0]
+
+    final fun <#A1: cordis.kernel/CordisEvent> on(kotlin.reflect/KClass<#A1>, cordis.kernel/ZoneId?, kotlin.coroutines/SuspendFunction1<#A1, kotlin/Unit>): kotlin/Int // cordis.kernel/Registry.on|on(kotlin.reflect.KClass<0:0>;cordis.kernel.ZoneId?;kotlin.coroutines.SuspendFunction1<0:0,kotlin.Unit>){0§<cordis.kernel.CordisEvent>}[0]
+    final fun <#A1: kotlin/Any> replaceValue(cordis.kernel/Slot, cordis.kernel/Context, kotlin/Function1<#A1, #A1>) // cordis.kernel/Registry.replaceValue|replaceValue(cordis.kernel.Slot;cordis.kernel.Context;kotlin.Function1<0:0,0:0>){0§<kotlin.Any>}[0]
+    final fun <#A1: kotlin/Any> update(cordis.kernel/Slot, cordis.kernel/Context, kotlin/Function1<#A1, kotlin/Unit>) // cordis.kernel/Registry.update|update(cordis.kernel.Slot;cordis.kernel.Context;kotlin.Function1<0:0,kotlin.Unit>){0§<kotlin.Any>}[0]
+    final fun anonymousRealm(): kotlin/String // cordis.kernel/Registry.anonymousRealm|anonymousRealm(){}[0]
+    final fun entry(cordis.kernel/Slot): cordis.kernel/Registry.Entry? // cordis.kernel/Registry.entry|entry(cordis.kernel.Slot){}[0]
+    final fun listenerCount(kotlin.reflect/KClass<out cordis.kernel/CordisEvent>): kotlin/Int // cordis.kernel/Registry.listenerCount|listenerCount(kotlin.reflect.KClass<out|cordis.kernel.CordisEvent>){}[0]
+    final fun off(kotlin.reflect/KClass<out cordis.kernel/CordisEvent>, kotlin/Int) // cordis.kernel/Registry.off|off(kotlin.reflect.KClass<out|cordis.kernel.CordisEvent>;kotlin.Int){}[0]
+    final fun register(cordis.kernel/Fork) // cordis.kernel/Registry.register|register(cordis.kernel.Fork){}[0]
+    final fun snapshot(): cordis.kernel/RuntimeSnapshot // cordis.kernel/Registry.snapshot|snapshot(){}[0]
+    final fun unregister(cordis.kernel/Fork) // cordis.kernel/Registry.unregister|unregister(cordis.kernel.Fork){}[0]
+    final fun zone(kotlin/String, cordis.kernel/ZoneId?): cordis.kernel/ZoneId // cordis.kernel/Registry.zone|zone(kotlin.String;cordis.kernel.ZoneId?){}[0]
+    final suspend fun emit(cordis.kernel/CordisEvent, cordis.kernel/ZoneId? = ...) // cordis.kernel/Registry.emit|emit(cordis.kernel.CordisEvent;cordis.kernel.ZoneId?){}[0]
+    final suspend fun provide(cordis.kernel/Slot, kotlin/Any, cordis.kernel/Context) // cordis.kernel/Registry.provide|provide(cordis.kernel.Slot;kotlin.Any;cordis.kernel.Context){}[0]
+    final suspend fun withdraw(cordis.kernel/Slot, kotlin/Any, cordis.kernel/PluginId?) // cordis.kernel/Registry.withdraw|withdraw(cordis.kernel.Slot;kotlin.Any;cordis.kernel.PluginId?){}[0]
+
+    final class Entry { // cordis.kernel/Registry.Entry|null[0]
+        constructor <init>(kotlin/Any, kotlin/Any, kotlin/String, cordis.kernel/PluginId?, kotlin/Int, cordis.kernel/OccurrenceId) // cordis.kernel/Registry.Entry.<init>|<init>(kotlin.Any;kotlin.Any;kotlin.String;cordis.kernel.PluginId?;kotlin.Int;cordis.kernel.OccurrenceId){}[0]
+
+        final val fork // cordis.kernel/Registry.Entry.fork|{}fork[0]
+            final fun <get-fork>(): cordis.kernel/PluginId? // cordis.kernel/Registry.Entry.fork.<get-fork>|<get-fork>(){}[0]
+        final val generation // cordis.kernel/Registry.Entry.generation|{}generation[0]
+            final fun <get-generation>(): kotlin/Int // cordis.kernel/Registry.Entry.generation.<get-generation>|<get-generation>(){}[0]
+        final val occurrence // cordis.kernel/Registry.Entry.occurrence|{}occurrence[0]
+            final fun <get-occurrence>(): cordis.kernel/OccurrenceId // cordis.kernel/Registry.Entry.occurrence.<get-occurrence>|<get-occurrence>(){}[0]
+        final val owner // cordis.kernel/Registry.Entry.owner|{}owner[0]
+            final fun <get-owner>(): kotlin/Any // cordis.kernel/Registry.Entry.owner.<get-owner>|<get-owner>(){}[0]
+        final val ownerName // cordis.kernel/Registry.Entry.ownerName|{}ownerName[0]
+            final fun <get-ownerName>(): kotlin/String // cordis.kernel/Registry.Entry.ownerName.<get-ownerName>|<get-ownerName>(){}[0]
+
+        final var value // cordis.kernel/Registry.Entry.value|{}value[0]
+            final fun <get-value>(): kotlin/Any // cordis.kernel/Registry.Entry.value.<get-value>|<get-value>(){}[0]
+            final fun <set-value>(kotlin/Any) // cordis.kernel/Registry.Entry.value.<set-value>|<set-value>(kotlin.Any){}[0]
+    }
+
+    final class Listener { // cordis.kernel/Registry.Listener|null[0]
+        constructor <init>(kotlin/Int, cordis.kernel/ZoneId?, kotlin.coroutines/SuspendFunction1<cordis.kernel/CordisEvent, kotlin/Unit>) // cordis.kernel/Registry.Listener.<init>|<init>(kotlin.Int;cordis.kernel.ZoneId?;kotlin.coroutines.SuspendFunction1<cordis.kernel.CordisEvent,kotlin.Unit>){}[0]
+
+        final val handler // cordis.kernel/Registry.Listener.handler|{}handler[0]
+            final fun <get-handler>(): kotlin.coroutines/SuspendFunction1<cordis.kernel/CordisEvent, kotlin/Unit> // cordis.kernel/Registry.Listener.handler.<get-handler>|<get-handler>(){}[0]
+        final val id // cordis.kernel/Registry.Listener.id|{}id[0]
+            final fun <get-id>(): kotlin/Int // cordis.kernel/Registry.Listener.id.<get-id>|<get-id>(){}[0]
+        final val zone // cordis.kernel/Registry.Listener.zone|{}zone[0]
+            final fun <get-zone>(): cordis.kernel/ZoneId? // cordis.kernel/Registry.Listener.zone.<get-zone>|<get-zone>(){}[0]
+    }
+}
+
+final class cordis.kernel/RuntimeSnapshot { // cordis.kernel/RuntimeSnapshot|null[0]
+    constructor <init>(kotlin.collections/List<cordis.kernel/PluginInfo>, kotlin.collections/List<cordis.kernel/SlotInfo>) // cordis.kernel/RuntimeSnapshot.<init>|<init>(kotlin.collections.List<cordis.kernel.PluginInfo>;kotlin.collections.List<cordis.kernel.SlotInfo>){}[0]
+
+    final val plugins // cordis.kernel/RuntimeSnapshot.plugins|{}plugins[0]
+        final fun <get-plugins>(): kotlin.collections/List<cordis.kernel/PluginInfo> // cordis.kernel/RuntimeSnapshot.plugins.<get-plugins>|<get-plugins>(){}[0]
+    final val slots // cordis.kernel/RuntimeSnapshot.slots|{}slots[0]
+        final fun <get-slots>(): kotlin.collections/List<cordis.kernel/SlotInfo> // cordis.kernel/RuntimeSnapshot.slots.<get-slots>|<get-slots>(){}[0]
+
+    final fun component1(): kotlin.collections/List<cordis.kernel/PluginInfo> // cordis.kernel/RuntimeSnapshot.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/List<cordis.kernel/SlotInfo> // cordis.kernel/RuntimeSnapshot.component2|component2(){}[0]
+    final fun copy(kotlin.collections/List<cordis.kernel/PluginInfo> = ..., kotlin.collections/List<cordis.kernel/SlotInfo> = ...): cordis.kernel/RuntimeSnapshot // cordis.kernel/RuntimeSnapshot.copy|copy(kotlin.collections.List<cordis.kernel.PluginInfo>;kotlin.collections.List<cordis.kernel.SlotInfo>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/RuntimeSnapshot.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // cordis.kernel/RuntimeSnapshot.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // cordis.kernel/RuntimeSnapshot.toString|toString(){}[0]
+}
+
+final class cordis.kernel/Scope { // cordis.kernel/Scope|null[0]
+    constructor <init>(kotlin.coroutines/SuspendFunction1<kotlin/Throwable, kotlin/Unit> = ..., kotlinx.coroutines/CoroutineScope? = ...) // cordis.kernel/Scope.<init>|<init>(kotlin.coroutines.SuspendFunction1<kotlin.Throwable,kotlin.Unit>;kotlinx.coroutines.CoroutineScope?){}[0]
+
+    final var isDisposed // cordis.kernel/Scope.isDisposed|{}isDisposed[0]
+        final fun <get-isDisposed>(): kotlin/Boolean // cordis.kernel/Scope.isDisposed.<get-isDisposed>|<get-isDisposed>(){}[0]
+
+    final fun collect(kotlin.coroutines/SuspendFunction0<kotlin/Unit>): cordis.kernel/Disposable // cordis.kernel/Scope.collect|collect(kotlin.coroutines.SuspendFunction0<kotlin.Unit>){}[0]
+    final suspend fun dispose() // cordis.kernel/Scope.dispose|dispose(){}[0]
+}
+
+final class cordis.kernel/ServiceChanged : cordis.kernel/CordisEvent { // cordis.kernel/ServiceChanged|null[0]
+    constructor <init>(cordis.kernel/Slot, kotlin/Boolean) // cordis.kernel/ServiceChanged.<init>|<init>(cordis.kernel.Slot;kotlin.Boolean){}[0]
+
+    final val isAvailable // cordis.kernel/ServiceChanged.isAvailable|{}isAvailable[0]
+        final fun <get-isAvailable>(): kotlin/Boolean // cordis.kernel/ServiceChanged.isAvailable.<get-isAvailable>|<get-isAvailable>(){}[0]
+    final val slot // cordis.kernel/ServiceChanged.slot|{}slot[0]
+        final fun <get-slot>(): cordis.kernel/Slot // cordis.kernel/ServiceChanged.slot.<get-slot>|<get-slot>(){}[0]
+
+    final fun component1(): cordis.kernel/Slot // cordis.kernel/ServiceChanged.component1|component1(){}[0]
+    final fun component2(): kotlin/Boolean // cordis.kernel/ServiceChanged.component2|component2(){}[0]
+    final fun copy(cordis.kernel/Slot = ..., kotlin/Boolean = ...): cordis.kernel/ServiceChanged // cordis.kernel/ServiceChanged.copy|copy(cordis.kernel.Slot;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/ServiceChanged.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // cordis.kernel/ServiceChanged.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // cordis.kernel/ServiceChanged.toString|toString(){}[0]
+}
+
+final class cordis.kernel/ServiceId { // cordis.kernel/ServiceId|null[0]
+    constructor <init>(kotlin/Any, kotlin/String = ...) // cordis.kernel/ServiceId.<init>|<init>(kotlin.Any;kotlin.String){}[0]
+
+    final val description // cordis.kernel/ServiceId.description|{}description[0]
+        final fun <get-description>(): kotlin/String // cordis.kernel/ServiceId.description.<get-description>|<get-description>(){}[0]
+    final val raw // cordis.kernel/ServiceId.raw|{}raw[0]
+        final fun <get-raw>(): kotlin/Any // cordis.kernel/ServiceId.raw.<get-raw>|<get-raw>(){}[0]
+
+    final fun component1(): kotlin/Any // cordis.kernel/ServiceId.component1|component1(){}[0]
+    final fun component2(): kotlin/String // cordis.kernel/ServiceId.component2|component2(){}[0]
+    final fun copy(kotlin/Any = ..., kotlin/String = ...): cordis.kernel/ServiceId // cordis.kernel/ServiceId.copy|copy(kotlin.Any;kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/ServiceId.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // cordis.kernel/ServiceId.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // cordis.kernel/ServiceId.toString|toString(){}[0]
+
+    final object Companion { // cordis.kernel/ServiceId.Companion|null[0]
+        final fun of(cordis.kernel/ServiceKey<*>): cordis.kernel/ServiceId // cordis.kernel/ServiceId.Companion.of|of(cordis.kernel.ServiceKey<*>){}[0]
+        final fun of(kotlin.reflect/KClass<*>): cordis.kernel/ServiceId // cordis.kernel/ServiceId.Companion.of|of(kotlin.reflect.KClass<*>){}[0]
+    }
+}
+
+final class cordis.kernel/Slot { // cordis.kernel/Slot|null[0]
+    constructor <init>(cordis.kernel/ServiceId, kotlin/String = ...) // cordis.kernel/Slot.<init>|<init>(cordis.kernel.ServiceId;kotlin.String){}[0]
+
+    final val realm // cordis.kernel/Slot.realm|{}realm[0]
+        final fun <get-realm>(): kotlin/String // cordis.kernel/Slot.realm.<get-realm>|<get-realm>(){}[0]
+    final val service // cordis.kernel/Slot.service|{}service[0]
+        final fun <get-service>(): cordis.kernel/ServiceId // cordis.kernel/Slot.service.<get-service>|<get-service>(){}[0]
+
+    final fun component1(): cordis.kernel/ServiceId // cordis.kernel/Slot.component1|component1(){}[0]
+    final fun component2(): kotlin/String // cordis.kernel/Slot.component2|component2(){}[0]
+    final fun copy(cordis.kernel/ServiceId = ..., kotlin/String = ...): cordis.kernel/Slot // cordis.kernel/Slot.copy|copy(cordis.kernel.ServiceId;kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/Slot.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // cordis.kernel/Slot.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // cordis.kernel/Slot.toString|toString(){}[0]
+
+    final object Companion { // cordis.kernel/Slot.Companion|null[0]
+        final const val SHARED_REALM // cordis.kernel/Slot.Companion.SHARED_REALM|{}SHARED_REALM[0]
+            final fun <get-SHARED_REALM>(): kotlin/String // cordis.kernel/Slot.Companion.SHARED_REALM.<get-SHARED_REALM>|<get-SHARED_REALM>(){}[0]
+    }
+}
+
+final class cordis.kernel/SlotInfo { // cordis.kernel/SlotInfo|null[0]
+    constructor <init>(kotlin/String, kotlin/String, cordis.kernel/PluginId?, kotlin/Int) // cordis.kernel/SlotInfo.<init>|<init>(kotlin.String;kotlin.String;cordis.kernel.PluginId?;kotlin.Int){}[0]
+
+    final val generation // cordis.kernel/SlotInfo.generation|{}generation[0]
+        final fun <get-generation>(): kotlin/Int // cordis.kernel/SlotInfo.generation.<get-generation>|<get-generation>(){}[0]
+    final val provider // cordis.kernel/SlotInfo.provider|{}provider[0]
+        final fun <get-provider>(): cordis.kernel/PluginId? // cordis.kernel/SlotInfo.provider.<get-provider>|<get-provider>(){}[0]
+    final val realm // cordis.kernel/SlotInfo.realm|{}realm[0]
+        final fun <get-realm>(): kotlin/String // cordis.kernel/SlotInfo.realm.<get-realm>|<get-realm>(){}[0]
+    final val service // cordis.kernel/SlotInfo.service|{}service[0]
+        final fun <get-service>(): kotlin/String // cordis.kernel/SlotInfo.service.<get-service>|<get-service>(){}[0]
+
+    final fun component1(): kotlin/String // cordis.kernel/SlotInfo.component1|component1(){}[0]
+    final fun component2(): kotlin/String // cordis.kernel/SlotInfo.component2|component2(){}[0]
+    final fun component3(): cordis.kernel/PluginId? // cordis.kernel/SlotInfo.component3|component3(){}[0]
+    final fun component4(): kotlin/Int // cordis.kernel/SlotInfo.component4|component4(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., cordis.kernel/PluginId? = ..., kotlin/Int = ...): cordis.kernel/SlotInfo // cordis.kernel/SlotInfo.copy|copy(kotlin.String;kotlin.String;cordis.kernel.PluginId?;kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/SlotInfo.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // cordis.kernel/SlotInfo.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // cordis.kernel/SlotInfo.toString|toString(){}[0]
+}
+
+final class cordis.kernel/TeardownFailed : cordis.kernel/CordisEvent { // cordis.kernel/TeardownFailed|null[0]
+    constructor <init>(kotlin/String, kotlin/Throwable) // cordis.kernel/TeardownFailed.<init>|<init>(kotlin.String;kotlin.Throwable){}[0]
+
+    final val error // cordis.kernel/TeardownFailed.error|{}error[0]
+        final fun <get-error>(): kotlin/Throwable // cordis.kernel/TeardownFailed.error.<get-error>|<get-error>(){}[0]
+    final val plugin // cordis.kernel/TeardownFailed.plugin|{}plugin[0]
+        final fun <get-plugin>(): kotlin/String // cordis.kernel/TeardownFailed.plugin.<get-plugin>|<get-plugin>(){}[0]
+
+    final fun component1(): kotlin/String // cordis.kernel/TeardownFailed.component1|component1(){}[0]
+    final fun component2(): kotlin/Throwable // cordis.kernel/TeardownFailed.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/Throwable = ...): cordis.kernel/TeardownFailed // cordis.kernel/TeardownFailed.copy|copy(kotlin.String;kotlin.Throwable){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/TeardownFailed.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // cordis.kernel/TeardownFailed.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // cordis.kernel/TeardownFailed.toString|toString(){}[0]
+}
+
+final class cordis.kernel/ZoneId { // cordis.kernel/ZoneId|null[0]
+    constructor <init>(kotlin/Int) // cordis.kernel/ZoneId.<init>|<init>(kotlin.Int){}[0]
+
+    final val rawValue // cordis.kernel/ZoneId.rawValue|{}rawValue[0]
+        final fun <get-rawValue>(): kotlin/Int // cordis.kernel/ZoneId.rawValue.<get-rawValue>|<get-rawValue>(){}[0]
+
+    final fun component1(): kotlin/Int // cordis.kernel/ZoneId.component1|component1(){}[0]
+    final fun copy(kotlin/Int = ...): cordis.kernel/ZoneId // cordis.kernel/ZoneId.copy|copy(kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/ZoneId.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // cordis.kernel/ZoneId.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // cordis.kernel/ZoneId.toString|toString(){}[0]
+}
+
+sealed class cordis.kernel/CordisException : kotlin/Exception { // cordis.kernel/CordisException|null[0]
+    final class Disposed : cordis.kernel/CordisException { // cordis.kernel/CordisException.Disposed|null[0]
+        constructor <init>() // cordis.kernel/CordisException.Disposed.<init>|<init>(){}[0]
+    }
+
+    final class MissingService : cordis.kernel/CordisException { // cordis.kernel/CordisException.MissingService|null[0]
+        constructor <init>(cordis.kernel/ServiceId) // cordis.kernel/CordisException.MissingService.<init>|<init>(cordis.kernel.ServiceId){}[0]
+
+        final val service // cordis.kernel/CordisException.MissingService.service|{}service[0]
+            final fun <get-service>(): cordis.kernel/ServiceId // cordis.kernel/CordisException.MissingService.service.<get-service>|<get-service>(){}[0]
+    }
+
+    final class NotPublished : cordis.kernel/CordisException { // cordis.kernel/CordisException.NotPublished|null[0]
+        constructor <init>(cordis.kernel/Slot) // cordis.kernel/CordisException.NotPublished.<init>|<init>(cordis.kernel.Slot){}[0]
+
+        final val slot // cordis.kernel/CordisException.NotPublished.slot|{}slot[0]
+            final fun <get-slot>(): cordis.kernel/Slot // cordis.kernel/CordisException.NotPublished.slot.<get-slot>|<get-slot>(){}[0]
+    }
+
+    final class ServiceConflict : cordis.kernel/CordisException { // cordis.kernel/CordisException.ServiceConflict|null[0]
+        constructor <init>(cordis.kernel/Slot, kotlin/String) // cordis.kernel/CordisException.ServiceConflict.<init>|<init>(cordis.kernel.Slot;kotlin.String){}[0]
+
+        final val existingOwner // cordis.kernel/CordisException.ServiceConflict.existingOwner|{}existingOwner[0]
+            final fun <get-existingOwner>(): kotlin/String // cordis.kernel/CordisException.ServiceConflict.existingOwner.<get-existingOwner>|<get-existingOwner>(){}[0]
+        final val slot // cordis.kernel/CordisException.ServiceConflict.slot|{}slot[0]
+            final fun <get-slot>(): cordis.kernel/Slot // cordis.kernel/CordisException.ServiceConflict.slot.<get-slot>|<get-slot>(){}[0]
+    }
+}
+
+sealed class cordis.kernel/UpdateOutcome { // cordis.kernel/UpdateOutcome|null[0]
+    final class Rejected : cordis.kernel/UpdateOutcome { // cordis.kernel/UpdateOutcome.Rejected|null[0]
+        constructor <init>(kotlin/Throwable) // cordis.kernel/UpdateOutcome.Rejected.<init>|<init>(kotlin.Throwable){}[0]
+
+        final val error // cordis.kernel/UpdateOutcome.Rejected.error|{}error[0]
+            final fun <get-error>(): kotlin/Throwable // cordis.kernel/UpdateOutcome.Rejected.error.<get-error>|<get-error>(){}[0]
+
+        final fun component1(): kotlin/Throwable // cordis.kernel/UpdateOutcome.Rejected.component1|component1(){}[0]
+        final fun copy(kotlin/Throwable = ...): cordis.kernel/UpdateOutcome.Rejected // cordis.kernel/UpdateOutcome.Rejected.copy|copy(kotlin.Throwable){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/UpdateOutcome.Rejected.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // cordis.kernel/UpdateOutcome.Rejected.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // cordis.kernel/UpdateOutcome.Rejected.toString|toString(){}[0]
+    }
+
+    final object Applied : cordis.kernel/UpdateOutcome { // cordis.kernel/UpdateOutcome.Applied|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/UpdateOutcome.Applied.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // cordis.kernel/UpdateOutcome.Applied.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // cordis.kernel/UpdateOutcome.Applied.toString|toString(){}[0]
+    }
+
+    final object Unchanged : cordis.kernel/UpdateOutcome { // cordis.kernel/UpdateOutcome.Unchanged|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/UpdateOutcome.Unchanged.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // cordis.kernel/UpdateOutcome.Unchanged.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // cordis.kernel/UpdateOutcome.Unchanged.toString|toString(){}[0]
+    }
+}
+
+final object cordis.kernel/DefaultClock : cordis.kernel/CordisClock { // cordis.kernel/DefaultClock|null[0]
+    final val now // cordis.kernel/DefaultClock.now|{}now[0]
+        final fun <get-now>(): kotlin.time/Duration // cordis.kernel/DefaultClock.now.<get-now>|<get-now>(){}[0]
+
+    final suspend fun delay(kotlin.time/Duration) // cordis.kernel/DefaultClock.delay|delay(kotlin.time.Duration){}[0]
+}

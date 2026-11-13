@@ -1,0 +1,443 @@
+public final class cordis/kernel/Context {
+	public static final field Companion Lcordis/kernel/Context$Companion;
+	public final fun dispose (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun effect (Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun emit (Lcordis/kernel/CordisEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun events (Lkotlin/reflect/KClass;)Lkotlinx/coroutines/flow/Flow;
+	public final fun get (Lcordis/kernel/ServiceKey;)Ljava/lang/Object;
+	public final fun getFork ()Lcordis/kernel/Fork;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getParent ()Lcordis/kernel/Context;
+	public final fun getRegistry ()Lcordis/kernel/Registry;
+	public final fun getScope ()Lcordis/kernel/Scope;
+	public final fun getZoneId ()Lcordis/kernel/ZoneId;
+	public final fun intercept (Lcordis/kernel/ServiceKey;Lkotlin/jvm/functions/Function1;)Lcordis/kernel/Context;
+	public final fun isolate (Lcordis/kernel/ServiceKey;Ljava/lang/String;)Lcordis/kernel/Context;
+	public static synthetic fun isolate$default (Lcordis/kernel/Context;Lcordis/kernel/ServiceKey;Ljava/lang/String;ILjava/lang/Object;)Lcordis/kernel/Context;
+	public final fun launch (Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function2;)Lkotlinx/coroutines/Job;
+	public static synthetic fun launch$default (Lcordis/kernel/Context;Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lkotlinx/coroutines/Job;
+	public final fun on (Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function2;)Lcordis/kernel/Disposable;
+	public final fun onDispose (Lkotlin/jvm/functions/Function1;)Lcordis/kernel/Disposable;
+	public final fun plugin (Lcordis/kernel/Plugin;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun plugin (Lcordis/kernel/Plugin;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun plugin (Ljava/lang/String;Lcordis/kernel/Inject;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun plugin$default (Lcordis/kernel/Context;Ljava/lang/String;Lcordis/kernel/Inject;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun provide (Lcordis/kernel/ServiceKey;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun replaceValue (Lcordis/kernel/ServiceKey;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun require (Lcordis/kernel/ServiceKey;)Ljava/lang/Object;
+	public final fun serviceFlow (Lcordis/kernel/ServiceKey;)Lkotlinx/coroutines/flow/Flow;
+	public final fun slot (Lcordis/kernel/ServiceId;)Lcordis/kernel/Slot;
+	public final fun snapshot ()Lcordis/kernel/RuntimeSnapshot;
+	public final fun update (Lcordis/kernel/ServiceKey;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun zone (Ljava/lang/String;)Lcordis/kernel/Context;
+}
+
+public final class cordis/kernel/Context$Companion {
+	public final fun root (Lkotlinx/coroutines/CoroutineDispatcher;)Lcordis/kernel/Context;
+	public static synthetic fun root$default (Lcordis/kernel/Context$Companion;Lkotlinx/coroutines/CoroutineDispatcher;ILjava/lang/Object;)Lcordis/kernel/Context;
+}
+
+public abstract interface class cordis/kernel/CordisClock {
+	public abstract fun delay-VtjQ1oo (JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getNow-UwyO8pc ()J
+}
+
+public abstract interface class cordis/kernel/CordisEvent {
+}
+
+public abstract class cordis/kernel/CordisException : java/lang/Exception {
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class cordis/kernel/CordisException$Disposed : cordis/kernel/CordisException {
+	public fun <init> ()V
+}
+
+public final class cordis/kernel/CordisException$MissingService : cordis/kernel/CordisException {
+	public fun <init> (Lcordis/kernel/ServiceId;)V
+	public final fun getService ()Lcordis/kernel/ServiceId;
+}
+
+public final class cordis/kernel/CordisException$NotPublished : cordis/kernel/CordisException {
+	public fun <init> (Lcordis/kernel/Slot;)V
+	public final fun getSlot ()Lcordis/kernel/Slot;
+}
+
+public final class cordis/kernel/CordisException$ServiceConflict : cordis/kernel/CordisException {
+	public fun <init> (Lcordis/kernel/Slot;Ljava/lang/String;)V
+	public final fun getExistingOwner ()Ljava/lang/String;
+	public final fun getSlot ()Lcordis/kernel/Slot;
+}
+
+public final class cordis/kernel/DefaultClock : cordis/kernel/CordisClock {
+	public static final field INSTANCE Lcordis/kernel/DefaultClock;
+	public fun delay-VtjQ1oo (JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getNow-UwyO8pc ()J
+}
+
+public final class cordis/kernel/Disposable {
+	public fun <init> (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun invoke (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun isDisposed ()Z
+}
+
+public final class cordis/kernel/Fork {
+	public fun <init> (Ljava/lang/String;Lcordis/kernel/Inject;Lcordis/kernel/Context;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcordis/kernel/Inject;Lcordis/kernel/Context;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun dependsOn (Lcordis/kernel/Slot;)Z
+	public final fun dispose (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getId ()Lcordis/kernel/PluginId;
+	public final fun getInject ()Lcordis/kernel/Inject;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getParent ()Lcordis/kernel/Context;
+	public final fun getStatus ()Lcordis/kernel/Fork$Status;
+	public final fun getStatusFlow ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun reconfigure (Ljava/lang/Object;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun refresh (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract class cordis/kernel/Fork$Status {
+}
+
+public final class cordis/kernel/Fork$Status$Active : cordis/kernel/Fork$Status {
+	public static final field INSTANCE Lcordis/kernel/Fork$Status$Active;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/kernel/Fork$Status$Disposed : cordis/kernel/Fork$Status {
+	public static final field INSTANCE Lcordis/kernel/Fork$Status$Disposed;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/kernel/Fork$Status$Failed : cordis/kernel/Fork$Status {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcordis/kernel/Fork$Status$Failed;
+	public static synthetic fun copy$default (Lcordis/kernel/Fork$Status$Failed;Ljava/lang/String;ILjava/lang/Object;)Lcordis/kernel/Fork$Status$Failed;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getReason ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/kernel/Fork$Status$Loading : cordis/kernel/Fork$Status {
+	public static final field INSTANCE Lcordis/kernel/Fork$Status$Loading;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/kernel/Fork$Status$Pending : cordis/kernel/Fork$Status {
+	public static final field INSTANCE Lcordis/kernel/Fork$Status$Pending;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/kernel/Inject {
+	public static final field Companion Lcordis/kernel/Inject$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;Ljava/util/List;)Lcordis/kernel/Inject;
+	public static synthetic fun copy$default (Lcordis/kernel/Inject;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lcordis/kernel/Inject;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAll ()Ljava/util/List;
+	public final fun getOptional ()Ljava/util/List;
+	public final fun getRequired ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/kernel/Inject$Companion {
+	public final fun getNONE ()Lcordis/kernel/Inject;
+	public final fun of (Ljava/util/List;Ljava/util/List;)Lcordis/kernel/Inject;
+	public static synthetic fun of$default (Lcordis/kernel/Inject$Companion;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lcordis/kernel/Inject;
+}
+
+public final class cordis/kernel/OccurrenceId {
+	public fun <init> (I)V
+	public final fun component1 ()I
+	public final fun copy (I)Lcordis/kernel/OccurrenceId;
+	public static synthetic fun copy$default (Lcordis/kernel/OccurrenceId;IILjava/lang/Object;)Lcordis/kernel/OccurrenceId;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRawValue ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class cordis/kernel/Plugin {
+	public abstract fun apply (Lcordis/kernel/Context;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getInject ()Lcordis/kernel/Inject;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun validate (Ljava/lang/Object;)V
+}
+
+public final class cordis/kernel/Plugin$DefaultImpls {
+	public static fun getInject (Lcordis/kernel/Plugin;)Lcordis/kernel/Inject;
+	public static fun getName (Lcordis/kernel/Plugin;)Ljava/lang/String;
+	public static fun validate (Lcordis/kernel/Plugin;Ljava/lang/Object;)V
+}
+
+public final class cordis/kernel/PluginFailed : cordis/kernel/CordisEvent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Throwable;)Lcordis/kernel/PluginFailed;
+	public static synthetic fun copy$default (Lcordis/kernel/PluginFailed;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)Lcordis/kernel/PluginFailed;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public final fun getPlugin ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/kernel/PluginHandle {
+	public fun <init> (Lcordis/kernel/Fork;Lcordis/kernel/Plugin;)V
+	public final fun awaitActive (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun dispose (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getFork ()Lcordis/kernel/Fork;
+	public final fun getStatus ()Lcordis/kernel/Fork$Status;
+	public final fun update (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class cordis/kernel/PluginId {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lcordis/kernel/PluginId;
+	public static synthetic fun copy$default (Lcordis/kernel/PluginId;Ljava/lang/Object;ILjava/lang/Object;)Lcordis/kernel/PluginId;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRaw ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/kernel/PluginInfo {
+	public fun <init> (Lcordis/kernel/PluginId;Ljava/lang/String;Lcordis/kernel/Fork$Status;Lcordis/kernel/PluginId;)V
+	public final fun component1 ()Lcordis/kernel/PluginId;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lcordis/kernel/Fork$Status;
+	public final fun component4 ()Lcordis/kernel/PluginId;
+	public final fun copy (Lcordis/kernel/PluginId;Ljava/lang/String;Lcordis/kernel/Fork$Status;Lcordis/kernel/PluginId;)Lcordis/kernel/PluginInfo;
+	public static synthetic fun copy$default (Lcordis/kernel/PluginInfo;Lcordis/kernel/PluginId;Ljava/lang/String;Lcordis/kernel/Fork$Status;Lcordis/kernel/PluginId;ILjava/lang/Object;)Lcordis/kernel/PluginInfo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Lcordis/kernel/PluginId;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getParent ()Lcordis/kernel/PluginId;
+	public final fun getStatus ()Lcordis/kernel/Fork$Status;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/kernel/PluginStatusChanged : cordis/kernel/CordisEvent {
+	public fun <init> (Ljava/lang/String;Lcordis/kernel/Fork$Status;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lcordis/kernel/Fork$Status;
+	public final fun copy (Ljava/lang/String;Lcordis/kernel/Fork$Status;)Lcordis/kernel/PluginStatusChanged;
+	public static synthetic fun copy$default (Lcordis/kernel/PluginStatusChanged;Ljava/lang/String;Lcordis/kernel/Fork$Status;ILjava/lang/Object;)Lcordis/kernel/PluginStatusChanged;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPlugin ()Ljava/lang/String;
+	public final fun getStatus ()Lcordis/kernel/Fork$Status;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/kernel/Registry {
+	public fun <init> ()V
+	public fun <init> (Lkotlinx/coroutines/CoroutineDispatcher;)V
+	public synthetic fun <init> (Lkotlinx/coroutines/CoroutineDispatcher;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun anonymousRealm ()Ljava/lang/String;
+	public final fun emit (Lcordis/kernel/CordisEvent;Lcordis/kernel/ZoneId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun emit$default (Lcordis/kernel/Registry;Lcordis/kernel/CordisEvent;Lcordis/kernel/ZoneId;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun entry (Lcordis/kernel/Slot;)Lcordis/kernel/Registry$Entry;
+	public final fun getCoroutineScope ()Lkotlinx/coroutines/CoroutineScope;
+	public final fun getDispatcher ()Lkotlinx/coroutines/CoroutineDispatcher;
+	public final fun listenerCount (Lkotlin/reflect/KClass;)I
+	public final fun off (Lkotlin/reflect/KClass;I)V
+	public final fun on (Lkotlin/reflect/KClass;Lcordis/kernel/ZoneId;Lkotlin/jvm/functions/Function2;)I
+	public final fun provide (Lcordis/kernel/Slot;Ljava/lang/Object;Lcordis/kernel/Context;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun register (Lcordis/kernel/Fork;)V
+	public final fun replaceValue (Lcordis/kernel/Slot;Lcordis/kernel/Context;Lkotlin/jvm/functions/Function1;)V
+	public final fun snapshot ()Lcordis/kernel/RuntimeSnapshot;
+	public final fun unregister (Lcordis/kernel/Fork;)V
+	public final fun update (Lcordis/kernel/Slot;Lcordis/kernel/Context;Lkotlin/jvm/functions/Function1;)V
+	public final fun withdraw (Lcordis/kernel/Slot;Ljava/lang/Object;Lcordis/kernel/PluginId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun zone (Ljava/lang/String;Lcordis/kernel/ZoneId;)Lcordis/kernel/ZoneId;
+}
+
+public final class cordis/kernel/Registry$Entry {
+	public fun <init> (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;Lcordis/kernel/PluginId;ILcordis/kernel/OccurrenceId;)V
+	public final fun getFork ()Lcordis/kernel/PluginId;
+	public final fun getGeneration ()I
+	public final fun getOccurrence ()Lcordis/kernel/OccurrenceId;
+	public final fun getOwner ()Ljava/lang/Object;
+	public final fun getOwnerName ()Ljava/lang/String;
+	public final fun getValue ()Ljava/lang/Object;
+	public final fun setValue (Ljava/lang/Object;)V
+}
+
+public final class cordis/kernel/Registry$Listener {
+	public fun <init> (ILcordis/kernel/ZoneId;Lkotlin/jvm/functions/Function2;)V
+	public final fun getHandler ()Lkotlin/jvm/functions/Function2;
+	public final fun getId ()I
+	public final fun getZone ()Lcordis/kernel/ZoneId;
+}
+
+public final class cordis/kernel/RuntimeSnapshot {
+	public fun <init> (Ljava/util/List;Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;Ljava/util/List;)Lcordis/kernel/RuntimeSnapshot;
+	public static synthetic fun copy$default (Lcordis/kernel/RuntimeSnapshot;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lcordis/kernel/RuntimeSnapshot;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPlugins ()Ljava/util/List;
+	public final fun getSlots ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/kernel/Scope {
+	public fun <init> ()V
+	public fun <init> (Lkotlin/jvm/functions/Function2;Lkotlinx/coroutines/CoroutineScope;)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function2;Lkotlinx/coroutines/CoroutineScope;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun collect (Lkotlin/jvm/functions/Function1;)Lcordis/kernel/Disposable;
+	public final fun dispose (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun isDisposed ()Z
+}
+
+public final class cordis/kernel/ServiceChanged : cordis/kernel/CordisEvent {
+	public fun <init> (Lcordis/kernel/Slot;Z)V
+	public final fun component1 ()Lcordis/kernel/Slot;
+	public final fun component2 ()Z
+	public final fun copy (Lcordis/kernel/Slot;Z)Lcordis/kernel/ServiceChanged;
+	public static synthetic fun copy$default (Lcordis/kernel/ServiceChanged;Lcordis/kernel/Slot;ZILjava/lang/Object;)Lcordis/kernel/ServiceChanged;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSlot ()Lcordis/kernel/Slot;
+	public fun hashCode ()I
+	public final fun isAvailable ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/kernel/ServiceId {
+	public static final field Companion Lcordis/kernel/ServiceId$Companion;
+	public fun <init> (Ljava/lang/Object;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/Object;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/Object;Ljava/lang/String;)Lcordis/kernel/ServiceId;
+	public static synthetic fun copy$default (Lcordis/kernel/ServiceId;Ljava/lang/Object;Ljava/lang/String;ILjava/lang/Object;)Lcordis/kernel/ServiceId;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getRaw ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/kernel/ServiceId$Companion {
+	public final fun of (Lcordis/kernel/ServiceKey;)Lcordis/kernel/ServiceId;
+	public final fun of (Lkotlin/reflect/KClass;)Lcordis/kernel/ServiceId;
+}
+
+public abstract interface class cordis/kernel/ServiceKey {
+	public abstract fun getServiceId ()Lcordis/kernel/ServiceId;
+}
+
+public final class cordis/kernel/ServiceKey$DefaultImpls {
+	public static fun getServiceId (Lcordis/kernel/ServiceKey;)Lcordis/kernel/ServiceId;
+}
+
+public final class cordis/kernel/Slot {
+	public static final field Companion Lcordis/kernel/Slot$Companion;
+	public static final field SHARED_REALM Ljava/lang/String;
+	public fun <init> (Lcordis/kernel/ServiceId;Ljava/lang/String;)V
+	public synthetic fun <init> (Lcordis/kernel/ServiceId;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcordis/kernel/ServiceId;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Lcordis/kernel/ServiceId;Ljava/lang/String;)Lcordis/kernel/Slot;
+	public static synthetic fun copy$default (Lcordis/kernel/Slot;Lcordis/kernel/ServiceId;Ljava/lang/String;ILjava/lang/Object;)Lcordis/kernel/Slot;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRealm ()Ljava/lang/String;
+	public final fun getService ()Lcordis/kernel/ServiceId;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/kernel/Slot$Companion {
+}
+
+public final class cordis/kernel/SlotInfo {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lcordis/kernel/PluginId;I)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lcordis/kernel/PluginId;
+	public final fun component4 ()I
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lcordis/kernel/PluginId;I)Lcordis/kernel/SlotInfo;
+	public static synthetic fun copy$default (Lcordis/kernel/SlotInfo;Ljava/lang/String;Ljava/lang/String;Lcordis/kernel/PluginId;IILjava/lang/Object;)Lcordis/kernel/SlotInfo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getGeneration ()I
+	public final fun getProvider ()Lcordis/kernel/PluginId;
+	public final fun getRealm ()Ljava/lang/String;
+	public final fun getService ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/kernel/TeardownFailed : cordis/kernel/CordisEvent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Throwable;)Lcordis/kernel/TeardownFailed;
+	public static synthetic fun copy$default (Lcordis/kernel/TeardownFailed;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)Lcordis/kernel/TeardownFailed;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public final fun getPlugin ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class cordis/kernel/UpdateOutcome {
+}
+
+public final class cordis/kernel/UpdateOutcome$Applied : cordis/kernel/UpdateOutcome {
+	public static final field INSTANCE Lcordis/kernel/UpdateOutcome$Applied;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/kernel/UpdateOutcome$Rejected : cordis/kernel/UpdateOutcome {
+	public fun <init> (Ljava/lang/Throwable;)V
+	public final fun component1 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/Throwable;)Lcordis/kernel/UpdateOutcome$Rejected;
+	public static synthetic fun copy$default (Lcordis/kernel/UpdateOutcome$Rejected;Ljava/lang/Throwable;ILjava/lang/Object;)Lcordis/kernel/UpdateOutcome$Rejected;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/kernel/UpdateOutcome$Unchanged : cordis/kernel/UpdateOutcome {
+	public static final field INSTANCE Lcordis/kernel/UpdateOutcome$Unchanged;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/kernel/ZoneId {
+	public fun <init> (I)V
+	public final fun component1 ()I
+	public final fun copy (I)Lcordis/kernel/ZoneId;
+	public static synthetic fun copy$default (Lcordis/kernel/ZoneId;IILjava/lang/Object;)Lcordis/kernel/ZoneId;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRawValue ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

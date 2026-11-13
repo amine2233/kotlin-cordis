@@ -12,6 +12,9 @@ with spatiotemporal composability), ported from `swift-cordis`.
 - Fast JVM tests only: `./gradlew :cordis-kernel:jvmTest :cordis:jvmTest :cordis-testing:jvmTest :cordis-loader:jvmTest`
 - Native macOS tests: `./gradlew :cordis-kernel:macosArm64Test :cordis:macosArm64Test :cordis-testing:macosArm64Test :cordis-loader:macosArm64Test`
 - Interactive Demo: `./gradlew :cordis-demo:run`
+- Public API check: `./gradlew apiCheck` compares the public API against the committed dumps in each module's `api/` directory (`*.api` for JVM, `*.klib.api` for native and JS). It runs as part of `./gradlew check`.
+- Public API dump: `./gradlew apiDump` after any intentional public API change. Run it on macOS so every klib target is dumped, and commit the updated `api/` files in the same PR as the change.
+- `cordis-demo` is excluded from binary-compatibility validation and has no API dump.
 
 ## CI
 - CI (GitHub Actions via `kotlin-ci-shared`) runs `mise run lint` and `mise run test` (`./gradlew allTests`) on `ubuntu-latest` only, covering JVM, Linux native and JS.

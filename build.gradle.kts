@@ -1,6 +1,16 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform) apply false
     alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.binary.compatibility.validator)
+}
+
+apiValidation {
+    ignoredProjects += "cordis-demo"
+
+    @OptIn(kotlinx.validation.ExperimentalBCVApi::class)
+    klib {
+        enabled = true
+    }
 }
 
 allprojects {

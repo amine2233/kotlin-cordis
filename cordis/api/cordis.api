@@ -1,0 +1,33 @@
+public abstract interface class cordis/ServicePlugin : cordis/kernel/Plugin {
+	public abstract fun apply (Lcordis/kernel/Context;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getKey ()Lcordis/kernel/ServiceKey;
+	public abstract fun make (Lcordis/kernel/Context;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class cordis/ServicePlugin$DefaultImpls {
+	public static fun apply (Lcordis/ServicePlugin;Lcordis/kernel/Context;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun getInject (Lcordis/ServicePlugin;)Lcordis/kernel/Inject;
+	public static fun getName (Lcordis/ServicePlugin;)Ljava/lang/String;
+	public static fun validate (Lcordis/ServicePlugin;Ljava/lang/Object;)V
+}
+
+public final class cordis/TimersKt {
+	public static final fun after-WPwdCS8 (Lcordis/kernel/Context;JLcordis/kernel/CordisClock;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun after-WPwdCS8$default (Lcordis/kernel/Context;JLcordis/kernel/CordisClock;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun every-WPwdCS8 (Lcordis/kernel/Context;JLcordis/kernel/CordisClock;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun every-WPwdCS8$default (Lcordis/kernel/Context;JLcordis/kernel/CordisClock;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public abstract interface class cordis/UnitServicePlugin : cordis/ServicePlugin {
+	public abstract fun make (Lcordis/kernel/Context;Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun make (Lcordis/kernel/Context;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class cordis/UnitServicePlugin$DefaultImpls {
+	public static fun apply (Lcordis/UnitServicePlugin;Lcordis/kernel/Context;Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun getInject (Lcordis/UnitServicePlugin;)Lcordis/kernel/Inject;
+	public static fun getName (Lcordis/UnitServicePlugin;)Ljava/lang/String;
+	public static fun make (Lcordis/UnitServicePlugin;Lcordis/kernel/Context;Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun validate (Lcordis/UnitServicePlugin;Lkotlin/Unit;)V
+}
+
