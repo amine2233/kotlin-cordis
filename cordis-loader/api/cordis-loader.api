@@ -1,23 +1,58 @@
 public final class cordis/loader/LoadKt {
-	public static final fun load (Lcordis/kernel/Context;Lcordis/loader/LoadPlan;Lcordis/loader/PluginRegistry;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun load (Lcordis/kernel/Context;Lcordis/loader/LoadPlan;Lcordis/loader/PluginFactoryRegistry;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class cordis/loader/LoadOutcome {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lcordis/kernel/Fork$Status;)V
-	public final fun component1 ()Ljava/lang/String;
+public abstract class cordis/loader/LoadOutcome {
+	public abstract fun getKey-cnM9MhM ()Ljava/lang/String;
+	public abstract fun getName ()Ljava/lang/String;
+}
+
+public final class cordis/loader/LoadOutcome$Invalid : cordis/loader/LoadOutcome {
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-cnM9MhM ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Lcordis/kernel/Fork$Status;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lcordis/kernel/Fork$Status;)Lcordis/loader/LoadOutcome;
-	public static synthetic fun copy$default (Lcordis/loader/LoadOutcome;Ljava/lang/String;Ljava/lang/String;Lcordis/kernel/Fork$Status;ILjava/lang/Object;)Lcordis/loader/LoadOutcome;
+	public final fun component3 ()Ljava/util/List;
+	public final fun copy-x35LzDk (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lcordis/loader/LoadOutcome$Invalid;
+	public static synthetic fun copy-x35LzDk$default (Lcordis/loader/LoadOutcome$Invalid;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lcordis/loader/LoadOutcome$Invalid;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getKey ()Ljava/lang/String;
-	public final fun getName ()Ljava/lang/String;
+	public final fun getErrors ()Ljava/util/List;
+	public fun getKey-cnM9MhM ()Ljava/lang/String;
+	public fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/loader/LoadOutcome$Loaded : cordis/loader/LoadOutcome {
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lcordis/kernel/PluginHandle;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-cnM9MhM ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lcordis/kernel/PluginHandle;
+	public final fun copy-x35LzDk (Ljava/lang/String;Ljava/lang/String;Lcordis/kernel/PluginHandle;)Lcordis/loader/LoadOutcome$Loaded;
+	public static synthetic fun copy-x35LzDk$default (Lcordis/loader/LoadOutcome$Loaded;Ljava/lang/String;Ljava/lang/String;Lcordis/kernel/PluginHandle;ILjava/lang/Object;)Lcordis/loader/LoadOutcome$Loaded;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHandle ()Lcordis/kernel/PluginHandle;
+	public fun getKey-cnM9MhM ()Ljava/lang/String;
+	public fun getName ()Ljava/lang/String;
 	public final fun getStatus ()Lcordis/kernel/Fork$Status;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class cordis/loader/LoadOutcome$NotLoaded : cordis/loader/LoadOutcome {
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-cnM9MhM ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy-60oTi3E (Ljava/lang/String;Ljava/lang/String;)Lcordis/loader/LoadOutcome$NotLoaded;
+	public static synthetic fun copy-60oTi3E$default (Lcordis/loader/LoadOutcome$NotLoaded;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcordis/loader/LoadOutcome$NotLoaded;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getKey-cnM9MhM ()Ljava/lang/String;
+	public fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class cordis/loader/LoadPlan {
+	public static final field Companion Lcordis/loader/LoadPlan$Companion;
 	public fun <init> (Ljava/util/List;)V
 	public final fun component1 ()Ljava/util/List;
 	public final fun copy (Ljava/util/List;)Lcordis/loader/LoadPlan;
@@ -26,31 +61,63 @@ public final class cordis/loader/LoadPlan {
 	public final fun getEntries ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public final fun validate (Lcordis/loader/PluginRegistry;)Ljava/util/List;
+	public final fun validate (Lcordis/loader/PluginFactoryRegistry;)Ljava/util/List;
+}
+
+public final synthetic class cordis/loader/LoadPlan$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcordis/loader/LoadPlan$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcordis/loader/LoadPlan;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcordis/loader/LoadPlan;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class cordis/loader/LoadPlan$Companion {
+	public final fun fromJson (Ljava/lang/String;)Lcordis/loader/LoadPlan;
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
 public final class cordis/loader/LoadPlan$Entry {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/String;
+	public static final field Companion Lcordis/loader/LoadPlan$Entry$Companion;
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-cnM9MhM ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcordis/loader/LoadPlan$Entry;
-	public static synthetic fun copy$default (Lcordis/loader/LoadPlan$Entry;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcordis/loader/LoadPlan$Entry;
+	public final fun component3 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun copy-x35LzDk (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;)Lcordis/loader/LoadPlan$Entry;
+	public static synthetic fun copy-x35LzDk$default (Lcordis/loader/LoadPlan$Entry;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;ILjava/lang/Object;)Lcordis/loader/LoadPlan$Entry;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getConfig ()Ljava/lang/String;
-	public final fun getKey ()Ljava/lang/String;
+	public final fun getConfig ()Lkotlinx/serialization/json/JsonElement;
+	public final fun getKey-cnM9MhM ()Ljava/lang/String;
 	public final fun getName ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
+public final synthetic class cordis/loader/LoadPlan$Entry$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcordis/loader/LoadPlan$Entry$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcordis/loader/LoadPlan$Entry;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcordis/loader/LoadPlan$Entry;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class cordis/loader/LoadPlan$Entry$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final class cordis/loader/LoadPlanBuilder {
 	public fun <init> (Lkotlinx/serialization/json/Json;)V
-	public final fun plugin (Ljava/lang/String;Ljava/lang/Object;Lkotlinx/serialization/KSerializer;Ljava/lang/String;)V
-	public final fun plugin (Ljava/lang/String;Ljava/lang/String;)V
-	public static synthetic fun plugin$default (Lcordis/loader/LoadPlanBuilder;Ljava/lang/String;Ljava/lang/Object;Lkotlinx/serialization/KSerializer;Ljava/lang/String;ILjava/lang/Object;)V
-	public static synthetic fun plugin$default (Lcordis/loader/LoadPlanBuilder;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun plugin-60oTi3E (Ljava/lang/String;Ljava/lang/String;)V
+	public static synthetic fun plugin-60oTi3E$default (Lcordis/loader/LoadPlanBuilder;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun plugin-TCmHeUM (Ljava/lang/String;Ljava/lang/Object;Lkotlinx/serialization/KSerializer;Ljava/lang/String;)V
+	public static synthetic fun plugin-TCmHeUM$default (Lcordis/loader/LoadPlanBuilder;Ljava/lang/String;Ljava/lang/Object;Lkotlinx/serialization/KSerializer;Ljava/lang/String;ILjava/lang/Object;)V
 }
 
 public final class cordis/loader/LoadPlanKt {
@@ -78,42 +145,45 @@ public final class cordis/loader/LoaderError$DuplicateName : cordis/loader/Loade
 }
 
 public final class cordis/loader/LoaderError$InvalidConfig : cordis/loader/LoaderError {
-	public fun <init> (Ljava/lang/String;ILjava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
+	public synthetic fun <init> (Ljava/lang/String;ILjava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-cnM9MhM ()Ljava/lang/String;
 	public final fun component2 ()I
 	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;ILjava/lang/String;)Lcordis/loader/LoaderError$InvalidConfig;
-	public static synthetic fun copy$default (Lcordis/loader/LoaderError$InvalidConfig;Ljava/lang/String;ILjava/lang/String;ILjava/lang/Object;)Lcordis/loader/LoaderError$InvalidConfig;
+	public final fun copy-x35LzDk (Ljava/lang/String;ILjava/lang/String;)Lcordis/loader/LoaderError$InvalidConfig;
+	public static synthetic fun copy-x35LzDk$default (Lcordis/loader/LoaderError$InvalidConfig;Ljava/lang/String;ILjava/lang/String;ILjava/lang/Object;)Lcordis/loader/LoaderError$InvalidConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getEntry ()I
-	public final fun getKey ()Ljava/lang/String;
+	public final fun getKey-cnM9MhM ()Ljava/lang/String;
 	public final fun getReason ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
 public final class cordis/loader/LoaderError$UnknownKey : cordis/loader/LoaderError {
-	public fun <init> (Ljava/lang/String;I)V
-	public final fun component1 ()Ljava/lang/String;
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-cnM9MhM ()Ljava/lang/String;
 	public final fun component2 ()I
-	public final fun copy (Ljava/lang/String;I)Lcordis/loader/LoaderError$UnknownKey;
-	public static synthetic fun copy$default (Lcordis/loader/LoaderError$UnknownKey;Ljava/lang/String;IILjava/lang/Object;)Lcordis/loader/LoaderError$UnknownKey;
+	public final fun copy-60oTi3E (Ljava/lang/String;I)Lcordis/loader/LoaderError$UnknownKey;
+	public static synthetic fun copy-60oTi3E$default (Lcordis/loader/LoaderError$UnknownKey;Ljava/lang/String;IILjava/lang/Object;)Lcordis/loader/LoaderError$UnknownKey;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getEntry ()I
-	public final fun getKey ()Ljava/lang/String;
+	public final fun getKey-cnM9MhM ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class cordis/loader/PluginRegistry {
+public final class cordis/loader/PluginFactoryRegistry {
 	public fun <init> ()V
 	public fun <init> (Lkotlinx/serialization/json/Json;)V
 	public synthetic fun <init> (Lkotlinx/serialization/json/Json;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getJson ()Lkotlinx/serialization/json/Json;
-	public final fun isRegistered (Ljava/lang/String;)Z
-	public final fun loader (Ljava/lang/String;Ljava/lang/String;)Lkotlin/jvm/functions/Function2;
-	public final fun register (Lcordis/kernel/Plugin;Ljava/lang/String;)V
-	public final fun register (Lcordis/kernel/Plugin;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
-	public final fun register (Lcordis/kernel/Plugin;Ljava/lang/String;Lkotlinx/serialization/KSerializer;)V
+	public final fun isRegistered-Sc2mjNI (Ljava/lang/String;)Z
+	public final fun loader-60oTi3E (Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;)Lkotlin/jvm/functions/Function2;
+	public final fun register-W-5eHYg (Lcordis/kernel/Plugin;Lkotlinx/serialization/KSerializer;Ljava/lang/String;)V
+	public static synthetic fun register-W-5eHYg$default (Lcordis/loader/PluginFactoryRegistry;Lcordis/kernel/Plugin;Lkotlinx/serialization/KSerializer;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun register-_XaHzTk (Lcordis/kernel/Plugin;Ljava/lang/String;)V
+	public static synthetic fun register-_XaHzTk$default (Lcordis/loader/PluginFactoryRegistry;Lcordis/kernel/Plugin;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun register-bYSnpos (Lcordis/kernel/Plugin;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun register-bYSnpos$default (Lcordis/loader/PluginFactoryRegistry;Lcordis/kernel/Plugin;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 

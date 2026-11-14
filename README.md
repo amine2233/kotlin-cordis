@@ -27,7 +27,7 @@ Cordis' core idea: **everything is a plugin**, and plugins compose along two ort
 
 - `cordis-kernel`: `Scope`, `Fork`, `Context`, `ServiceKey`, `Inject`, events, zones, intercept layers, snapshots. Zero sugar.
 - `cordis`: Re-exports the kernel and adds `ServicePlugin` and timer effects (`ctx.after`, `ctx.every`).
-- `cordis-loader`: Declarative JSON load-plan loader (`LoadPlan`, `PluginRegistry`, `Context.load`) with `kotlinx.serialization`.
+- `cordis-loader`: Declarative JSON load-plan loader (`LoadPlan`, `PluginFactoryRegistry`, `Context.load`) with `kotlinx.serialization`.
 - `cordis-testing`: Test support module (`ManualClock`, `settle(until = ...)`, `withTestApp`, `RecordedEvents`).
 - `cordis-demo`: Executable walkthrough showing the 6 core scenarios.
 
@@ -104,7 +104,7 @@ Any side effect registered inside `Plugin.apply` (event listeners, provided serv
 - **Zones**: Hierarchical event routing independent of lifetimes (`ctx.zone("tenant")`).
 
 ### Declarative Loading
-`cordis-loader` validates a `LoadPlan` before loading any plugin. If unknown keys, duplicate entry names, or undecodable configs exist, validation rejects the entire plan and loads nothing.
+`cordis-loader` resolves each `LoadPlan` entry's `PluginKey` through a `PluginFactoryRegistry` and validates the whole plan before loading any plugin. If unknown keys, duplicate entry names, or undecodable configs exist, the plan loads nothing: entries with errors are reported `LoadOutcome.Invalid` (with their `LoaderError`s) and the rest `LoadOutcome.NotLoaded`. A valid plan reports `LoadOutcome.Loaded` with the plugin's `PluginHandle`. Plans are `@Serializable` and can be parsed with `LoadPlan.fromJson(text)`.
 
 ### Deterministic Testing
 `cordis-testing` offers `ManualClock` for controlling virtual time without sleeping real wall-clock time, `settle { condition }` for bounded yielding, and `withTestApp { ctx, events -> ... }` which captures lifecycle and failure events in order and guarantees root disposal. Inside `runTest`, `withTestApp(StandardTestDispatcher(testScheduler)) { ctx, events -> ... }` runs the graph on the test scheduler, so `advanceUntilIdle()` settles it deterministically.
@@ -138,10 +138,10 @@ val status = app.plugin(Repo).awaitActive()              // Active | Failed | Di
 
 // Type-safe load plan (cordis-loader)
 val plan = loadPlan {
-    plugin("database", config = DbConfig("postgres://..."), serializer = DbConfig.serializer())
-    plugin("analytics", name = "custom-analytics")
+    plugin(PluginKey("database"), config = DbConfig("postgres://..."), serializer = DbConfig.serializer())
+    plugin(PluginKey("analytics"), name = "custom-analytics")
 }
-val outcomes = app.load(plan, registry)
+val outcomes = app.load(plan, registry)                  // PluginFactoryRegistry; Loaded(handle) | Invalid | NotLoaded
 ```
 
 `ctx[Key]` is lock-free (copy-on-write registry), so it is safe to call from any thread.

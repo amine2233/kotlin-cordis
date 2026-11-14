@@ -6,25 +6,6 @@
 // - Show declarations: true
 
 // Library unique name: <io.github.amine2233:cordis-loader>
-final class cordis.loader/LoadOutcome { // cordis.loader/LoadOutcome|null[0]
-    constructor <init>(kotlin/String, kotlin/String?, cordis.kernel/Fork.Status) // cordis.loader/LoadOutcome.<init>|<init>(kotlin.String;kotlin.String?;cordis.kernel.Fork.Status){}[0]
-
-    final val key // cordis.loader/LoadOutcome.key|{}key[0]
-        final fun <get-key>(): kotlin/String // cordis.loader/LoadOutcome.key.<get-key>|<get-key>(){}[0]
-    final val name // cordis.loader/LoadOutcome.name|{}name[0]
-        final fun <get-name>(): kotlin/String? // cordis.loader/LoadOutcome.name.<get-name>|<get-name>(){}[0]
-    final val status // cordis.loader/LoadOutcome.status|{}status[0]
-        final fun <get-status>(): cordis.kernel/Fork.Status // cordis.loader/LoadOutcome.status.<get-status>|<get-status>(){}[0]
-
-    final fun component1(): kotlin/String // cordis.loader/LoadOutcome.component1|component1(){}[0]
-    final fun component2(): kotlin/String? // cordis.loader/LoadOutcome.component2|component2(){}[0]
-    final fun component3(): cordis.kernel/Fork.Status // cordis.loader/LoadOutcome.component3|component3(){}[0]
-    final fun copy(kotlin/String = ..., kotlin/String? = ..., cordis.kernel/Fork.Status = ...): cordis.loader/LoadOutcome // cordis.loader/LoadOutcome.copy|copy(kotlin.String;kotlin.String?;cordis.kernel.Fork.Status){}[0]
-    final fun equals(kotlin/Any?): kotlin/Boolean // cordis.loader/LoadOutcome.equals|equals(kotlin.Any?){}[0]
-    final fun hashCode(): kotlin/Int // cordis.loader/LoadOutcome.hashCode|hashCode(){}[0]
-    final fun toString(): kotlin/String // cordis.loader/LoadOutcome.toString|toString(){}[0]
-}
-
 final class cordis.loader/LoadPlan { // cordis.loader/LoadPlan|null[0]
     constructor <init>(kotlin.collections/List<cordis.loader/LoadPlan.Entry>) // cordis.loader/LoadPlan.<init>|<init>(kotlin.collections.List<cordis.loader.LoadPlan.Entry>){}[0]
 
@@ -36,46 +17,138 @@ final class cordis.loader/LoadPlan { // cordis.loader/LoadPlan|null[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // cordis.loader/LoadPlan.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // cordis.loader/LoadPlan.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // cordis.loader/LoadPlan.toString|toString(){}[0]
-    final fun validate(cordis.loader/PluginRegistry): kotlin.collections/List<cordis.loader/LoaderError> // cordis.loader/LoadPlan.validate|validate(cordis.loader.PluginRegistry){}[0]
+    final fun validate(cordis.loader/PluginFactoryRegistry): kotlin.collections/List<cordis.loader/LoaderError> // cordis.loader/LoadPlan.validate|validate(cordis.loader.PluginFactoryRegistry){}[0]
 
     final class Entry { // cordis.loader/LoadPlan.Entry|null[0]
-        constructor <init>(kotlin/String, kotlin/String? = ..., kotlin/String? = ...) // cordis.loader/LoadPlan.Entry.<init>|<init>(kotlin.String;kotlin.String?;kotlin.String?){}[0]
+        constructor <init>(cordis.kernel/PluginKey, kotlin/String? = ..., kotlinx.serialization.json/JsonElement? = ...) // cordis.loader/LoadPlan.Entry.<init>|<init>(cordis.kernel.PluginKey;kotlin.String?;kotlinx.serialization.json.JsonElement?){}[0]
 
         final val config // cordis.loader/LoadPlan.Entry.config|{}config[0]
-            final fun <get-config>(): kotlin/String? // cordis.loader/LoadPlan.Entry.config.<get-config>|<get-config>(){}[0]
+            final fun <get-config>(): kotlinx.serialization.json/JsonElement? // cordis.loader/LoadPlan.Entry.config.<get-config>|<get-config>(){}[0]
         final val key // cordis.loader/LoadPlan.Entry.key|{}key[0]
-            final fun <get-key>(): kotlin/String // cordis.loader/LoadPlan.Entry.key.<get-key>|<get-key>(){}[0]
+            final fun <get-key>(): cordis.kernel/PluginKey // cordis.loader/LoadPlan.Entry.key.<get-key>|<get-key>(){}[0]
         final val name // cordis.loader/LoadPlan.Entry.name|{}name[0]
             final fun <get-name>(): kotlin/String? // cordis.loader/LoadPlan.Entry.name.<get-name>|<get-name>(){}[0]
 
-        final fun component1(): kotlin/String // cordis.loader/LoadPlan.Entry.component1|component1(){}[0]
+        final fun component1(): cordis.kernel/PluginKey // cordis.loader/LoadPlan.Entry.component1|component1(){}[0]
         final fun component2(): kotlin/String? // cordis.loader/LoadPlan.Entry.component2|component2(){}[0]
-        final fun component3(): kotlin/String? // cordis.loader/LoadPlan.Entry.component3|component3(){}[0]
-        final fun copy(kotlin/String = ..., kotlin/String? = ..., kotlin/String? = ...): cordis.loader/LoadPlan.Entry // cordis.loader/LoadPlan.Entry.copy|copy(kotlin.String;kotlin.String?;kotlin.String?){}[0]
+        final fun component3(): kotlinx.serialization.json/JsonElement? // cordis.loader/LoadPlan.Entry.component3|component3(){}[0]
+        final fun copy(cordis.kernel/PluginKey = ..., kotlin/String? = ..., kotlinx.serialization.json/JsonElement? = ...): cordis.loader/LoadPlan.Entry // cordis.loader/LoadPlan.Entry.copy|copy(cordis.kernel.PluginKey;kotlin.String?;kotlinx.serialization.json.JsonElement?){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // cordis.loader/LoadPlan.Entry.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // cordis.loader/LoadPlan.Entry.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // cordis.loader/LoadPlan.Entry.toString|toString(){}[0]
+
+        final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<cordis.loader/LoadPlan.Entry> { // cordis.loader/LoadPlan.Entry.$serializer|null[0]
+            final val descriptor // cordis.loader/LoadPlan.Entry.$serializer.descriptor|{}descriptor[0]
+                final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // cordis.loader/LoadPlan.Entry.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+            final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // cordis.loader/LoadPlan.Entry.$serializer.childSerializers|childSerializers(){}[0]
+            final fun deserialize(kotlinx.serialization.encoding/Decoder): cordis.loader/LoadPlan.Entry // cordis.loader/LoadPlan.Entry.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+            final fun serialize(kotlinx.serialization.encoding/Encoder, cordis.loader/LoadPlan.Entry) // cordis.loader/LoadPlan.Entry.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;cordis.loader.LoadPlan.Entry){}[0]
+        }
+
+        final object Companion { // cordis.loader/LoadPlan.Entry.Companion|null[0]
+            final fun serializer(): kotlinx.serialization/KSerializer<cordis.loader/LoadPlan.Entry> // cordis.loader/LoadPlan.Entry.Companion.serializer|serializer(){}[0]
+        }
+    }
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<cordis.loader/LoadPlan> { // cordis.loader/LoadPlan.$serializer|null[0]
+        final val descriptor // cordis.loader/LoadPlan.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // cordis.loader/LoadPlan.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // cordis.loader/LoadPlan.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): cordis.loader/LoadPlan // cordis.loader/LoadPlan.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, cordis.loader/LoadPlan) // cordis.loader/LoadPlan.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;cordis.loader.LoadPlan){}[0]
+    }
+
+    final object Companion { // cordis.loader/LoadPlan.Companion|null[0]
+        final val $childSerializers // cordis.loader/LoadPlan.Companion.$childSerializers|{}$childSerializers[0]
+
+        final fun fromJson(kotlin/String): cordis.loader/LoadPlan // cordis.loader/LoadPlan.Companion.fromJson|fromJson(kotlin.String){}[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<cordis.loader/LoadPlan> // cordis.loader/LoadPlan.Companion.serializer|serializer(){}[0]
     }
 }
 
 final class cordis.loader/LoadPlanBuilder { // cordis.loader/LoadPlanBuilder|null[0]
     constructor <init>(kotlinx.serialization.json/Json) // cordis.loader/LoadPlanBuilder.<init>|<init>(kotlinx.serialization.json.Json){}[0]
 
-    final fun <#A1: kotlin/Any?> plugin(kotlin/String, #A1, kotlinx.serialization/KSerializer<#A1>, kotlin/String? = ...) // cordis.loader/LoadPlanBuilder.plugin|plugin(kotlin.String;0:0;kotlinx.serialization.KSerializer<0:0>;kotlin.String?){0§<kotlin.Any?>}[0]
-    final fun plugin(kotlin/String, kotlin/String? = ...) // cordis.loader/LoadPlanBuilder.plugin|plugin(kotlin.String;kotlin.String?){}[0]
+    final fun <#A1: kotlin/Any?> plugin(cordis.kernel/PluginKey, #A1, kotlinx.serialization/KSerializer<#A1>, kotlin/String? = ...) // cordis.loader/LoadPlanBuilder.plugin|plugin(cordis.kernel.PluginKey;0:0;kotlinx.serialization.KSerializer<0:0>;kotlin.String?){0§<kotlin.Any?>}[0]
+    final fun plugin(cordis.kernel/PluginKey, kotlin/String? = ...) // cordis.loader/LoadPlanBuilder.plugin|plugin(cordis.kernel.PluginKey;kotlin.String?){}[0]
 }
 
-final class cordis.loader/PluginRegistry { // cordis.loader/PluginRegistry|null[0]
-    constructor <init>(kotlinx.serialization.json/Json = ...) // cordis.loader/PluginRegistry.<init>|<init>(kotlinx.serialization.json.Json){}[0]
+final class cordis.loader/PluginFactoryRegistry { // cordis.loader/PluginFactoryRegistry|null[0]
+    constructor <init>(kotlinx.serialization.json/Json = ...) // cordis.loader/PluginFactoryRegistry.<init>|<init>(kotlinx.serialization.json.Json){}[0]
 
-    final val json // cordis.loader/PluginRegistry.json|{}json[0]
-        final fun <get-json>(): kotlinx.serialization.json/Json // cordis.loader/PluginRegistry.json.<get-json>|<get-json>(){}[0]
+    final val json // cordis.loader/PluginFactoryRegistry.json|{}json[0]
+        final fun <get-json>(): kotlinx.serialization.json/Json // cordis.loader/PluginFactoryRegistry.json.<get-json>|<get-json>(){}[0]
 
-    final fun <#A1: kotlin/Any?> register(cordis.kernel/Plugin<#A1>, kotlin/String, kotlin/Function1<kotlin/String?, #A1>) // cordis.loader/PluginRegistry.register|register(cordis.kernel.Plugin<0:0>;kotlin.String;kotlin.Function1<kotlin.String?,0:0>){0§<kotlin.Any?>}[0]
-    final fun <#A1: kotlin/Any?> register(cordis.kernel/Plugin<#A1>, kotlin/String, kotlinx.serialization/KSerializer<#A1>) // cordis.loader/PluginRegistry.register|register(cordis.kernel.Plugin<0:0>;kotlin.String;kotlinx.serialization.KSerializer<0:0>){0§<kotlin.Any?>}[0]
-    final fun isRegistered(kotlin/String): kotlin/Boolean // cordis.loader/PluginRegistry.isRegistered|isRegistered(kotlin.String){}[0]
-    final fun loader(kotlin/String, kotlin/String?): kotlin.coroutines/SuspendFunction1<cordis.kernel/Context, cordis.kernel/Fork.Status>? // cordis.loader/PluginRegistry.loader|loader(kotlin.String;kotlin.String?){}[0]
-    final fun register(cordis.kernel/Plugin<kotlin/Unit>, kotlin/String) // cordis.loader/PluginRegistry.register|register(cordis.kernel.Plugin<kotlin.Unit>;kotlin.String){}[0]
+    final fun <#A1: kotlin/Any?> register(cordis.kernel/Plugin<#A1>, cordis.kernel/PluginKey? = ..., kotlin/Function1<kotlinx.serialization.json/JsonElement?, #A1>) // cordis.loader/PluginFactoryRegistry.register|register(cordis.kernel.Plugin<0:0>;cordis.kernel.PluginKey?;kotlin.Function1<kotlinx.serialization.json.JsonElement?,0:0>){0§<kotlin.Any?>}[0]
+    final fun <#A1: kotlin/Any?> register(cordis.kernel/Plugin<#A1>, kotlinx.serialization/KSerializer<#A1>, cordis.kernel/PluginKey? = ...) // cordis.loader/PluginFactoryRegistry.register|register(cordis.kernel.Plugin<0:0>;kotlinx.serialization.KSerializer<0:0>;cordis.kernel.PluginKey?){0§<kotlin.Any?>}[0]
+    final fun isRegistered(cordis.kernel/PluginKey): kotlin/Boolean // cordis.loader/PluginFactoryRegistry.isRegistered|isRegistered(cordis.kernel.PluginKey){}[0]
+    final fun loader(cordis.kernel/PluginKey, kotlinx.serialization.json/JsonElement?): kotlin.coroutines/SuspendFunction1<cordis.kernel/Context, cordis.kernel/PluginHandle<*>>? // cordis.loader/PluginFactoryRegistry.loader|loader(cordis.kernel.PluginKey;kotlinx.serialization.json.JsonElement?){}[0]
+    final fun register(cordis.kernel/Plugin<kotlin/Unit>, cordis.kernel/PluginKey? = ...) // cordis.loader/PluginFactoryRegistry.register|register(cordis.kernel.Plugin<kotlin.Unit>;cordis.kernel.PluginKey?){}[0]
+}
+
+sealed class cordis.loader/LoadOutcome { // cordis.loader/LoadOutcome|null[0]
+    abstract val key // cordis.loader/LoadOutcome.key|{}key[0]
+        abstract fun <get-key>(): cordis.kernel/PluginKey // cordis.loader/LoadOutcome.key.<get-key>|<get-key>(){}[0]
+    abstract val name // cordis.loader/LoadOutcome.name|{}name[0]
+        abstract fun <get-name>(): kotlin/String? // cordis.loader/LoadOutcome.name.<get-name>|<get-name>(){}[0]
+
+    final class Invalid : cordis.loader/LoadOutcome { // cordis.loader/LoadOutcome.Invalid|null[0]
+        constructor <init>(cordis.kernel/PluginKey, kotlin/String?, kotlin.collections/List<cordis.loader/LoaderError>) // cordis.loader/LoadOutcome.Invalid.<init>|<init>(cordis.kernel.PluginKey;kotlin.String?;kotlin.collections.List<cordis.loader.LoaderError>){}[0]
+
+        final val errors // cordis.loader/LoadOutcome.Invalid.errors|{}errors[0]
+            final fun <get-errors>(): kotlin.collections/List<cordis.loader/LoaderError> // cordis.loader/LoadOutcome.Invalid.errors.<get-errors>|<get-errors>(){}[0]
+        final val key // cordis.loader/LoadOutcome.Invalid.key|{}key[0]
+            final fun <get-key>(): cordis.kernel/PluginKey // cordis.loader/LoadOutcome.Invalid.key.<get-key>|<get-key>(){}[0]
+        final val name // cordis.loader/LoadOutcome.Invalid.name|{}name[0]
+            final fun <get-name>(): kotlin/String? // cordis.loader/LoadOutcome.Invalid.name.<get-name>|<get-name>(){}[0]
+
+        final fun component1(): cordis.kernel/PluginKey // cordis.loader/LoadOutcome.Invalid.component1|component1(){}[0]
+        final fun component2(): kotlin/String? // cordis.loader/LoadOutcome.Invalid.component2|component2(){}[0]
+        final fun component3(): kotlin.collections/List<cordis.loader/LoaderError> // cordis.loader/LoadOutcome.Invalid.component3|component3(){}[0]
+        final fun copy(cordis.kernel/PluginKey = ..., kotlin/String? = ..., kotlin.collections/List<cordis.loader/LoaderError> = ...): cordis.loader/LoadOutcome.Invalid // cordis.loader/LoadOutcome.Invalid.copy|copy(cordis.kernel.PluginKey;kotlin.String?;kotlin.collections.List<cordis.loader.LoaderError>){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // cordis.loader/LoadOutcome.Invalid.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // cordis.loader/LoadOutcome.Invalid.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // cordis.loader/LoadOutcome.Invalid.toString|toString(){}[0]
+    }
+
+    final class Loaded : cordis.loader/LoadOutcome { // cordis.loader/LoadOutcome.Loaded|null[0]
+        constructor <init>(cordis.kernel/PluginKey, kotlin/String?, cordis.kernel/PluginHandle<*>) // cordis.loader/LoadOutcome.Loaded.<init>|<init>(cordis.kernel.PluginKey;kotlin.String?;cordis.kernel.PluginHandle<*>){}[0]
+
+        final val handle // cordis.loader/LoadOutcome.Loaded.handle|{}handle[0]
+            final fun <get-handle>(): cordis.kernel/PluginHandle<*> // cordis.loader/LoadOutcome.Loaded.handle.<get-handle>|<get-handle>(){}[0]
+        final val key // cordis.loader/LoadOutcome.Loaded.key|{}key[0]
+            final fun <get-key>(): cordis.kernel/PluginKey // cordis.loader/LoadOutcome.Loaded.key.<get-key>|<get-key>(){}[0]
+        final val name // cordis.loader/LoadOutcome.Loaded.name|{}name[0]
+            final fun <get-name>(): kotlin/String? // cordis.loader/LoadOutcome.Loaded.name.<get-name>|<get-name>(){}[0]
+        final val status // cordis.loader/LoadOutcome.Loaded.status|{}status[0]
+            final fun <get-status>(): cordis.kernel/Fork.Status // cordis.loader/LoadOutcome.Loaded.status.<get-status>|<get-status>(){}[0]
+
+        final fun component1(): cordis.kernel/PluginKey // cordis.loader/LoadOutcome.Loaded.component1|component1(){}[0]
+        final fun component2(): kotlin/String? // cordis.loader/LoadOutcome.Loaded.component2|component2(){}[0]
+        final fun component3(): cordis.kernel/PluginHandle<*> // cordis.loader/LoadOutcome.Loaded.component3|component3(){}[0]
+        final fun copy(cordis.kernel/PluginKey = ..., kotlin/String? = ..., cordis.kernel/PluginHandle<*> = ...): cordis.loader/LoadOutcome.Loaded // cordis.loader/LoadOutcome.Loaded.copy|copy(cordis.kernel.PluginKey;kotlin.String?;cordis.kernel.PluginHandle<*>){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // cordis.loader/LoadOutcome.Loaded.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // cordis.loader/LoadOutcome.Loaded.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // cordis.loader/LoadOutcome.Loaded.toString|toString(){}[0]
+    }
+
+    final class NotLoaded : cordis.loader/LoadOutcome { // cordis.loader/LoadOutcome.NotLoaded|null[0]
+        constructor <init>(cordis.kernel/PluginKey, kotlin/String?) // cordis.loader/LoadOutcome.NotLoaded.<init>|<init>(cordis.kernel.PluginKey;kotlin.String?){}[0]
+
+        final val key // cordis.loader/LoadOutcome.NotLoaded.key|{}key[0]
+            final fun <get-key>(): cordis.kernel/PluginKey // cordis.loader/LoadOutcome.NotLoaded.key.<get-key>|<get-key>(){}[0]
+        final val name // cordis.loader/LoadOutcome.NotLoaded.name|{}name[0]
+            final fun <get-name>(): kotlin/String? // cordis.loader/LoadOutcome.NotLoaded.name.<get-name>|<get-name>(){}[0]
+
+        final fun component1(): cordis.kernel/PluginKey // cordis.loader/LoadOutcome.NotLoaded.component1|component1(){}[0]
+        final fun component2(): kotlin/String? // cordis.loader/LoadOutcome.NotLoaded.component2|component2(){}[0]
+        final fun copy(cordis.kernel/PluginKey = ..., kotlin/String? = ...): cordis.loader/LoadOutcome.NotLoaded // cordis.loader/LoadOutcome.NotLoaded.copy|copy(cordis.kernel.PluginKey;kotlin.String?){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // cordis.loader/LoadOutcome.NotLoaded.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // cordis.loader/LoadOutcome.NotLoaded.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // cordis.loader/LoadOutcome.NotLoaded.toString|toString(){}[0]
+    }
 }
 
 sealed class cordis.loader/LoaderError : kotlin/Exception { // cordis.loader/LoaderError|null[0]
@@ -101,35 +174,35 @@ sealed class cordis.loader/LoaderError : kotlin/Exception { // cordis.loader/Loa
     }
 
     final class InvalidConfig : cordis.loader/LoaderError { // cordis.loader/LoaderError.InvalidConfig|null[0]
-        constructor <init>(kotlin/String, kotlin/Int, kotlin/String) // cordis.loader/LoaderError.InvalidConfig.<init>|<init>(kotlin.String;kotlin.Int;kotlin.String){}[0]
+        constructor <init>(cordis.kernel/PluginKey, kotlin/Int, kotlin/String) // cordis.loader/LoaderError.InvalidConfig.<init>|<init>(cordis.kernel.PluginKey;kotlin.Int;kotlin.String){}[0]
 
         final val entry // cordis.loader/LoaderError.InvalidConfig.entry|{}entry[0]
             final fun <get-entry>(): kotlin/Int // cordis.loader/LoaderError.InvalidConfig.entry.<get-entry>|<get-entry>(){}[0]
         final val key // cordis.loader/LoaderError.InvalidConfig.key|{}key[0]
-            final fun <get-key>(): kotlin/String // cordis.loader/LoaderError.InvalidConfig.key.<get-key>|<get-key>(){}[0]
+            final fun <get-key>(): cordis.kernel/PluginKey // cordis.loader/LoaderError.InvalidConfig.key.<get-key>|<get-key>(){}[0]
         final val reason // cordis.loader/LoaderError.InvalidConfig.reason|{}reason[0]
             final fun <get-reason>(): kotlin/String // cordis.loader/LoaderError.InvalidConfig.reason.<get-reason>|<get-reason>(){}[0]
 
-        final fun component1(): kotlin/String // cordis.loader/LoaderError.InvalidConfig.component1|component1(){}[0]
+        final fun component1(): cordis.kernel/PluginKey // cordis.loader/LoaderError.InvalidConfig.component1|component1(){}[0]
         final fun component2(): kotlin/Int // cordis.loader/LoaderError.InvalidConfig.component2|component2(){}[0]
         final fun component3(): kotlin/String // cordis.loader/LoaderError.InvalidConfig.component3|component3(){}[0]
-        final fun copy(kotlin/String = ..., kotlin/Int = ..., kotlin/String = ...): cordis.loader/LoaderError.InvalidConfig // cordis.loader/LoaderError.InvalidConfig.copy|copy(kotlin.String;kotlin.Int;kotlin.String){}[0]
+        final fun copy(cordis.kernel/PluginKey = ..., kotlin/Int = ..., kotlin/String = ...): cordis.loader/LoaderError.InvalidConfig // cordis.loader/LoaderError.InvalidConfig.copy|copy(cordis.kernel.PluginKey;kotlin.Int;kotlin.String){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // cordis.loader/LoaderError.InvalidConfig.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // cordis.loader/LoaderError.InvalidConfig.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // cordis.loader/LoaderError.InvalidConfig.toString|toString(){}[0]
     }
 
     final class UnknownKey : cordis.loader/LoaderError { // cordis.loader/LoaderError.UnknownKey|null[0]
-        constructor <init>(kotlin/String, kotlin/Int) // cordis.loader/LoaderError.UnknownKey.<init>|<init>(kotlin.String;kotlin.Int){}[0]
+        constructor <init>(cordis.kernel/PluginKey, kotlin/Int) // cordis.loader/LoaderError.UnknownKey.<init>|<init>(cordis.kernel.PluginKey;kotlin.Int){}[0]
 
         final val entry // cordis.loader/LoaderError.UnknownKey.entry|{}entry[0]
             final fun <get-entry>(): kotlin/Int // cordis.loader/LoaderError.UnknownKey.entry.<get-entry>|<get-entry>(){}[0]
         final val key // cordis.loader/LoaderError.UnknownKey.key|{}key[0]
-            final fun <get-key>(): kotlin/String // cordis.loader/LoaderError.UnknownKey.key.<get-key>|<get-key>(){}[0]
+            final fun <get-key>(): cordis.kernel/PluginKey // cordis.loader/LoaderError.UnknownKey.key.<get-key>|<get-key>(){}[0]
 
-        final fun component1(): kotlin/String // cordis.loader/LoaderError.UnknownKey.component1|component1(){}[0]
+        final fun component1(): cordis.kernel/PluginKey // cordis.loader/LoaderError.UnknownKey.component1|component1(){}[0]
         final fun component2(): kotlin/Int // cordis.loader/LoaderError.UnknownKey.component2|component2(){}[0]
-        final fun copy(kotlin/String = ..., kotlin/Int = ...): cordis.loader/LoaderError.UnknownKey // cordis.loader/LoaderError.UnknownKey.copy|copy(kotlin.String;kotlin.Int){}[0]
+        final fun copy(cordis.kernel/PluginKey = ..., kotlin/Int = ...): cordis.loader/LoaderError.UnknownKey // cordis.loader/LoaderError.UnknownKey.copy|copy(cordis.kernel.PluginKey;kotlin.Int){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // cordis.loader/LoaderError.UnknownKey.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // cordis.loader/LoaderError.UnknownKey.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // cordis.loader/LoaderError.UnknownKey.toString|toString(){}[0]
@@ -137,4 +210,4 @@ sealed class cordis.loader/LoaderError : kotlin/Exception { // cordis.loader/Loa
 }
 
 final fun cordis.loader/loadPlan(kotlinx.serialization.json/Json = ..., kotlin/Function1<cordis.loader/LoadPlanBuilder, kotlin/Unit>): cordis.loader/LoadPlan // cordis.loader/loadPlan|loadPlan(kotlinx.serialization.json.Json;kotlin.Function1<cordis.loader.LoadPlanBuilder,kotlin.Unit>){}[0]
-final suspend fun (cordis.kernel/Context).cordis.loader/load(cordis.loader/LoadPlan, cordis.loader/PluginRegistry): kotlin.collections/List<cordis.loader/LoadOutcome> // cordis.loader/load|load@cordis.kernel.Context(cordis.loader.LoadPlan;cordis.loader.PluginRegistry){}[0]
+final suspend fun (cordis.kernel/Context).cordis.loader/load(cordis.loader/LoadPlan, cordis.loader/PluginFactoryRegistry): kotlin.collections/List<cordis.loader/LoadOutcome> // cordis.loader/load|load@cordis.kernel.Context(cordis.loader.LoadPlan;cordis.loader.PluginFactoryRegistry){}[0]

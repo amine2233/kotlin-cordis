@@ -24,7 +24,7 @@ Group `io.github.amine2233`, published to GitHub Packages (`https://maven.pkg.gi
 | Module | Use |
 |---|---|
 | `cordis` | what apps depend on: re-exports the kernel, adds `ServicePlugin`, `ctx.after`, `ctx.every` |
-| `cordis-loader` | `LoadPlan`, `loadPlan { }`, `PluginRegistry`, `ctx.load(...)` (kotlinx-serialization JSON) |
+| `cordis-loader` | `LoadPlan`, `loadPlan { }`, `LoadPlan.fromJson`, `PluginFactoryRegistry`, `ctx.load(...)` (kotlinx-serialization JSON) |
 | `cordis-testing` | `withTestApp`, `settle`, `ManualClock` (test scope only) |
 | `cordis-kernel` | zero-sugar core; pulled in by `cordis` |
 
@@ -75,18 +75,19 @@ Space and routing: `ctx.isolate(Key, label)` gives a child where `Key` resolves 
 
 Declarative loading (`cordis-loader`):
 ```kotlin
-val registry = PluginRegistry().apply {
-    register(DbPlugin, key = "db", serializer = DbConfig.serializer())
-    register(Metrics, key = "metrics")                    // Plugin<Unit>
+val registry = PluginFactoryRegistry().apply {
+    register(DbPlugin, serializer = DbConfig.serializer(), key = PluginKey("db"))
+    register(Metrics)                                     // Plugin<Unit>; key defaults to Metrics.pluginKey
 }
 val plan = loadPlan {
-    plugin("db", config = DbConfig(url), serializer = DbConfig.serializer())
-    plugin("metrics", name = "custom-metrics")
+    plugin(PluginKey("db"), config = DbConfig(url), serializer = DbConfig.serializer())
+    plugin(PluginKey("metrics"), name = "custom-metrics")
 }
-val outcomes = app.load(plan, registry)                   // List<LoadOutcome(key, name, status)>
+val outcomes = app.load(plan, registry)                   // List<LoadOutcome>: Loaded(key, name, handle) | Invalid(key, name, errors) | NotLoaded(key, name)
 ```
-An invalid plan (unknown key, duplicate name, bad config) loads nothing; every entry is reported `Failed`.
-Raw JSON is also fine: `LoadPlan(listOf(LoadPlan.Entry(key = "db", config = """{"url":"…"}""")))`.
+An invalid plan (unknown key, duplicate name, bad config) loads nothing: entries with errors are `Invalid`, the others `NotLoaded`.
+A plugin that fails its own `validate`/`apply` is `Loaded` with `status is Fork.Status.Failed`. A missing config decodes as `{}`, so all-defaults config types need none.
+Raw JSON is also fine: `LoadPlan.fromJson("""{"entries":[{"key":"db","config":{"url":"…"}}]}""")`.
 
 ## Rules and pitfalls
 

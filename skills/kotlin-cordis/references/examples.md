@@ -40,7 +40,7 @@ suspend fun simpleExample(out: MutableList<String>) {
 
 ## Medium — config, events, lambda plugin, declarative loading
 
-A mailer service is loaded from a typed plan (config encoded to JSON, decoded by the `PluginRegistry`).
+A mailer service is loaded from a typed plan (config encoded to JSON, decoded by the `PluginFactoryRegistry`).
 An anonymous plugin injects it and listens for an event; its listener disappears with the plugin.
 
 ```kotlin
@@ -63,15 +63,15 @@ object MailerPlugin : ServicePlugin<MailerKey, Mailer, MailerConfig> {
 
 suspend fun mediumExample(): List<String> {
     val app = Context.root()
-    val registry = PluginRegistry().apply {
-        register(MailerPlugin, key = "mailer", serializer = MailerConfig.serializer())
+    val registry = PluginFactoryRegistry().apply {
+        register(MailerPlugin, serializer = MailerConfig.serializer(), key = PluginKey("mailer"))
     }
 
     val outcomes = app.load(
-        loadPlan { plugin("mailer", config = MailerConfig("noreply@a.io"), serializer = MailerConfig.serializer()) },
+        loadPlan { plugin(PluginKey("mailer"), config = MailerConfig("noreply@a.io"), serializer = MailerConfig.serializer()) },
         registry,
     )
-    check(outcomes.single().status == Fork.Status.Active)
+    check((outcomes.single() as LoadOutcome.Loaded).status == Fork.Status.Active)
 
     app.plugin("welcome", Inject.of(required = listOf(MailerKey))) { ctx ->
         val mailer = ctx.require(MailerKey)
