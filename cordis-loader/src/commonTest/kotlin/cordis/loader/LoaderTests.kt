@@ -9,6 +9,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.Serializable
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 object BaseKey : ServiceKey<Int>
@@ -49,11 +50,25 @@ object BrokenPlugin : Plugin<Unit> {
     ): Unit = throw LoaderTestFailure()
 }
 
+object PositivePlugin : Plugin<BaseConfig> {
+    override fun validate(config: BaseConfig) {
+        require(config.value > 0) { "value must be positive" }
+    }
+
+    override suspend fun apply(
+        ctx: Context,
+        config: BaseConfig,
+    ) {
+        ctx.provide(DerivedKey, config.value)
+    }
+}
+
 fun makeRegistry(): PluginRegistry {
     val registry = PluginRegistry()
     registry.register(BasePlugin, key = "base", serializer = BaseConfig.serializer())
     registry.register(DerivedPlugin, key = "derived")
     registry.register(BrokenPlugin, key = "broken")
+    registry.register(PositivePlugin, key = "positive", serializer = BaseConfig.serializer())
     return registry
 }
 
@@ -171,6 +186,27 @@ class LoaderTests {
             assertEquals(Fork.Status.Active, outcomes[1].status)
             assertEquals("primary", outcomes[1].name)
             assertEquals(1, app[BaseKey])
+        }
+
+    @Test
+    fun validateRejectionFailsEntryWithoutStoppingOthers() =
+        runTest {
+            val app = Context.root()
+            val plan =
+                LoadPlan(
+                    entries =
+                        listOf(
+                            LoadPlan.Entry(key = "positive", config = """{"value":0}"""),
+                            LoadPlan.Entry(key = "base", name = "primary", config = """{"value":1}"""),
+                        ),
+                )
+            assertTrue(plan.validate(against = makeRegistry()).isEmpty())
+            val outcomes = app.load(plan, registry = makeRegistry())
+            assertEquals(2, outcomes.size)
+            assertEquals(Fork.Status.Failed("value must be positive"), outcomes[0].status)
+            assertEquals(Fork.Status.Active, outcomes[1].status)
+            assertEquals(1, app[BaseKey])
+            assertNull(app[DerivedKey])
         }
 
     @Test
