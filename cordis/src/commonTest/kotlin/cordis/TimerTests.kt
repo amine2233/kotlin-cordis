@@ -1,6 +1,7 @@
 package cordis
 
 import cordis.kernel.Context
+import cordis.kernel.InternalCordisApi
 import cordis.kernel.Plugin
 import cordis.testing.ManualClock
 import cordis.testing.settle
@@ -119,5 +120,22 @@ class TimerTests {
             settle { counter.value >= 1 }
             yield()
             assertEquals(1, counter.value)
+        }
+
+    @OptIn(InternalCordisApi::class)
+    @Test
+    fun firedAfterReleasesItsScopeEntry() =
+        runTest {
+            val app = Context.root()
+            val clock = ManualClock()
+            val counter = TimerCounter()
+            val before = app.scope.size
+            app.after(1.seconds, clock = clock) { counter.value += 1 }
+            waitForSleepers(clock, 1)
+            clock.advance(1.seconds)
+            settle { counter.value == 1 }
+            settle { app.scope.size == before }
+            assertEquals(before, app.scope.size)
+            app.dispose()
         }
 }
