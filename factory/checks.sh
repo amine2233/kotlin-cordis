@@ -24,3 +24,7 @@ fi
 "$KTLINT" '**/*.kt' '**/*.kts' '!**/build/**' '!**/.worktrees/**' --reporter=plain
 
 ./gradlew jvmTest macosArm64Test apiCheck build -x check --console=plain
+
+if [ -f samples/settings.gradle.kts ]; then
+  ./gradlew -p samples check --console=plain
+fi
