@@ -65,7 +65,7 @@ internal class Registry(
 
     class Entry(
         var value: Any,
-        val owner: Any, // providing Context
+        val owner: Context,
         val ownerName: String,
         val fork: PluginId?, // providing Fork (null = root)
         val generation: Int,
@@ -172,7 +172,7 @@ internal class Registry(
 
     suspend fun withdraw(
         slot: Slot,
-        owner: Any,
+        owner: Context,
         fork: PluginId?,
     ) {
         val current = slots[slot] ?: return
