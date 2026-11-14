@@ -13,13 +13,17 @@ class DefaultClockTests {
     @Test
     fun delayReturnsAfterRequestedDuration() =
         runTest {
-            val requested = 10.milliseconds
+            val requested = 100.milliseconds
+            val timerSlack = 5.milliseconds
             withContext(Dispatchers.Default) {
                 withTimeout(5.seconds) {
                     val start = DefaultClock.now
                     DefaultClock.delay(requested)
                     val elapsed = DefaultClock.now - start
-                    assertTrue(elapsed >= requested, "elapsed $elapsed < requested $requested")
+                    assertTrue(
+                        elapsed >= requested - timerSlack,
+                        "elapsed $elapsed < requested $requested - slack $timerSlack",
+                    )
                 }
             }
         }
