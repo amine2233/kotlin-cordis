@@ -157,15 +157,7 @@ public class Context internal constructor(
     ): Context {
         val newRealms = realms.toMutableMap()
         newRealms[key.serviceId] = label ?: registry.anonymousRealm()
-        return Context(
-            registry = registry,
-            parent = this,
-            fork = fork,
-            scope = scope,
-            realms = newRealms,
-            layers = layers,
-            zoneId = zoneId,
-        )
+        return child(realms = newRealms)
     }
 
     // MARK: Event routing — zones
@@ -176,16 +168,7 @@ public class Context internal constructor(
      * listeners with no zone hear everything. Independent of scope and realms; not an authorization
      * boundary.
      */
-    public fun zone(label: String): Context =
-        Context(
-            registry = registry,
-            parent = this,
-            fork = fork,
-            scope = scope,
-            realms = realms,
-            layers = layers,
-            zoneId = registry.zone(label, under = zoneId),
-        )
+    public fun zone(label: String): Context = child(zoneId = registry.zone(label, under = zoneId))
 
     // MARK: Intercept
 
@@ -206,16 +189,23 @@ public class Context internal constructor(
             layer(current as T)
         }
         newLayers[key.serviceId] = existing
-        return Context(
+        return child(layers = newLayers)
+    }
+
+    private fun child(
+        realms: Map<ServiceId, String> = this.realms,
+        layers: Map<ServiceId, List<(Any) -> Any>> = this.layers,
+        zoneId: ZoneId? = this.zoneId,
+    ): Context =
+        Context(
             registry = registry,
             parent = this,
             fork = fork,
             scope = scope,
             realms = realms,
-            layers = newLayers,
+            layers = layers,
             zoneId = zoneId,
         )
-    }
 
     // MARK: Composition
 

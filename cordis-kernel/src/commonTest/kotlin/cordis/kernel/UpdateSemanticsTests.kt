@@ -7,34 +7,40 @@ import kotlin.test.assertTrue
 
 class BadConfigException : Exception("bad")
 
-object EqualPlugin : Plugin<String> {
+class EqualPlugin(
+    private val log: MutableList<String>,
+) : Plugin<String> {
     override suspend fun apply(
         ctx: Context,
         config: String,
     ) {
-        ctx.onDispose { Recorder.log.add("stop:$config") }
-        Recorder.log.add("start:$config")
+        ctx.onDispose { log.add("stop:$config") }
+        log.add("start:$config")
     }
 }
 
-object FailsOnBadPlugin : Plugin<String> {
+class FailsOnBadPlugin(
+    private val log: MutableList<String>,
+) : Plugin<String> {
     override suspend fun apply(
         ctx: Context,
         config: String,
     ) {
-        Recorder.log.add("apply:$config")
+        log.add("apply:$config")
         if (config == "bad") throw BadConfigException()
     }
 }
 
 class OpaqueConfig
 
-object OpaquePlugin : Plugin<OpaqueConfig> {
+class OpaquePlugin(
+    private val log: MutableList<String>,
+) : Plugin<OpaqueConfig> {
     override suspend fun apply(
         ctx: Context,
         config: OpaqueConfig,
     ) {
-        Recorder.log.add("apply")
+        log.add("apply")
     }
 }
 
@@ -58,23 +64,20 @@ object ValueProviderPlugin : Plugin<String> {
     }
 }
 
-object Recorder {
-    val log = mutableListOf<String>()
-}
-
 class UpdateSemanticsTests {
     @Test
     fun equalConfigOnActivePluginIsNoOp() =
         runTest {
-            Recorder.log.clear()
+            val log = mutableListOf<String>()
             val app = Context.root()
-            val handle = app.plugin(EqualPlugin, "a")
-            Recorder.log.clear()
+            val handle = app.plugin(EqualPlugin(log), "a")
+            log.clear()
 
             val outcome = handle.update("a")
             assertEquals(UpdateOutcome.Unchanged, outcome)
-            assertTrue(Recorder.log.isEmpty())
+            assertTrue(log.isEmpty())
             assertEquals(Fork.Status.Active, handle.status)
+            app.dispose()
         }
 
     @Test
@@ -92,44 +95,48 @@ class UpdateSemanticsTests {
 
             provider.update("B")
             assertEquals(listOf("dependent"), probe.log)
+            app.dispose()
         }
 
     @Test
     fun differentConfigStillRestarts() =
         runTest {
-            Recorder.log.clear()
+            val log = mutableListOf<String>()
             val app = Context.root()
-            val handle = app.plugin(EqualPlugin, "a")
-            Recorder.log.clear()
+            val handle = app.plugin(EqualPlugin(log), "a")
+            log.clear()
 
             val outcome = handle.update("b")
             assertEquals(UpdateOutcome.Applied, outcome)
-            assertEquals(listOf("stop:a", "start:b"), Recorder.log)
+            assertEquals(listOf("stop:a", "start:b"), log)
+            app.dispose()
         }
 
     @Test
     fun retryingSameConfigAfterFailedApplyReRunsApply() =
         runTest {
-            Recorder.log.clear()
+            val log = mutableListOf<String>()
             val app = Context.root()
-            val handle = app.plugin(FailsOnBadPlugin, "ok")
+            val handle = app.plugin(FailsOnBadPlugin(log), "ok")
             handle.update("bad")
-            Recorder.log.clear()
+            log.clear()
 
             handle.update("bad")
-            assertEquals(listOf("apply:bad"), Recorder.log)
+            assertEquals(listOf("apply:bad"), log)
+            app.dispose()
         }
 
     @Test
     fun nonEquatableConfigStillRestarts() =
         runTest {
-            Recorder.log.clear()
+            val log = mutableListOf<String>()
             val app = Context.root()
-            val handle = app.plugin(OpaquePlugin, OpaqueConfig())
-            Recorder.log.clear()
+            val handle = app.plugin(OpaquePlugin(log), OpaqueConfig())
+            log.clear()
 
             val outcome = handle.update(OpaqueConfig())
             assertEquals(UpdateOutcome.Applied, outcome)
-            assertEquals(listOf("apply"), Recorder.log)
+            assertEquals(listOf("apply"), log)
+            app.dispose()
         }
 }

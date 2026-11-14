@@ -4,9 +4,7 @@ import cordis.kernel.Context
 import cordis.kernel.CordisClock
 import cordis.kernel.DefaultClock
 import cordis.kernel.Disposable
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.isActive
-import kotlin.coroutines.coroutineContext
 import kotlin.time.Duration
 
 /**
@@ -17,16 +15,17 @@ public suspend fun Context.after(
     clock: CordisClock = DefaultClock,
     body: suspend () -> Unit,
 ): Disposable {
-    return ownTask {
-        try {
+    val job =
+        launch {
             clock.delay(delay)
-        } catch (_: Throwable) {
-            return@ownTask
+            if (isActive) body()
         }
-        if (coroutineContext.isActive) {
-            body()
-        }
-    }
+    return Disposable(
+        action = {
+            job.cancel()
+            job.join()
+        },
+    )
 }
 
 /**
@@ -37,28 +36,18 @@ public suspend fun Context.every(
     clock: CordisClock = DefaultClock,
     body: suspend () -> Unit,
 ): Disposable {
-    return ownTask {
-        while (coroutineContext.isActive) {
-            try {
+    val job =
+        launch {
+            while (isActive) {
                 clock.delay(interval)
-            } catch (_: Throwable) {
-                return@ownTask
+                if (!isActive) return@launch
+                body()
             }
-            if (!coroutineContext.isActive) return@ownTask
-            body()
         }
-    }
-}
-
-private suspend fun Context.ownTask(run: suspend CoroutineScope.() -> Unit): Disposable {
-    return effect {
-        val job =
-            launch {
-                run()
-            }
-        return@effect {
+    return Disposable(
+        action = {
             job.cancel()
             job.join()
-        }
-    }
+        },
+    )
 }

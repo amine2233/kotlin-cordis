@@ -293,6 +293,9 @@ final class cordis.kernel/RuntimeSnapshot { // cordis.kernel/RuntimeSnapshot|nul
 final class cordis.kernel/Scope { // cordis.kernel/Scope|null[0]
     constructor <init>(kotlin.coroutines/SuspendFunction1<kotlin/Throwable, kotlin/Unit> = ..., kotlinx.coroutines/CoroutineScope) // cordis.kernel/Scope.<init>|<init>(kotlin.coroutines.SuspendFunction1<kotlin.Throwable,kotlin.Unit>;kotlinx.coroutines.CoroutineScope){}[0]
 
+    final val size // cordis.kernel/Scope.size|{}size[0]
+        final fun <get-size>(): kotlin/Int // cordis.kernel/Scope.size.<get-size>|<get-size>(){}[0]
+
     final var isDisposed // cordis.kernel/Scope.isDisposed|{}isDisposed[0]
         final fun <get-isDisposed>(): kotlin/Boolean // cordis.kernel/Scope.isDisposed.<get-isDisposed>|<get-isDisposed>(){}[0]
 

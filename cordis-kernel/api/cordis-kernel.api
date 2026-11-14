@@ -277,6 +277,7 @@ public final class cordis/kernel/Scope {
 	public synthetic fun <init> (Lkotlin/jvm/functions/Function2;Lkotlinx/coroutines/CoroutineScope;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun collect (Lkotlin/jvm/functions/Function1;)Lcordis/kernel/Disposable;
 	public final fun dispose (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getSize ()I
 	public final fun isDisposed ()Z
 }
 

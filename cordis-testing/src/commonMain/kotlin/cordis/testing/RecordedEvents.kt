@@ -6,13 +6,20 @@ import cordis.kernel.PluginFailed
 import cordis.kernel.PluginStatusChanged
 import cordis.kernel.ServiceChanged
 import cordis.kernel.TeardownFailed
+import kotlin.concurrent.Volatile
 import kotlin.reflect.KClass
 
 /**
  * Lifecycle and failure events captured during a [withTestApp] run, in emission order.
  */
 public class RecordedEvents {
-    public val all: MutableList<CordisEvent> = mutableListOf()
+    private val lock = Lock()
+
+    @Volatile
+    private var snapshot: List<CordisEvent> = emptyList()
+
+    public val all: List<CordisEvent>
+        get() = snapshot
 
     public inline fun <reified E : CordisEvent> ofType(): List<E> = all.filterIsInstance<E>()
 
@@ -26,7 +33,7 @@ public class RecordedEvents {
         get() = all.filter { it is PluginFailed || it is TeardownFailed }
 
     public fun record(event: CordisEvent) {
-        all.add(event)
+        lock.withLock { snapshot = snapshot + event }
     }
 }
 

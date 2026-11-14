@@ -73,7 +73,7 @@ A `Slot` is the combination of `(ServiceId, Realm)`.
 - Conflicting providers for the same slot throw `CordisException.ServiceConflict`, failing the incoming plugin while keeping the original provider active.
 - Teardowns may throw. `Scope.dispose` runs all registered disposables in reverse order, catching each error and emitting it as `TeardownFailed(plugin, error)` without aborting the remaining disposables.
 - Listeners are isolated from each other and from the emitter. `Registry.emit` calls each listener in its own `try`/`catch`: a throwing listener does not stop the remaining listeners, the emitter never sees the error, and the failure is emitted as `ListenerFailed(event, error)` from the same zone. A listener that throws while handling `ListenerFailed` is not reported again, so there is no recursion. `CancellationException` still propagates.
-- The graph's coroutine scope has a `CoroutineExceptionHandler`. A throwing `ctx.launch` body, timer body (`after` / `every`) or internal launch is reported as `TaskFailed(plugin, error)`, where `plugin` is the launching context's name (`root` when there is no owner). The exception never reaches the platform's uncaught-exception handler.
+- The graph's coroutine scope has a `CoroutineExceptionHandler`. A throwing `ctx.launch` body, timer body (`after` / `every`), timer clock (a `CordisClock.delay` that throws) or internal launch is reported as `TaskFailed(plugin, error)`, where `plugin` is the launching context's name (`root` when there is no owner). The exception never reaches the platform's uncaught-exception handler.
 - A `CancellationException` out of `apply` is never a failure: the run is rolled back, the fork returns to `Pending` (unless disposed), no `Failed` status is set and no `PluginFailed` is emitted.
 - `Disposed` is terminal: once a fork is `Disposed`, no further status change or `PluginFailed` is emitted for it. Disposing a fork while its `apply` is suspended cancels that `apply`, waits for its rollback and ends in `Disposed`.
 - Root `Context.dispose()` tears the graph down children first, then cancels the graph's coroutine scope (`Registry.coroutineScope`), so every `ctx.launch` job and timer stops. A second `dispose()` is a no-op.
@@ -83,7 +83,7 @@ A `Slot` is the combination of `(ServiceId, Realm)`.
 
 - `ctx.after(delay, clock) { ... }` runs once after a delay.
 - `ctx.every(interval, clock) { ... }` runs periodically.
-- Built on `ctx.effect`: when the context, plugin, or scope is disposed, the timer's job is cancelled and joined immediately, preventing background leaks.
+- Built on `ctx.launch`: when the context, plugin, or scope is disposed, the timer's job is cancelled and joined immediately, preventing background leaks. A timer that finishes frees its scope entry.
 - Injectable `CordisClock` allows tests to use `ManualClock` for zero-delay deterministic time simulation.
 
 ## 10. Declarative Loading (`cordis-loader`)
