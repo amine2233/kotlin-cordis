@@ -59,101 +59,108 @@ class GraphTests {
     @Test
     fun consumerWaitsForRequiredService() =
         runTest {
-            val app = Context.root()
-            val probe = Probe()
-            val consumer = app.plugin(Consumer, probe)
-            assertEquals(Fork.Status.Pending, consumer.status)
+            withRoot { app ->
+                val probe = Probe()
+                val consumer = app.plugin(Consumer, probe)
+                assertEquals(Fork.Status.Pending, consumer.status)
 
-            app.plugin(Provider, ProviderConfig(probe, "A"))
-            assertEquals(Fork.Status.Active, consumer.status)
-            assertEquals(listOf("start:A", "provide:A"), probe.log)
+                app.plugin(Provider, ProviderConfig(probe, "A"))
+                assertEquals(Fork.Status.Active, consumer.status)
+                assertEquals(listOf("start:A", "provide:A"), probe.log)
+            }
         }
 
     @Test
     fun hotSwapRestartsDependents() =
         runTest {
-            val app = Context.root()
-            val probe = Probe()
-            val provider = app.plugin(Provider, ProviderConfig(probe, "A"))
-            app.plugin(Consumer, probe)
-            probe.log.clear()
+            withRoot { app ->
+                val probe = Probe()
+                val provider = app.plugin(Provider, ProviderConfig(probe, "A"))
+                app.plugin(Consumer, probe)
+                probe.log.clear()
 
-            provider.update(ProviderConfig(probe, "B"))
-            assertEquals(listOf("withdraw:A", "stop:A", "start:B", "provide:B"), probe.log)
+                provider.update(ProviderConfig(probe, "B"))
+                assertEquals(listOf("withdraw:A", "stop:A", "start:B", "provide:B"), probe.log)
+            }
         }
 
     @Test
     fun unloadRollsBackListeners() =
         runTest {
-            val app = Context.root()
-            val probe = Probe()
-            val provider = app.plugin(Provider, ProviderConfig(probe, "A"))
-            val consumer = app.plugin(Consumer, probe)
+            withRoot { app ->
+                val probe = Probe()
+                val provider = app.plugin(Provider, ProviderConfig(probe, "A"))
+                val consumer = app.plugin(Consumer, probe)
 
-            app.emit(Ping())
-            provider.dispose()
-            app.emit(Ping())
+                app.emit(Ping())
+                provider.dispose()
+                app.emit(Ping())
 
-            assertEquals(Fork.Status.Pending, consumer.status)
-            assertEquals(listOf("ping:A"), probe.log.filter { it.startsWith("ping") })
+                assertEquals(Fork.Status.Pending, consumer.status)
+                assertEquals(listOf("ping:A"), probe.log.filter { it.startsWith("ping") })
+            }
         }
 
     @Test
     fun isolationGivesEachRealmItsOwnInstance() =
         runTest {
-            val app = Context.root()
-            val probe = Probe()
-            val tenantA = app.isolate(ValueKey, label = "a")
-            val tenantB = app.isolate(ValueKey, label = "b")
+            withRoot { app ->
+                val probe = Probe()
+                val tenantA = app.isolate(ValueKey, label = "a")
+                val tenantB = app.isolate(ValueKey, label = "b")
 
-            tenantA.plugin(Provider, ProviderConfig(probe, "A"))
-            val consumerB = tenantB.plugin(Consumer, probe)
-            assertEquals(Fork.Status.Pending, consumerB.status) // A's value is invisible to B
+                tenantA.plugin(Provider, ProviderConfig(probe, "A"))
+                val consumerB = tenantB.plugin(Consumer, probe)
+                assertEquals(Fork.Status.Pending, consumerB.status) // A's value is invisible to B
 
-            tenantB.plugin(Provider, ProviderConfig(probe, "B"))
-            assertEquals(Fork.Status.Active, consumerB.status)
-            assertEquals("A", tenantA[ValueKey])
-            assertEquals("B", tenantB[ValueKey])
-            assertNull(app[ValueKey])
+                tenantB.plugin(Provider, ProviderConfig(probe, "B"))
+                assertEquals(Fork.Status.Active, consumerB.status)
+                assertEquals("A", tenantA[ValueKey])
+                assertEquals("B", tenantB[ValueKey])
+                assertNull(app[ValueKey])
+            }
         }
 
     @Test
     fun conflictingProvidersAreRejected() =
         runTest {
-            val app = Context.root()
-            val probe = Probe()
-            app.plugin(Provider, ProviderConfig(probe, "A"))
-            val second = app.plugin(Provider, ProviderConfig(probe, "B"))
+            withRoot { app ->
+                val probe = Probe()
+                app.plugin(Provider, ProviderConfig(probe, "A"))
+                val second = app.plugin(Provider, ProviderConfig(probe, "B"))
 
-            assertTrue(second.status is Fork.Status.Failed)
-            assertEquals("A", app[ValueKey])
+                assertTrue(second.status is Fork.Status.Failed)
+                assertEquals("A", app[ValueKey])
+            }
         }
 
     @Test
     fun failingPluginIsRolledBack() =
         runTest {
-            val app = Context.root()
-            val probe = Probe()
-            val reported = Probe()
-            app.on<PluginFailed> { reported.log.add(it.plugin) }
+            withRoot { app ->
+                val probe = Probe()
+                val reported = Probe()
+                app.on<PluginFailed> { reported.log.add(it.plugin) }
 
-            val handle = app.plugin(Failing, probe)
-            assertTrue(handle.status is Fork.Status.Failed)
+                val handle = app.plugin(Failing, probe)
+                assertTrue(handle.status is Fork.Status.Failed)
 
-            assertEquals(listOf("rollback"), probe.log)
-            assertEquals(listOf(Failing.name), reported.log)
+                assertEquals(listOf("rollback"), probe.log)
+                assertEquals(listOf(Failing.name), reported.log)
+            }
         }
 
     @Test
     fun disposingRootTearsDownEverythingInReverse() =
         runTest {
-            val app = Context.root()
-            val probe = Probe()
-            app.plugin(Provider, ProviderConfig(probe, "A"))
-            app.plugin(Consumer, probe)
-            probe.log.clear()
+            withRoot { app ->
+                val probe = Probe()
+                app.plugin(Provider, ProviderConfig(probe, "A"))
+                app.plugin(Consumer, probe)
+                probe.log.clear()
 
-            app.dispose()
-            assertEquals(listOf("stop:A", "withdraw:A"), probe.log)
+                app.dispose()
+                assertEquals(listOf("stop:A", "withdraw:A"), probe.log)
+            }
         }
 }

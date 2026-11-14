@@ -69,74 +69,74 @@ class UpdateSemanticsTests {
     fun equalConfigOnActivePluginIsNoOp() =
         runTest {
             val log = mutableListOf<String>()
-            val app = Context.root()
-            val handle = app.plugin(EqualPlugin(log), "a")
-            log.clear()
+            withRoot { app ->
+                val handle = app.plugin(EqualPlugin(log), "a")
+                log.clear()
 
-            val outcome = handle.update("a")
-            assertEquals(UpdateOutcome.Unchanged, outcome)
-            assertTrue(log.isEmpty())
-            assertEquals(Fork.Status.Active, handle.status)
-            app.dispose()
+                val outcome = handle.update("a")
+                assertEquals(UpdateOutcome.Unchanged, outcome)
+                assertTrue(log.isEmpty())
+                assertEquals(Fork.Status.Active, handle.status)
+            }
         }
 
     @Test
     fun equalConfigDoesNotRestartDependents() =
         runTest {
-            val app = Context.root()
-            val probe = Probe()
-            val provider = app.plugin(ValueProviderPlugin, "A")
-            app.plugin(DependentPlugin, probe)
-            probe.log.clear()
+            withRoot { app ->
+                val probe = Probe()
+                val provider = app.plugin(ValueProviderPlugin, "A")
+                app.plugin(DependentPlugin, probe)
+                probe.log.clear()
 
-            val outcome = provider.update("A")
-            assertEquals(UpdateOutcome.Unchanged, outcome)
-            assertTrue(probe.log.isEmpty())
+                val outcome = provider.update("A")
+                assertEquals(UpdateOutcome.Unchanged, outcome)
+                assertTrue(probe.log.isEmpty())
 
-            provider.update("B")
-            assertEquals(listOf("dependent"), probe.log)
-            app.dispose()
+                provider.update("B")
+                assertEquals(listOf("dependent"), probe.log)
+            }
         }
 
     @Test
     fun differentConfigStillRestarts() =
         runTest {
             val log = mutableListOf<String>()
-            val app = Context.root()
-            val handle = app.plugin(EqualPlugin(log), "a")
-            log.clear()
+            withRoot { app ->
+                val handle = app.plugin(EqualPlugin(log), "a")
+                log.clear()
 
-            val outcome = handle.update("b")
-            assertEquals(UpdateOutcome.Applied, outcome)
-            assertEquals(listOf("stop:a", "start:b"), log)
-            app.dispose()
+                val outcome = handle.update("b")
+                assertEquals(UpdateOutcome.Applied, outcome)
+                assertEquals(listOf("stop:a", "start:b"), log)
+            }
         }
 
     @Test
     fun retryingSameConfigAfterFailedApplyReRunsApply() =
         runTest {
             val log = mutableListOf<String>()
-            val app = Context.root()
-            val handle = app.plugin(FailsOnBadPlugin(log), "ok")
-            handle.update("bad")
-            log.clear()
+            withRoot { app ->
+                val handle = app.plugin(FailsOnBadPlugin(log), "ok")
+                handle.update("bad")
+                log.clear()
 
-            handle.update("bad")
-            assertEquals(listOf("apply:bad"), log)
-            app.dispose()
+                handle.update("bad")
+                assertEquals(listOf("apply:bad"), log)
+            }
         }
 
     @Test
     fun nonEquatableConfigStillRestarts() =
         runTest {
             val log = mutableListOf<String>()
-            val app = Context.root()
-            val handle = app.plugin(OpaquePlugin(log), OpaqueConfig())
-            log.clear()
+            withRoot { app ->
+                val handle = app.plugin(OpaquePlugin(log), OpaqueConfig())
+                log.clear()
 
-            val outcome = handle.update(OpaqueConfig())
-            assertEquals(UpdateOutcome.Applied, outcome)
-            assertEquals(listOf("apply"), log)
-            app.dispose()
+                val outcome = handle.update(OpaqueConfig())
+                assertEquals(UpdateOutcome.Applied, outcome)
+                assertEquals(listOf("apply"), log)
+            }
         }
 }

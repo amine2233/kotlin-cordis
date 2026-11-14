@@ -67,162 +67,164 @@ class LifecycleOwnershipTests {
     @Test
     fun cancellingTheCallerMidApplyLetsThePluginBecomeActive() =
         runTest {
-            val app = Context.root()
-            val events = EventLog(app)
-            val entered = CompletableDeferred<Unit>()
-            val gate = CompletableDeferred<Unit>()
+            withRoot { app ->
+                val events = EventLog(app)
+                val entered = CompletableDeferred<Unit>()
+                val gate = CompletableDeferred<Unit>()
 
-            val caller =
-                launch {
-                    app.plugin("slow") {
-                        entered.complete(Unit)
-                        gate.await()
+                val caller =
+                    launch {
+                        app.plugin("slow") {
+                            entered.complete(Unit)
+                            gate.await()
+                        }
                     }
-                }
-            entered.await()
-            caller.cancelAndJoin()
-            gate.complete(Unit)
+                entered.await()
+                caller.cancelAndJoin()
+                gate.complete(Unit)
 
-            eventually { Fork.Status.Active in events.statuses("slow") }
-            assertEquals(
-                Fork.Status.Active,
-                app
-                    .snapshot()
-                    .plugins
-                    .single { it.name == "slow" }
-                    .status,
-            )
-            assertTrue(events.failures().isEmpty())
-            assertTrue(events.statuses("slow").none { it is Fork.Status.Failed })
-            app.dispose()
+                eventually { Fork.Status.Active in events.statuses("slow") }
+                assertEquals(
+                    Fork.Status.Active,
+                    app
+                        .snapshot()
+                        .plugins
+                        .single { it.name == "slow" }
+                        .status,
+                )
+                assertTrue(events.failures().isEmpty())
+                assertTrue(events.statuses("slow").none { it is Fork.Status.Failed })
+            }
         }
 
     @Test
     fun disposingMidApplyEndsDisposedAndRollsBack() =
         runTest {
-            val app = Context.root()
-            val events = EventLog(app)
-            val probe = Probe()
-            val forkReady = CompletableDeferred<Fork>()
-            val plugin = HangingPlugin(probe, forkReady)
+            withRoot { app ->
+                val events = EventLog(app)
+                val probe = Probe()
+                val forkReady = CompletableDeferred<Fork>()
+                val plugin = HangingPlugin(probe, forkReady)
 
-            val loader = async { app.plugin(plugin) }
-            val handle = PluginHandle(forkReady.await(), plugin)
-            launch { handle.dispose() }.join()
-            val loaded = loader.await()
+                val loader = async { app.plugin(plugin) }
+                val handle = PluginHandle(forkReady.await(), plugin)
+                launch { handle.dispose() }.join()
+                val loaded = loader.await()
 
-            assertEquals(Fork.Status.Disposed, handle.status)
-            assertEquals(Fork.Status.Disposed, loaded.status)
-            assertEquals(listOf("teardown"), probe.log)
-            assertTrue(events.failures().isEmpty())
-            assertEquals(Fork.Status.Disposed, events.statuses("hanging").last())
-            assertEquals(1, events.statuses("hanging").count { it == Fork.Status.Disposed })
-            assertTrue(app.snapshot().plugins.none { it.name == "hanging" })
-            app.dispose()
+                assertEquals(Fork.Status.Disposed, handle.status)
+                assertEquals(Fork.Status.Disposed, loaded.status)
+                assertEquals(listOf("teardown"), probe.log)
+                assertTrue(events.failures().isEmpty())
+                assertEquals(Fork.Status.Disposed, events.statuses("hanging").last())
+                assertEquals(1, events.statuses("hanging").count { it == Fork.Status.Disposed })
+                assertTrue(app.snapshot().plugins.none { it.name == "hanging" })
+            }
         }
 
     @OptIn(InternalCordisApi::class)
     @Test
     fun loadDisposeTogglesLeaveNoScopeEntries() =
         runTest {
-            val app = Context.root()
-            val before = app.scope.size
-            repeat(1000) { app.plugin("p") {}.dispose() }
-            assertEquals(before, app.scope.size)
-            assertTrue(app.snapshot().plugins.isEmpty())
-            app.dispose()
+            withRoot { app ->
+                val before = app.scope.size
+                repeat(1000) { app.plugin("p") {}.dispose() }
+                assertEquals(before, app.scope.size)
+                assertTrue(app.snapshot().plugins.isEmpty())
+            }
         }
 
     @OptIn(InternalCordisApi::class)
     @Test
     fun reprovidingKeepsOneWithdrawEntry() =
         runTest {
-            val app = Context.root()
-            val before = app.scope.size
-            repeat(1000) { app.provide(ReprovidedKey, it) }
-            assertTrue(app.scope.size <= before + 1)
-            assertEquals(999, app[ReprovidedKey])
-            app.dispose()
-            assertNull(app[ReprovidedKey])
+            withRoot { app ->
+                val before = app.scope.size
+                repeat(1000) { app.provide(ReprovidedKey, it) }
+                assertTrue(app.scope.size <= before + 1)
+                assertEquals(999, app[ReprovidedKey])
+                app.dispose()
+                assertNull(app[ReprovidedKey])
+            }
         }
 
     @Test
     fun reprovidedKeyIsStillWithdrawnOnDispose() =
         runTest {
-            val app = Context.root()
-            val handle = app.plugin("provider") { ctx -> repeat(1000) { ctx.provide(ReprovidedKey, it) } }
-            assertEquals(999, app[ReprovidedKey])
-            handle.dispose()
-            assertNull(app[ReprovidedKey])
-            app.dispose()
+            withRoot { app ->
+                val handle = app.plugin("provider") { ctx -> repeat(1000) { ctx.provide(ReprovidedKey, it) } }
+                assertEquals(999, app[ReprovidedKey])
+                handle.dispose()
+                assertNull(app[ReprovidedKey])
+            }
         }
 
     @Test
     fun rootDisposeCancelsTheGraphScope() =
         runTest {
-            val app = Context.root()
-            val job = app.launch { awaitCancellation() }
-            app.dispose()
-            assertFalse(app.registry.coroutineScope.isActive)
-            assertTrue(job.isCancelled)
-            app.dispose()
+            withRoot { app ->
+                val job = app.launch { awaitCancellation() }
+                app.dispose()
+                assertFalse(app.registry.coroutineScope.isActive)
+                assertTrue(job.isCancelled)
+            }
         }
 
     @Test
     fun lateRootTeardownRunsOnTheGraphDispatcher() =
         runTest {
             val dispatcher = Dispatchers.Default.limitedParallelism(1)
-            val app = Context.root(dispatcher = dispatcher)
-            app.dispose()
+            withRoot(dispatcher = dispatcher) { app ->
+                app.dispose()
 
-            val ranOn = CompletableDeferred<CoroutineContext.Element?>()
-            app.onDispose { ranOn.complete(currentCoroutineContext()[ContinuationInterceptor]) }
+                val ranOn = CompletableDeferred<CoroutineContext.Element?>()
+                app.onDispose { ranOn.complete(currentCoroutineContext()[ContinuationInterceptor]) }
 
-            assertEquals(dispatcher, awaitReal(ranOn))
+                assertEquals(dispatcher, awaitReal(ranOn))
+            }
         }
 
     @Test
     fun lateForkTeardownRunsOnTheGraphDispatcher() =
         runTest {
             val dispatcher = Dispatchers.Default.limitedParallelism(1)
-            val app = Context.root(dispatcher = dispatcher)
-            var pluginContext: Context? = null
-            val handle = app.plugin("p") { ctx -> pluginContext = ctx }
-            handle.dispose()
+            withRoot(dispatcher = dispatcher) { app ->
+                var pluginContext: Context? = null
+                val handle = app.plugin("p") { ctx -> pluginContext = ctx }
+                handle.dispose()
 
-            val ranOn = CompletableDeferred<CoroutineContext.Element?>()
-            checkNotNull(pluginContext).onDispose { ranOn.complete(currentCoroutineContext()[ContinuationInterceptor]) }
+                val ranOn = CompletableDeferred<CoroutineContext.Element?>()
+                checkNotNull(pluginContext).onDispose { ranOn.complete(currentCoroutineContext()[ContinuationInterceptor]) }
 
-            assertEquals(dispatcher, awaitReal(ranOn))
-            app.dispose()
+                assertEquals(dispatcher, awaitReal(ranOn))
+            }
         }
 
     @Test
     fun cancellationFromApplyIsNotAFailure() =
         runTest {
-            val app = Context.root()
-            val events = EventLog(app)
-            val probe = Probe()
+            withRoot { app ->
+                val events = EventLog(app)
+                val probe = Probe()
 
-            assertFailsWith<CancellationException> {
-                app.plugin("cancelling") { ctx ->
-                    ctx.onDispose { probe.log.add("rolled-back") }
-                    throw CancellationException("stop")
+                assertFailsWith<CancellationException> {
+                    app.plugin("cancelling") { ctx ->
+                        ctx.onDispose { probe.log.add("rolled-back") }
+                        throw CancellationException("stop")
+                    }
                 }
-            }
 
-            assertEquals(
-                Fork.Status.Pending,
-                app
-                    .snapshot()
-                    .plugins
-                    .single { it.name == "cancelling" }
-                    .status,
-            )
-            assertTrue(events.failures().isEmpty())
-            assertTrue(events.statuses("cancelling").none { it is Fork.Status.Failed })
-            assertEquals(listOf("rolled-back"), probe.log)
-            app.dispose()
+                assertEquals(
+                    Fork.Status.Pending,
+                    app
+                        .snapshot()
+                        .plugins
+                        .single { it.name == "cancelling" }
+                        .status,
+                )
+                assertTrue(events.failures().isEmpty())
+                assertTrue(events.statuses("cancelling").none { it is Fork.Status.Failed })
+                assertEquals(listOf("rolled-back"), probe.log)
+            }
         }
 
     private suspend fun eventually(condition: () -> Boolean) {
