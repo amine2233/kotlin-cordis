@@ -66,7 +66,7 @@ Reading and reacting:
 - `ctx.serviceFlow(Key): Flow<T?>` — current value, then each provide/withdraw. `replaceValue` / `update` (in place) emit nothing.
 - `ctx.events<E>(): Flow<E>`; emit with `ctx.emit(event)`; events implement `CordisEvent`.
 - Both `events()` and `serviceFlow()` complete normally when their context is disposed.
-- Built-in events: `ServiceChanged`, `PluginStatusChanged`, `PluginFailed`, `TeardownFailed`.
+- Built-in events: `ServiceChanged`, `PluginStatusChanged`, `PluginFailed`, `TeardownFailed`, `ListenerFailed`, `TaskFailed`.
 
 Space and routing: `ctx.isolate(Key, label)` gives a child where `Key` resolves to a separate instance (same label = shared);
 `ctx.zone("ui")` scopes event delivery; `ctx.intercept(Key) { wrap(it) }` decorates future `provide`s.

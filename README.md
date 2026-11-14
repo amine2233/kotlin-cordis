@@ -97,7 +97,7 @@ Run the interactive demo walkthrough:
 All graph state changes (`provide`, `withdraw`, `plugin`, `update`, `dispose`) run on a serialized coroutine dispatcher (`Dispatchers.Default.limitedParallelism(1)` by default). Re-entrancy during dependency cascade reconciliations is handled with a non-blocking iterative loop.
 
 ### Time: LIFO Scope Teardowns
-Any side effect registered inside `Plugin.apply` (event listeners, provided services, sub-plugins, custom disposables, timers) is tracked in the plugin's `Scope`. When unloaded or restarted, all teardowns run in reverse order (LIFO). If a teardown throws, remaining teardowns still execute, and errors are emitted via `TeardownFailed`.
+Any side effect registered inside `Plugin.apply` (event listeners, provided services, sub-plugins, custom disposables, timers) is tracked in the plugin's `Scope`. When unloaded or restarted, all teardowns run in reverse order (LIFO). If a teardown throws, remaining teardowns still execute, and errors are emitted via `TeardownFailed`. A throwing event listener does not stop the other listeners or reach the emitter; it is reported as `ListenerFailed`. A throwing `ctx.launch` or timer body is reported as `TaskFailed`. Neither changes the plugin's status.
 
 ### Space: Realms & Zones
 - **Realms**: Isolate service instances per tenant (`ctx.isolate(DatabaseKey, label = "tenant-a")`).
