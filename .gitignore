@@ -15,3 +15,7 @@ node_modules/
 /factory/jobs/
 /.worktrees/
 samples/ktor/enabled-plugins.json
+# samples/ runs on the root wrapper (./gradlew -p samples); ignore the one Android Studio generates there.
+/samples/gradle/
+/samples/gradlew
+/samples/gradlew.bat
