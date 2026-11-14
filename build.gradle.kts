@@ -22,6 +22,18 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform) apply false
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.binary.compatibility.validator)
+    alias(libs.plugins.dokka)
+    alias(libs.plugins.kover)
+}
+
+val libraryModules =
+    listOf("cordis-kernel", "cordis", "cordis-loader", "cordis-testing", "cordis-runtime", "cordis-ktor")
+
+dependencies {
+    libraryModules.forEach { module ->
+        dokka(project(":$module"))
+        kover(project(":$module"))
+    }
 }
 
 apiValidation {
@@ -44,6 +56,17 @@ allprojects {
 
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
         compilerOptions.freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
+}
+
+// Kover instruments every test task it sees, so it is applied only when a Kover task is requested,
+// which keeps the agent and koverFindJar out of plain jvmTest/build runs.
+val koverRequested = gradle.startParameter.taskNames.any { it.substringAfterLast(':').startsWith("kover") }
+
+configure(subprojects.filter { it.name in libraryModules }) {
+    apply(plugin = "org.jetbrains.dokka")
+    if (koverRequested) {
+        apply(plugin = "org.jetbrains.kotlinx.kover")
     }
 }
 
