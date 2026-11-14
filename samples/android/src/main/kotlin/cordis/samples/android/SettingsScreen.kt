@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
@@ -23,7 +24,11 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                 supportingContent = {
                     Column {
                         Text(row.description)
-                        Text(row.status.label, style = MaterialTheme.typography.labelMedium)
+                        Text(
+                            row.status.label,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = if (row.status is PluginStatus.Failed) MaterialTheme.colorScheme.error else Color.Unspecified,
+                        )
                     }
                 },
                 trailingContent = {
