@@ -3,6 +3,7 @@ package cordis.samples.shared
 import cordis.kernel.Context
 import cordis.kernel.Inject
 import cordis.kernel.Plugin
+import cordis.kernel.PluginKey
 import cordis.kernel.ServiceKey
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -30,6 +31,7 @@ class InMemoryAnalytics(
 object AnalyticsKey : ServiceKey<Analytics>
 
 object AnalyticsPlugin : Plugin<Unit> {
+    override val pluginKey: PluginKey = SampleKeys.analytics
     override val inject: Inject = Inject.of(required = listOf(LoggerKey))
 
     override suspend fun apply(

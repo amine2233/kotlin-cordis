@@ -3,6 +3,7 @@ package cordis.samples.shared
 import cordis.kernel.Context
 import cordis.kernel.Inject
 import cordis.kernel.Plugin
+import cordis.kernel.PluginKey
 import cordis.kernel.ServiceKey
 
 interface Notes {
@@ -35,6 +36,7 @@ class InMemoryNotes(
 object NotesKey : ServiceKey<Notes>
 
 object NotesPlugin : Plugin<Unit> {
+    override val pluginKey: PluginKey = SampleKeys.notes
     override val inject: Inject = Inject.of(required = listOf(DatabaseKey))
 
     override suspend fun apply(
