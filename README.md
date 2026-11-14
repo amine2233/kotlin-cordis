@@ -25,7 +25,7 @@ Cordis' core idea: **everything is a plugin**, and plugins compose along two ort
 
 ## Modules
 
-- `cordis-kernel`: `Scope`, `Fork`, `Registry`, `Context`, `ServiceKey`, `Inject`, events, zones, intercept layers, snapshots. Zero sugar.
+- `cordis-kernel`: `Scope`, `Fork`, `Context`, `ServiceKey`, `Inject`, events, zones, intercept layers, snapshots. Zero sugar.
 - `cordis`: Re-exports the kernel and adds `ServicePlugin` and timer effects (`ctx.after`, `ctx.every`).
 - `cordis-loader`: Declarative JSON load-plan loader (`LoadPlan`, `PluginRegistry`, `Context.load`) with `kotlinx.serialization`.
 - `cordis-testing`: Test support module (`ManualClock`, `settle(until = ...)`, `withTestApp`, `RecordedEvents`).

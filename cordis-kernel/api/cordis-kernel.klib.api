@@ -6,6 +6,10 @@
 // - Show declarations: true
 
 // Library unique name: <io.github.amine2233:cordis-kernel>
+open annotation class cordis.kernel/InternalCordisApi : kotlin/Annotation { // cordis.kernel/InternalCordisApi|null[0]
+    constructor <init>() // cordis.kernel/InternalCordisApi.<init>|<init>(){}[0]
+}
+
 abstract interface <#A: kotlin/Any> cordis.kernel/ServiceKey { // cordis.kernel/ServiceKey|null[0]
     open val serviceId // cordis.kernel/ServiceKey.serviceId|{}serviceId[0]
         open fun <get-serviceId>(): cordis.kernel/ServiceId // cordis.kernel/ServiceKey.serviceId.<get-serviceId>|<get-serviceId>(){}[0]
@@ -50,8 +54,6 @@ final class cordis.kernel/Context { // cordis.kernel/Context|null[0]
         final fun <get-name>(): kotlin/String // cordis.kernel/Context.name.<get-name>|<get-name>(){}[0]
     final val parent // cordis.kernel/Context.parent|{}parent[0]
         final fun <get-parent>(): cordis.kernel/Context? // cordis.kernel/Context.parent.<get-parent>|<get-parent>(){}[0]
-    final val registry // cordis.kernel/Context.registry|{}registry[0]
-        final fun <get-registry>(): cordis.kernel/Registry // cordis.kernel/Context.registry.<get-registry>|<get-registry>(){}[0]
     final val scope // cordis.kernel/Context.scope|{}scope[0]
         final fun <get-scope>(): cordis.kernel/Scope // cordis.kernel/Context.scope.<get-scope>|<get-scope>(){}[0]
     final val zoneId // cordis.kernel/Context.zoneId|{}zoneId[0]
@@ -96,8 +98,6 @@ final class cordis.kernel/Disposable { // cordis.kernel/Disposable|null[0]
 }
 
 final class cordis.kernel/Fork { // cordis.kernel/Fork|null[0]
-    constructor <init>(kotlin/String, cordis.kernel/Inject, cordis.kernel/Context, kotlin/Any? = ..., kotlin.coroutines/SuspendFunction1<cordis.kernel/Context, kotlin/Unit>) // cordis.kernel/Fork.<init>|<init>(kotlin.String;cordis.kernel.Inject;cordis.kernel.Context;kotlin.Any?;kotlin.coroutines.SuspendFunction1<cordis.kernel.Context,kotlin.Unit>){}[0]
-
     final val id // cordis.kernel/Fork.id|{}id[0]
         final fun <get-id>(): cordis.kernel/PluginId // cordis.kernel/Fork.id.<get-id>|<get-id>(){}[0]
     final val inject // cordis.kernel/Fork.inject|{}inject[0]
@@ -272,60 +272,6 @@ final class cordis.kernel/PluginStatusChanged : cordis.kernel/CordisEvent { // c
     final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/PluginStatusChanged.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // cordis.kernel/PluginStatusChanged.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // cordis.kernel/PluginStatusChanged.toString|toString(){}[0]
-}
-
-final class cordis.kernel/Registry { // cordis.kernel/Registry|null[0]
-    constructor <init>(kotlinx.coroutines/CoroutineDispatcher = ...) // cordis.kernel/Registry.<init>|<init>(kotlinx.coroutines.CoroutineDispatcher){}[0]
-
-    final val coroutineScope // cordis.kernel/Registry.coroutineScope|{}coroutineScope[0]
-        final fun <get-coroutineScope>(): kotlinx.coroutines/CoroutineScope // cordis.kernel/Registry.coroutineScope.<get-coroutineScope>|<get-coroutineScope>(){}[0]
-    final val dispatcher // cordis.kernel/Registry.dispatcher|{}dispatcher[0]
-        final fun <get-dispatcher>(): kotlinx.coroutines/CoroutineDispatcher // cordis.kernel/Registry.dispatcher.<get-dispatcher>|<get-dispatcher>(){}[0]
-
-    final fun <#A1: cordis.kernel/CordisEvent> on(kotlin.reflect/KClass<#A1>, cordis.kernel/ZoneId?, kotlin.coroutines/SuspendFunction1<#A1, kotlin/Unit>): kotlin/Int // cordis.kernel/Registry.on|on(kotlin.reflect.KClass<0:0>;cordis.kernel.ZoneId?;kotlin.coroutines.SuspendFunction1<0:0,kotlin.Unit>){0§<cordis.kernel.CordisEvent>}[0]
-    final fun <#A1: kotlin/Any> replaceValue(cordis.kernel/Slot, cordis.kernel/Context, kotlin/Function1<#A1, #A1>) // cordis.kernel/Registry.replaceValue|replaceValue(cordis.kernel.Slot;cordis.kernel.Context;kotlin.Function1<0:0,0:0>){0§<kotlin.Any>}[0]
-    final fun <#A1: kotlin/Any> update(cordis.kernel/Slot, cordis.kernel/Context, kotlin/Function1<#A1, kotlin/Unit>) // cordis.kernel/Registry.update|update(cordis.kernel.Slot;cordis.kernel.Context;kotlin.Function1<0:0,kotlin.Unit>){0§<kotlin.Any>}[0]
-    final fun anonymousRealm(): kotlin/String // cordis.kernel/Registry.anonymousRealm|anonymousRealm(){}[0]
-    final fun entry(cordis.kernel/Slot): cordis.kernel/Registry.Entry? // cordis.kernel/Registry.entry|entry(cordis.kernel.Slot){}[0]
-    final fun listenerCount(kotlin.reflect/KClass<out cordis.kernel/CordisEvent>): kotlin/Int // cordis.kernel/Registry.listenerCount|listenerCount(kotlin.reflect.KClass<out|cordis.kernel.CordisEvent>){}[0]
-    final fun off(kotlin.reflect/KClass<out cordis.kernel/CordisEvent>, kotlin/Int) // cordis.kernel/Registry.off|off(kotlin.reflect.KClass<out|cordis.kernel.CordisEvent>;kotlin.Int){}[0]
-    final fun register(cordis.kernel/Fork) // cordis.kernel/Registry.register|register(cordis.kernel.Fork){}[0]
-    final fun snapshot(): cordis.kernel/RuntimeSnapshot // cordis.kernel/Registry.snapshot|snapshot(){}[0]
-    final fun unregister(cordis.kernel/Fork) // cordis.kernel/Registry.unregister|unregister(cordis.kernel.Fork){}[0]
-    final fun zone(kotlin/String, cordis.kernel/ZoneId?): cordis.kernel/ZoneId // cordis.kernel/Registry.zone|zone(kotlin.String;cordis.kernel.ZoneId?){}[0]
-    final suspend fun emit(cordis.kernel/CordisEvent, cordis.kernel/ZoneId? = ...) // cordis.kernel/Registry.emit|emit(cordis.kernel.CordisEvent;cordis.kernel.ZoneId?){}[0]
-    final suspend fun provide(cordis.kernel/Slot, kotlin/Any, cordis.kernel/Context) // cordis.kernel/Registry.provide|provide(cordis.kernel.Slot;kotlin.Any;cordis.kernel.Context){}[0]
-    final suspend fun withdraw(cordis.kernel/Slot, kotlin/Any, cordis.kernel/PluginId?) // cordis.kernel/Registry.withdraw|withdraw(cordis.kernel.Slot;kotlin.Any;cordis.kernel.PluginId?){}[0]
-
-    final class Entry { // cordis.kernel/Registry.Entry|null[0]
-        constructor <init>(kotlin/Any, kotlin/Any, kotlin/String, cordis.kernel/PluginId?, kotlin/Int, cordis.kernel/OccurrenceId) // cordis.kernel/Registry.Entry.<init>|<init>(kotlin.Any;kotlin.Any;kotlin.String;cordis.kernel.PluginId?;kotlin.Int;cordis.kernel.OccurrenceId){}[0]
-
-        final val fork // cordis.kernel/Registry.Entry.fork|{}fork[0]
-            final fun <get-fork>(): cordis.kernel/PluginId? // cordis.kernel/Registry.Entry.fork.<get-fork>|<get-fork>(){}[0]
-        final val generation // cordis.kernel/Registry.Entry.generation|{}generation[0]
-            final fun <get-generation>(): kotlin/Int // cordis.kernel/Registry.Entry.generation.<get-generation>|<get-generation>(){}[0]
-        final val occurrence // cordis.kernel/Registry.Entry.occurrence|{}occurrence[0]
-            final fun <get-occurrence>(): cordis.kernel/OccurrenceId // cordis.kernel/Registry.Entry.occurrence.<get-occurrence>|<get-occurrence>(){}[0]
-        final val owner // cordis.kernel/Registry.Entry.owner|{}owner[0]
-            final fun <get-owner>(): kotlin/Any // cordis.kernel/Registry.Entry.owner.<get-owner>|<get-owner>(){}[0]
-        final val ownerName // cordis.kernel/Registry.Entry.ownerName|{}ownerName[0]
-            final fun <get-ownerName>(): kotlin/String // cordis.kernel/Registry.Entry.ownerName.<get-ownerName>|<get-ownerName>(){}[0]
-
-        final var value // cordis.kernel/Registry.Entry.value|{}value[0]
-            final fun <get-value>(): kotlin/Any // cordis.kernel/Registry.Entry.value.<get-value>|<get-value>(){}[0]
-            final fun <set-value>(kotlin/Any) // cordis.kernel/Registry.Entry.value.<set-value>|<set-value>(kotlin.Any){}[0]
-    }
-
-    final class Listener { // cordis.kernel/Registry.Listener|null[0]
-        constructor <init>(kotlin/Int, cordis.kernel/ZoneId?, kotlin.coroutines/SuspendFunction1<cordis.kernel/CordisEvent, kotlin/Unit>) // cordis.kernel/Registry.Listener.<init>|<init>(kotlin.Int;cordis.kernel.ZoneId?;kotlin.coroutines.SuspendFunction1<cordis.kernel.CordisEvent,kotlin.Unit>){}[0]
-
-        final val handler // cordis.kernel/Registry.Listener.handler|{}handler[0]
-            final fun <get-handler>(): kotlin.coroutines/SuspendFunction1<cordis.kernel/CordisEvent, kotlin/Unit> // cordis.kernel/Registry.Listener.handler.<get-handler>|<get-handler>(){}[0]
-        final val id // cordis.kernel/Registry.Listener.id|{}id[0]
-            final fun <get-id>(): kotlin/Int // cordis.kernel/Registry.Listener.id.<get-id>|<get-id>(){}[0]
-        final val zone // cordis.kernel/Registry.Listener.zone|{}zone[0]
-            final fun <get-zone>(): cordis.kernel/ZoneId? // cordis.kernel/Registry.Listener.zone.<get-zone>|<get-zone>(){}[0]
-    }
 }
 
 final class cordis.kernel/RuntimeSnapshot { // cordis.kernel/RuntimeSnapshot|null[0]

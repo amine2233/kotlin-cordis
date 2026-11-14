@@ -8,7 +8,6 @@ public final class cordis/kernel/Context {
 	public final fun getFork ()Lcordis/kernel/Fork;
 	public final fun getName ()Ljava/lang/String;
 	public final fun getParent ()Lcordis/kernel/Context;
-	public final fun getRegistry ()Lcordis/kernel/Registry;
 	public final fun getScope ()Lcordis/kernel/Scope;
 	public final fun getZoneId ()Lcordis/kernel/ZoneId;
 	public final fun intercept (Lcordis/kernel/ServiceKey;Lkotlin/jvm/functions/Function1;)Lcordis/kernel/Context;
@@ -83,8 +82,6 @@ public final class cordis/kernel/Disposable {
 }
 
 public final class cordis/kernel/Fork {
-	public fun <init> (Ljava/lang/String;Lcordis/kernel/Inject;Lcordis/kernel/Context;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)V
-	public synthetic fun <init> (Ljava/lang/String;Lcordis/kernel/Inject;Lcordis/kernel/Context;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun dependsOn (Lcordis/kernel/Slot;)Z
 	public final fun getId ()Lcordis/kernel/PluginId;
 	public final fun getInject ()Lcordis/kernel/Inject;
@@ -157,6 +154,9 @@ public final class cordis/kernel/Inject$Companion {
 	public final fun getNONE ()Lcordis/kernel/Inject;
 	public final fun of (Ljava/util/List;Ljava/util/List;)Lcordis/kernel/Inject;
 	public static synthetic fun of$default (Lcordis/kernel/Inject$Companion;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lcordis/kernel/Inject;
+}
+
+public abstract interface annotation class cordis/kernel/InternalCordisApi : java/lang/annotation/Annotation {
 }
 
 public final class cordis/kernel/ListenerFailed : cordis/kernel/CordisEvent {
@@ -257,47 +257,6 @@ public final class cordis/kernel/PluginStatusChanged : cordis/kernel/CordisEvent
 	public final fun getStatus ()Lcordis/kernel/Fork$Status;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class cordis/kernel/Registry {
-	public fun <init> ()V
-	public fun <init> (Lkotlinx/coroutines/CoroutineDispatcher;)V
-	public synthetic fun <init> (Lkotlinx/coroutines/CoroutineDispatcher;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun anonymousRealm ()Ljava/lang/String;
-	public final fun emit (Lcordis/kernel/CordisEvent;Lcordis/kernel/ZoneId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun emit$default (Lcordis/kernel/Registry;Lcordis/kernel/CordisEvent;Lcordis/kernel/ZoneId;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public final fun entry (Lcordis/kernel/Slot;)Lcordis/kernel/Registry$Entry;
-	public final fun getCoroutineScope ()Lkotlinx/coroutines/CoroutineScope;
-	public final fun getDispatcher ()Lkotlinx/coroutines/CoroutineDispatcher;
-	public final fun listenerCount (Lkotlin/reflect/KClass;)I
-	public final fun off (Lkotlin/reflect/KClass;I)V
-	public final fun on (Lkotlin/reflect/KClass;Lcordis/kernel/ZoneId;Lkotlin/jvm/functions/Function2;)I
-	public final fun provide (Lcordis/kernel/Slot;Ljava/lang/Object;Lcordis/kernel/Context;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun register (Lcordis/kernel/Fork;)V
-	public final fun replaceValue (Lcordis/kernel/Slot;Lcordis/kernel/Context;Lkotlin/jvm/functions/Function1;)V
-	public final fun snapshot ()Lcordis/kernel/RuntimeSnapshot;
-	public final fun unregister (Lcordis/kernel/Fork;)V
-	public final fun update (Lcordis/kernel/Slot;Lcordis/kernel/Context;Lkotlin/jvm/functions/Function1;)V
-	public final fun withdraw (Lcordis/kernel/Slot;Ljava/lang/Object;Lcordis/kernel/PluginId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun zone (Ljava/lang/String;Lcordis/kernel/ZoneId;)Lcordis/kernel/ZoneId;
-}
-
-public final class cordis/kernel/Registry$Entry {
-	public fun <init> (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;Lcordis/kernel/PluginId;ILcordis/kernel/OccurrenceId;)V
-	public final fun getFork ()Lcordis/kernel/PluginId;
-	public final fun getGeneration ()I
-	public final fun getOccurrence ()Lcordis/kernel/OccurrenceId;
-	public final fun getOwner ()Ljava/lang/Object;
-	public final fun getOwnerName ()Ljava/lang/String;
-	public final fun getValue ()Ljava/lang/Object;
-	public final fun setValue (Ljava/lang/Object;)V
-}
-
-public final class cordis/kernel/Registry$Listener {
-	public fun <init> (ILcordis/kernel/ZoneId;Lkotlin/jvm/functions/Function2;)V
-	public final fun getHandler ()Lkotlin/jvm/functions/Function2;
-	public final fun getId ()I
-	public final fun getZone ()Lcordis/kernel/ZoneId;
 }
 
 public final class cordis/kernel/RuntimeSnapshot {

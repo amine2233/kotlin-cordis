@@ -7,10 +7,10 @@ import cordis.kernel.ServiceKey
 /**
  * Sugar for the most common case: a plugin whose only job is to provide one service.
  */
-interface ServicePlugin<K : ServiceKey<V>, V : Any, C> : Plugin<C> {
-    val key: K
+public interface ServicePlugin<K : ServiceKey<V>, V : Any, C> : Plugin<C> {
+    public val key: K
 
-    suspend fun make(
+    public suspend fun make(
         ctx: Context,
         config: C,
     ): V
@@ -27,8 +27,8 @@ interface ServicePlugin<K : ServiceKey<V>, V : Any, C> : Plugin<C> {
 /**
  * Sugar for a [ServicePlugin] without configuration ([Unit]).
  */
-interface UnitServicePlugin<K : ServiceKey<V>, V : Any> : ServicePlugin<K, V, Unit> {
-    suspend fun make(ctx: Context): V
+public interface UnitServicePlugin<K : ServiceKey<V>, V : Any> : ServicePlugin<K, V, Unit> {
+    public suspend fun make(ctx: Context): V
 
     override suspend fun make(
         ctx: Context,

@@ -6,20 +6,20 @@ import cordis.kernel.Plugin
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 
-typealias LoaderAction = suspend (Context) -> Fork.Status
+public typealias LoaderAction = suspend (Context) -> Fork.Status
 
 /**
  * Maps string resolve keys to plugin types; the only place strings name plugins.
  */
-class PluginRegistry(
-    val json: Json = Json { ignoreUnknownKeys = true },
+public class PluginRegistry(
+    public val json: Json = Json { ignoreUnknownKeys = true },
 ) {
     private val makers = mutableMapOf<String, (String?) -> LoaderAction>()
 
     /**
      * Registers [plugin] under [key], decoding its config using [serializer].
      */
-    fun <C> register(
+    public fun <C> register(
         plugin: Plugin<C>,
         key: String,
         serializer: KSerializer<C>,
@@ -35,7 +35,7 @@ class PluginRegistry(
     /**
      * Registers a plugin with custom config decoding.
      */
-    fun <C> register(
+    public fun <C> register(
         plugin: Plugin<C>,
         key: String,
         decode: (String?) -> C,
@@ -50,16 +50,16 @@ class PluginRegistry(
     /**
      * Registers a plugin without configuration ([Unit]).
      */
-    fun register(
+    public fun register(
         plugin: Plugin<Unit>,
         key: String,
     ) {
         register(plugin, key) { }
     }
 
-    fun isRegistered(key: String): Boolean = makers.containsKey(key)
+    public fun isRegistered(key: String): Boolean = makers.containsKey(key)
 
-    fun loader(
+    public fun loader(
         key: String,
         config: String?,
     ): LoaderAction? {

@@ -6,7 +6,7 @@ import cordis.kernel.Fork
 /**
  * The result of loading one plan entry.
  */
-data class LoadOutcome(
+public data class LoadOutcome(
     val key: String,
     val name: String?,
     val status: Fork.Status,
@@ -16,7 +16,7 @@ data class LoadOutcome(
  * Loads the plan in order and returns one outcome per entry.
  * An invalid plan loads nothing: every entry is reported as failed.
  */
-suspend fun Context.load(
+public suspend fun Context.load(
     plan: LoadPlan,
     registry: PluginRegistry,
 ): List<LoadOutcome> {

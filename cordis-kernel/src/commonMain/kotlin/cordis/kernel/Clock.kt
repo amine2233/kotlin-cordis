@@ -6,16 +6,16 @@ import kotlin.time.TimeSource
 /**
  * Clock abstraction used by timer effects ([Context.after], [Context.every]).
  */
-interface CordisClock {
-    val now: Duration
+public interface CordisClock {
+    public val now: Duration
 
-    suspend fun delay(duration: Duration)
+    public suspend fun delay(duration: Duration)
 }
 
 /**
  * Default system clock backed by [TimeSource.Monotonic] and [kotlinx.coroutines.delay].
  */
-object DefaultClock : CordisClock {
+public object DefaultClock : CordisClock {
     private val startMark = TimeSource.Monotonic.markNow()
 
     override val now: Duration

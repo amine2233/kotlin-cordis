@@ -31,11 +31,11 @@ import kotlin.coroutines.CoroutineContext
  * Anything registered that way is automatically undone when the plugin is unloaded
  * or restarted — you never write a matching "unregister" by hand.
  */
-interface Plugin<C> {
-    val name: String get() = this::class.simpleName ?: "Plugin"
-    val inject: Inject get() = Inject.NONE
+public interface Plugin<C> {
+    public val name: String get() = this::class.simpleName ?: "Plugin"
+    public val inject: Inject get() = Inject.NONE
 
-    suspend fun apply(
+    public suspend fun apply(
         ctx: Context,
         config: C,
     )
@@ -45,23 +45,23 @@ interface Plugin<C> {
      * `update` tears anything down; throw to reject it.
      * Throwing on load marks the plugin `Failed` and emits `PluginFailed` without calling `apply`.
      */
-    fun validate(config: C) {}
+    public fun validate(config: C) {}
 }
 
 /**
  * Result of [PluginHandle.update]: whether the new config was accepted for application.
  */
-sealed class UpdateOutcome {
+public sealed class UpdateOutcome {
     /** The config passed validation and was applied; read `status` for the apply result. */
-    data object Applied : UpdateOutcome()
+    public data object Applied : UpdateOutcome()
 
     /** Validation threw; the running instance was left untouched. */
-    data class Rejected(
+    public data class Rejected(
         val error: Throwable,
     ) : UpdateOutcome()
 
     /** The plugin is active and the config equals the last applied one, so nothing was restarted. */
-    data object Unchanged : UpdateOutcome()
+    public data object Unchanged : UpdateOutcome()
 }
 
 /**
@@ -69,31 +69,31 @@ sealed class UpdateOutcome {
  * It owns a reactive lifecycle: pending → loading → active, and back,
  * driven by the availability of its injected services.
  */
-class Fork(
-    val name: String,
-    val inject: Inject,
-    val parent: Context,
+public class Fork internal constructor(
+    public val name: String,
+    public val inject: Inject,
+    public val parent: Context,
     private var config: Any? = null,
     private var body: suspend (Context) -> Unit,
 ) {
-    sealed class Status {
-        data object Pending : Status()
+    public sealed class Status {
+        public data object Pending : Status()
 
-        data object Loading : Status()
+        public data object Loading : Status()
 
-        data object Active : Status()
+        public data object Active : Status()
 
-        data class Failed(
+        public data class Failed(
             val reason: String,
         ) : Status()
 
-        data object Disposed : Status()
+        public data object Disposed : Status()
     }
 
-    val id: PluginId = PluginId(this)
+    public val id: PluginId = PluginId(this)
     private val statusState = MutableStateFlow<Status>(Status.Pending)
-    val statusFlow: StateFlow<Status> = statusState.asStateFlow()
-    val status: Status get() = statusState.value
+    public val statusFlow: StateFlow<Status> = statusState.asStateFlow()
+    public val status: Status get() = statusState.value
 
     private val registry: Registry = parent.registry
     private var appliedConfig: Any? = null
@@ -120,7 +120,7 @@ class Fork(
     // MARK: Reactive core
 
     /** Does this fork react to changes on [slot]? */
-    fun dependsOn(slot: Slot): Boolean = inject.all.any { parent.slot(it) == slot }
+    public fun dependsOn(slot: Slot): Boolean = inject.all.any { parent.slot(it) == slot }
 
     /**
      * Current occurrences of every injected slot, or null if a required one is missing.
@@ -321,24 +321,24 @@ private class ApplyMarker(
 /**
  * Typed handle returned by `ctx.plugin(...)`.
  */
-class PluginHandle<C>(
-    val fork: Fork,
+public class PluginHandle<C>(
+    public val fork: Fork,
     private val plugin: Plugin<C>,
 ) {
-    val status: Fork.Status
+    public val status: Fork.Status
         get() = fork.status
 
     /**
      * Suspends until the plugin leaves Pending / Loading; returns Active, Failed or Disposed.
      * Must not be called from the plugin's own `apply`, which would wait on itself.
      */
-    suspend fun awaitActive(): Fork.Status = fork.statusFlow.first { it !is Fork.Status.Pending && it !is Fork.Status.Loading }
+    public suspend fun awaitActive(): Fork.Status = fork.statusFlow.first { it !is Fork.Status.Pending && it !is Fork.Status.Loading }
 
     /**
      * Hot-reconfigure: validates the config, then tears the plugin down and re-applies it.
      * A no-op (`Unchanged`) when the plugin is active and config equals the last applied one.
      */
-    suspend fun update(config: C): UpdateOutcome {
+    public suspend fun update(config: C): UpdateOutcome {
         try {
             plugin.validate(config)
         } catch (t: Throwable) {
@@ -356,7 +356,7 @@ class PluginHandle<C>(
     /**
      * Hot-unload: every side effect of this plugin (and its sub-plugins) is rolled back.
      */
-    suspend fun dispose() {
+    public suspend fun dispose() {
         fork.parent.registry.lifecycle {
             fork.dispose()
         }
