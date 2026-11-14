@@ -21,7 +21,7 @@ In Swift, concurrency was managed via a single `@CordisActor`. In Kotlin Multipl
 | `Registry.kt` | `Registry` (internal to the kernel) | Per-graph state: slots with generation counters, live forks, event listeners, zones. |
 | `Plugin.kt` | `Plugin`, `Fork`, `PluginHandle`, `UpdateOutcome` | Plugin definition and its reactive lifecycle (`Pending`, `Loading`, `Active`, `Failed`, `Disposed`). |
 | `Context.kt` | `Context` | The primary API plugins interact with: service lookup, provision, events, isolation, interceptors. |
-| `Snapshot.kt` | `RuntimeSnapshot`, `PluginInfo`, `SlotInfo` | Read-only point-in-time snapshot of the graph structure and statuses. |
+| `Snapshot.kt` | `RuntimeSnapshot`, `PluginInfo`, `SlotInfo`, `PluginId`, `PluginKey` | Read-only point-in-time snapshot of the graph structure and statuses, also published live through `Context.snapshotFlow()`. |
 
 ## 3. Reactivity and Cascade Reconciler
 
@@ -78,6 +78,9 @@ A `Slot` is the combination of `(ServiceId, Realm)`.
 - `Disposed` is terminal: once a fork is `Disposed`, no further status change or `PluginFailed` is emitted for it. Disposing a fork while its `apply` is suspended cancels that `apply`, waits for its rollback and ends in `Disposed`.
 - Root `Context.dispose()` tears the graph down children first, then cancels the graph's coroutine scope (`Registry.coroutineScope`), so every `ctx.launch` job and timer stops. A second `dispose()` is a no-op.
 - Neither `ListenerFailed` nor `TaskFailed` changes plugin status: the plugin stays `Active`. Only a throwing `apply` or a config rejected by `validate` on load yields `Failed` and `PluginFailed`.
+- `PluginKey` is an optional, stable identifier a plugin declares with `override val pluginKey = PluginKey("db")` (or the `key` parameter of the lambda `ctx.plugin(name, inject, key) { }`). It is never derived from `name` or the class name, so it survives R8 obfuscation, and it is not unique: every application of the plugin carries it. It appears as `PluginInfo.key`, as `SlotInfo.providerKey` and as the `key` of `PluginStatusChanged`, `PluginFailed` and `TeardownFailed` (`null` for the root and for plugins without a key).
+- `PluginInfo.inject` is the fork's declared `Inject`, and `PluginInfo.missing` lists the required services whose slot (in the fork's own realms) has no provider right now, in declaration order. Optional services never appear in it, and a service the fork provides itself counts as present, so an empty `missing` means the plugin is not blocked on dependencies.
+- `Context.snapshotFlow()` is one `StateFlow<RuntimeSnapshot>` per graph, shared by every context and ignoring zones. The registry republishes `snapshot()` on each registration, removal, provide, withdraw and status change, before the matching event is emitted; in-place `update` / `replaceValue` do not republish.
 
 ## 9. Timer Effects (`cordis`)
 

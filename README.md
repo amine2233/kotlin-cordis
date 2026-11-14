@@ -130,6 +130,7 @@ app.plugin("metrics", Inject.of(required = listOf(LoggerKey))) { ctx ->
 // Flows: UI binding (e.g. Compose: collectAsState)
 val signups: Flow<UserSignedUp> = app.events<UserSignedUp>()
 val db: Flow<Database?> = app.serviceFlow(DatabaseKey)   // current value, then each provide/withdraw
+val graph: StateFlow<RuntimeSnapshot> = app.snapshotFlow() // live snapshot(): plugins (key, status, missing) and slots
 // Both flows complete normally when their context is disposed.
 
 // Await a plugin that may still be waiting for dependencies

@@ -71,7 +71,7 @@ get("/healthz") {
     call.respond(if (ok) HttpStatusCode.OK else HttpStatusCode.ServiceUnavailable, plugins.map { "${it.name}: ${it.status}" })
 }
 ```
-`RuntimeSnapshot` is marked provisional (`PluginInfo`: id, name, status, parent), so keep this behind one helper.
+`RuntimeSnapshot` is marked provisional (`PluginInfo`: id, name, status, parent, key, inject, missing), so keep this behind one helper.
 
 ## Hot reload of config without restarting the server
 

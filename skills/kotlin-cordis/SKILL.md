@@ -66,6 +66,8 @@ Reading and reacting:
 - `ctx.serviceFlow(Key): Flow<T?>` — current value, then each provide/withdraw. `replaceValue` / `update` (in place) emit nothing.
 - `ctx.events<E>(): Flow<E>`; emit with `ctx.emit(event)`; events implement `CordisEvent`.
 - Both `events()` and `serviceFlow()` complete normally when their context is disposed.
+- `ctx.snapshotFlow(): StateFlow<RuntimeSnapshot>` — the live `snapshot()` of the whole graph (same instance from every context, ignores zones), updated before the matching event. `PluginInfo.missing` lists the required services a plugin is waiting for.
+- Give a plugin a stable, obfuscation-proof identity with `override val pluginKey = PluginKey("db")` (lambda plugins: `ctx.plugin("db", key = PluginKey("db")) { }`). It is optional and not unique, and shows up as `PluginInfo.key`, `SlotInfo.providerKey` and the `key` of the plugin events.
 - Built-in events: `ServiceChanged`, `PluginStatusChanged`, `PluginFailed`, `TeardownFailed`, `ListenerFailed`, `TaskFailed`.
 
 Space and routing: `ctx.isolate(Key, label)` gives a child where `Key` resolves to a separate instance (same label = shared);
