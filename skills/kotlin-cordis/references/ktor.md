@@ -80,24 +80,27 @@ handler does not run, so turning a provider off with the runtime hides the route
 ## Admin routes
 
 ```kotlin
-authenticate("admin") {                                // host-supplied auth: cordisAdmin has none
-    route("/admin") { cordisAdmin(checkNotNull(application.cordisRuntime)) }
+authenticate("admin") {                                // host-supplied auth: cordisAdmin and cordisSnapshot have none
+    route("/admin") {
+        cordisAdmin(checkNotNull(application.cordisRuntime))
+        cordisSnapshot(application.cordis)
+    }
 }
 ```
 `GET plugins` lists every `PluginState` as JSON (`key`, `metadata`, `enabled`, `status`, `error`, `missing`);
 `PUT plugins/{key}` with `{"enabled": false}` toggles one and returns its new state. Refusals: 400 malformed body,
 404 unknown key, 409 locked entry, 503 runtime not started. No `ContentNegotiation` is needed.
 
+`cordisSnapshot(context)` is read-only and needs no runtime. Each request takes a fresh `context.snapshot()` and a new
+visitor: `GET snapshot/tree` (`TextTreeVisitor`) and `GET snapshot/mermaid` (`MermaidVisitor`) answer `text/plain`;
+`GET health` (`HealthVisitor`) answers `{"healthy", "failed", "missingServices", "pending"}`, each item
+`{"name", "key", "status", "reason", "missing"}`, with 200 when healthy and 503 otherwise.
+
 ## Health endpoint from the snapshot
 
-```kotlin
-get("/healthz") {
-    val plugins = call.application.cordis.snapshot().plugins
-    val ok = plugins.all { it.status is Fork.Status.Active }
-    call.respond(if (ok) HttpStatusCode.OK else HttpStatusCode.ServiceUnavailable, plugins.map { "${it.name}: ${it.status}" })
-}
-```
-`RuntimeSnapshot` is marked provisional (`PluginInfo`: id, name, status, parent, key, inject, missing), so keep this behind one helper.
+Use the built-in `health` route of `cordisSnapshot` (see Admin routes) instead of a hand-written one: it answers 503
+with the failed, missing-service and pending plugins. Mount it behind the host's auth, since it exposes plugin names,
+keys and failure reasons.
 
 ## Hot reload of config without restarting the server
 
@@ -121,7 +124,7 @@ tenant.plugin(DbPlugin, DbConfig(tenantUrl))
 
 ## Pitfalls
 - `install(Cordis)` starts the runtime with `runBlocking` at install time, so it blocks startup — keep `apply` quick; start I/O with `ctx.launch`.
-- `cordisAdmin` has no authentication or authorization: always mount it behind the host's own auth.
+- `cordisAdmin` and `cordisSnapshot` have no authentication or authorization: always mount them behind the host's own auth.
 - Install `Cordis` once per `Application`; a second `install` fails with Ktor's duplicate-plugin error.
 - Never use `call.application` coroutine scope for plugin work; use `ctx.launch` so shutdown cancels it.
 - Tests: `testApplication { application { module() } … }`; or test plugins alone with `withTestApp`.
