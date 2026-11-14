@@ -31,7 +31,7 @@ with spatiotemporal composability), ported from `swift-cordis`.
 - Visibility: the library modules build in strict explicit API mode (`explicitApi()`, set in the `cordis.kmp-library` convention plugin), so every public declaration needs an explicit `public` modifier and, where required, an explicit type. Kernel internals (`Registry`, `Context.registry`, the `Fork` constructor) are `internal`. `@InternalCordisApi` (`cordis.kernel`) is the opt-in marker for anything that has to stay visible across modules but is not public API.
 - Concurrency: `provide`/`update`/`replaceValue`/`contribute`/`plugin`/`effect`/`emit`/`dispose` and `PluginHandle.update`/`dispose` run on the graph's serialized single-threaded CoroutineDispatcher (`Context.root()`); `on`/`onDispose`/`launch`/`contributions`, the contribution `Disposable`, `Disposable` and `Scope` bookkeeping are lock-guarded and callable from any thread; `zone`/`isolate` are not yet thread-safe (see `docs/ARCHITECTURE.md`). Plugin lifecycle operations (`plugin`/`provide`/`dispose`, `PluginHandle.update`/`dispose`) run in a graph-owned job: cancelling the caller only stops its wait, and nested calls run inline.
 - Modules:
-  - `cordis-kernel`: Zero-dependency kernel (pure Kotlin + kotlinx-coroutines).
+  - `cordis-kernel`: Zero-dependency kernel (pure Kotlin + kotlinx-coroutines). `SnapshotVisitor` / `RuntimeSnapshot.accept` walk the plugin tree depth-first, with the built-in `TextTreeVisitor`, `MermaidVisitor` and `HealthVisitor`.
   - `cordis`: Public convenience API, `ServicePlugin`, timer effects (`after`, `every`).
   - `cordis-loader`: Declarative JSON loading with `kotlinx-serialization`.
   - `cordis-testing`: `ManualClock`, `settle`, `withTestApp`.

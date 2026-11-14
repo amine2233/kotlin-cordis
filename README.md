@@ -27,7 +27,7 @@ Cordis' core idea: **everything is a plugin**, and plugins compose along two ort
 
 | Module | Purpose | Platforms | Published |
 |---|---|---|---|
-| `cordis-kernel` | `Scope`, `Fork`, `Context`, `ServiceKey`, `Inject`, events, zones, intercept layers, snapshots. Zero sugar. | All KMP targets | Yes |
+| `cordis-kernel` | `Scope`, `Fork`, `Context`, `ServiceKey`, `Inject`, events, zones, intercept layers, snapshots, snapshot visitors. Zero sugar. | All KMP targets | Yes |
 | `cordis` | Re-exports the kernel and adds `ServicePlugin` and timer effects (`ctx.after`, `ctx.every`). | All KMP targets | Yes |
 | `cordis-loader` | Declarative JSON load-plan loader (`LoadPlan`, `PluginFactoryRegistry`, `Context.load`) with `kotlinx.serialization`. | All KMP targets | Yes |
 | `cordis-testing` | Test support module (`ManualClock`, `settle(until = ...)`, `withTestApp`, `RecordedEvents`). | All KMP targets | Yes |
@@ -214,6 +214,11 @@ val signups: Flow<UserSignedUp> = app.events<UserSignedUp>()
 val db: Flow<Database?> = app.serviceFlow(DatabaseKey)   // current value, then each provide/withdraw
 val graph: StateFlow<RuntimeSnapshot> = app.snapshotFlow() // live snapshot(): plugins (key, status, missing) and slots
 // events() and serviceFlow() complete normally when their context is disposed; snapshotFlow() never completes.
+
+// SnapshotVisitor: walk the plugin tree depth-first (also MermaidVisitor().render() and HealthVisitor().report())
+val tree = TextTreeVisitor()
+app.snapshot().accept(tree)
+println(tree.render())                                   // ├─ db [Active] / │  └─ repo [Pending] missing: LoggerKey
 
 // Await a plugin that may still be waiting for dependencies
 val status = app.plugin(Repo).awaitActive()              // Active | Failed | Disposed
