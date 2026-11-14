@@ -8,6 +8,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.concurrent.Volatile
@@ -68,6 +71,7 @@ internal class Registry(
         val owner: Context,
         val ownerName: String,
         val fork: PluginId?, // providing Fork (null = root)
+        val forkKey: PluginKey?,
         val generation: Int,
         val occurrence: OccurrenceId,
     )
@@ -125,10 +129,12 @@ internal class Registry(
                 owner = by,
                 ownerName = by.name,
                 fork = by.fork?.id,
+                forkKey = by.fork?.key,
                 generation = generation,
                 occurrence = OccurrenceId(occurrenceCounter),
             )
         slots = newSlots
+        publishSnapshot()
         changed(slot, isAvailable = true, fork = by.fork?.id)
     }
 
@@ -162,6 +168,7 @@ internal class Registry(
                 owner = entry.owner,
                 ownerName = entry.ownerName,
                 fork = entry.fork,
+                forkKey = entry.forkKey,
                 generation = entry.generation,
                 occurrence = entry.occurrence,
             )
@@ -181,6 +188,7 @@ internal class Registry(
         val newSlots = slots.toMutableMap()
         newSlots.remove(slot)
         slots = newSlots
+        publishSnapshot()
         changed(slot, isAvailable = false, fork = fork)
     }
 
@@ -216,6 +224,7 @@ internal class Registry(
         val newForks = forks.toMutableMap()
         newForks[fork.id] = fork
         forks = newForks
+        publishSnapshot()
     }
 
     fun unregister(fork: Fork) {
@@ -226,6 +235,7 @@ internal class Registry(
         val newOrder = forkOrder.toMutableMap()
         newOrder.remove(fork.id)
         forkOrder = newOrder
+        publishSnapshot()
     }
 
     fun snapshot(): RuntimeSnapshot {
@@ -238,6 +248,9 @@ internal class Registry(
                         name = fork.name,
                         status = fork.status,
                         parent = fork.parent.fork?.id,
+                        key = fork.key,
+                        inject = fork.inject,
+                        missing = fork.inject.required.filter { slots[fork.parent.slot(it)] == null },
                     )
                 }
         val slotInfos =
@@ -249,9 +262,17 @@ internal class Registry(
                         realm = slot.realm,
                         provider = entry.fork,
                         generation = entry.generation,
+                        providerKey = entry.forkKey,
                     )
                 }
         return RuntimeSnapshot(plugins = plugins, slots = slotInfos)
+    }
+
+    private val snapshotState = MutableStateFlow(RuntimeSnapshot(plugins = emptyList(), slots = emptyList()))
+    val snapshotFlow: StateFlow<RuntimeSnapshot> = snapshotState.asStateFlow()
+
+    fun publishSnapshot() {
+        snapshotState.value = snapshot()
     }
 
     // MARK: Events

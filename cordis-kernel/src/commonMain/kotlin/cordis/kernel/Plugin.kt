@@ -34,6 +34,7 @@ import kotlin.coroutines.CoroutineContext
 public interface Plugin<C> {
     public val name: String get() = this::class.simpleName ?: "Plugin"
     public val inject: Inject get() = Inject.NONE
+    public val pluginKey: PluginKey? get() = null
 
     public suspend fun apply(
         ctx: Context,
@@ -73,6 +74,7 @@ public class Fork internal constructor(
     public val name: String,
     public val inject: Inject,
     public val parent: Context,
+    public val key: PluginKey? = null,
     private var config: Any? = null,
     private var body: suspend (Context) -> Unit,
 ) {
@@ -193,7 +195,7 @@ public class Fork internal constructor(
         val scope =
             Scope(
                 failureHandler = { error ->
-                    registry.emit(TeardownFailed(plugin = name, error = error))
+                    registry.emit(TeardownFailed(plugin = name, error = error, key = key))
                 },
                 coroutineScope = registry.lifecycleScope,
             )
@@ -235,7 +237,7 @@ public class Fork internal constructor(
                 stop()
                 if (!isDisposing) {
                     setStatus(Status.Failed(t.message ?: t.toString()))
-                    parent.emit(PluginFailed(plugin = name, error = t))
+                    parent.emit(PluginFailed(plugin = name, error = t, key = key))
                 }
             }
         } finally {
@@ -252,7 +254,8 @@ public class Fork internal constructor(
     private suspend fun setStatus(newStatus: Status) {
         if (newStatus == status || status == Status.Disposed) return
         statusState.value = newStatus
-        parent.emit(PluginStatusChanged(plugin = name, status = newStatus))
+        registry.publishSnapshot()
+        parent.emit(PluginStatusChanged(plugin = name, status = newStatus, key = key))
     }
 
     // MARK: Public controls
@@ -282,7 +285,7 @@ public class Fork internal constructor(
     internal suspend fun reject(error: Throwable) {
         isRejected = true
         setStatus(Status.Failed(error.message ?: error.toString()))
-        parent.emit(PluginFailed(plugin = name, error = error))
+        parent.emit(PluginFailed(plugin = name, error = error, key = key))
     }
 
     /**
