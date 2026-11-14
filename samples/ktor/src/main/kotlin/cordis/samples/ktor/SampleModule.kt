@@ -1,8 +1,10 @@
 package cordis.samples.ktor
 
 import cordis.ktor.Cordis
+import cordis.ktor.cordis
 import cordis.ktor.cordisAdmin
 import cordis.ktor.cordisRuntime
+import cordis.ktor.cordisSnapshot
 import cordis.ktor.requireService
 import cordis.runtime.PluginRuntime
 import cordis.runtime.PluginRuntimeDefault
@@ -39,7 +41,7 @@ private data class WeatherResponse(
 )
 
 /**
- * Runs the sample catalog with toggles persisted in [storeFile], and mounts the feature, admin and event routes.
+ * Runs the sample catalog with toggles persisted in [storeFile], and mounts the feature, admin, snapshot and event routes.
  */
 fun Application.sampleModule(storeFile: Path) {
     install(Cordis) {
@@ -55,6 +57,7 @@ fun Application.sampleModule(storeFile: Path) {
         route("/admin") {
             get { call.respondText(adminPage, ContentType.Text.Html) }
             cordisAdmin(runtime)
+            cordisSnapshot(cordis)
             pluginEvents(runtime)
         }
     }
