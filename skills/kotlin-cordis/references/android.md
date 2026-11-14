@@ -1,6 +1,25 @@
 # Android / Compose
 
-kotlin-cordis has no Android target; an Android module consumes the **JVM variant** (Gradle resolves it automatically from the KMP metadata). Add the GitHub Packages repo + `implementation("io.github.amine2233:cordis:<version>")`.
+The KMP modules have no Android target; an Android module consumes their **JVM variant** (Gradle resolves it automatically from the KMP metadata). Add the GitHub Packages repo + `implementation("io.github.amine2233:cordis:<version>")`.
+
+For Android-specific glue use `cordis-android` (foreground bridge, DataStore-backed `EnabledPluginsStore`). It is not published yet: consume it as a project dependency, `implementation(project(":cordis-android"))`, in a build that has an Android SDK.
+
+## Foreground bridge
+
+`installAppForeground()` provides `AppForegroundKey` while `ProcessLifecycleOwner` is at least `STARTED` and withdraws it in the background, so plugins that require it pause and resume with the app. Dispose the returned handle to stop it.
+```kotlin
+cordis.installAppForeground()                                 // or installAppForeground(owner) with any LifecycleOwner
+cordis.plugin(LiveSyncPlugin)                                  // Inject.of(required = listOf(AppForegroundKey))
+```
+
+## Persisted enable/disable overrides
+
+`DataStoreEnabledPluginsStore` stores `PluginRuntimeDefault` overrides as `cordis.enabled.<key>` booleans in a Preferences `DataStore`; other preferences in it are left alone.
+```kotlin
+val Context.cordisPrefs by preferencesDataStore(name = "cordis")   // android.content.Context
+val runtime = PluginRuntimeDefault(cordis, catalog, DataStoreEnabledPluginsStore(applicationContext.cordisPrefs))
+runtime.start()
+```
 
 ## One root per process
 
