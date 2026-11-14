@@ -19,14 +19,15 @@ public final class cordis/kernel/Context {
 	public final fun onDispose (Lkotlin/jvm/functions/Function1;)Lcordis/kernel/Disposable;
 	public final fun plugin (Lcordis/kernel/Plugin;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun plugin (Lcordis/kernel/Plugin;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun plugin (Ljava/lang/String;Lcordis/kernel/Inject;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun plugin$default (Lcordis/kernel/Context;Ljava/lang/String;Lcordis/kernel/Inject;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun plugin-SoiJ_6g (Ljava/lang/String;Lcordis/kernel/Inject;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun plugin-SoiJ_6g$default (Lcordis/kernel/Context;Ljava/lang/String;Lcordis/kernel/Inject;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun provide (Lcordis/kernel/ServiceKey;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun replaceValue (Lcordis/kernel/ServiceKey;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun require (Lcordis/kernel/ServiceKey;)Ljava/lang/Object;
 	public final fun serviceFlow (Lcordis/kernel/ServiceKey;)Lkotlinx/coroutines/flow/Flow;
 	public final fun slot (Lcordis/kernel/ServiceId;)Lcordis/kernel/Slot;
 	public final fun snapshot ()Lcordis/kernel/RuntimeSnapshot;
+	public final fun snapshotFlow ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun update (Lcordis/kernel/ServiceKey;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun zone (Ljava/lang/String;)Lcordis/kernel/Context;
 }
@@ -82,9 +83,11 @@ public final class cordis/kernel/Disposable {
 }
 
 public final class cordis/kernel/Fork {
+	public synthetic fun <init> (Ljava/lang/String;Lcordis/kernel/Inject;Lcordis/kernel/Context;Ljava/lang/String;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun dependsOn (Lcordis/kernel/Slot;)Z
 	public final fun getId ()Lcordis/kernel/PluginId;
 	public final fun getInject ()Lcordis/kernel/Inject;
+	public final fun getKey-7FvoLxY ()Ljava/lang/String;
 	public final fun getName ()Ljava/lang/String;
 	public final fun getParent ()Lcordis/kernel/Context;
 	public final fun getStatus ()Lcordis/kernel/Fork$Status;
@@ -187,23 +190,28 @@ public abstract interface class cordis/kernel/Plugin {
 	public abstract fun apply (Lcordis/kernel/Context;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun getInject ()Lcordis/kernel/Inject;
 	public fun getName ()Ljava/lang/String;
+	public fun getPluginKey-7FvoLxY ()Ljava/lang/String;
 	public fun validate (Ljava/lang/Object;)V
 }
 
 public final class cordis/kernel/Plugin$DefaultImpls {
 	public static fun getInject (Lcordis/kernel/Plugin;)Lcordis/kernel/Inject;
 	public static fun getName (Lcordis/kernel/Plugin;)Ljava/lang/String;
+	public static fun getPluginKey-7FvoLxY (Lcordis/kernel/Plugin;)Ljava/lang/String;
 	public static fun validate (Lcordis/kernel/Plugin;Ljava/lang/Object;)V
 }
 
 public final class cordis/kernel/PluginFailed : cordis/kernel/CordisEvent {
-	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/Throwable;
-	public final fun copy (Ljava/lang/String;Ljava/lang/Throwable;)Lcordis/kernel/PluginFailed;
-	public static synthetic fun copy$default (Lcordis/kernel/PluginFailed;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)Lcordis/kernel/PluginFailed;
+	public final fun component3-7FvoLxY ()Ljava/lang/String;
+	public final fun copy-W-5eHYg (Ljava/lang/String;Ljava/lang/Throwable;Ljava/lang/String;)Lcordis/kernel/PluginFailed;
+	public static synthetic fun copy-W-5eHYg$default (Lcordis/kernel/PluginFailed;Ljava/lang/String;Ljava/lang/Throwable;Ljava/lang/String;ILjava/lang/Object;)Lcordis/kernel/PluginFailed;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getError ()Ljava/lang/Throwable;
+	public final fun getKey-7FvoLxY ()Ljava/lang/String;
 	public final fun getPlugin ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -230,15 +238,21 @@ public final class cordis/kernel/PluginId {
 }
 
 public final class cordis/kernel/PluginInfo {
-	public fun <init> (Lcordis/kernel/PluginId;Ljava/lang/String;Lcordis/kernel/Fork$Status;Lcordis/kernel/PluginId;)V
+	public synthetic fun <init> (Lcordis/kernel/PluginId;Ljava/lang/String;Lcordis/kernel/Fork$Status;Lcordis/kernel/PluginId;Ljava/lang/String;Lcordis/kernel/Inject;Ljava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lcordis/kernel/PluginId;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Lcordis/kernel/Fork$Status;
 	public final fun component4 ()Lcordis/kernel/PluginId;
-	public final fun copy (Lcordis/kernel/PluginId;Ljava/lang/String;Lcordis/kernel/Fork$Status;Lcordis/kernel/PluginId;)Lcordis/kernel/PluginInfo;
-	public static synthetic fun copy$default (Lcordis/kernel/PluginInfo;Lcordis/kernel/PluginId;Ljava/lang/String;Lcordis/kernel/Fork$Status;Lcordis/kernel/PluginId;ILjava/lang/Object;)Lcordis/kernel/PluginInfo;
+	public final fun component5-7FvoLxY ()Ljava/lang/String;
+	public final fun component6 ()Lcordis/kernel/Inject;
+	public final fun component7 ()Ljava/util/List;
+	public final fun copy-tYEIhx4 (Lcordis/kernel/PluginId;Ljava/lang/String;Lcordis/kernel/Fork$Status;Lcordis/kernel/PluginId;Ljava/lang/String;Lcordis/kernel/Inject;Ljava/util/List;)Lcordis/kernel/PluginInfo;
+	public static synthetic fun copy-tYEIhx4$default (Lcordis/kernel/PluginInfo;Lcordis/kernel/PluginId;Ljava/lang/String;Lcordis/kernel/Fork$Status;Lcordis/kernel/PluginId;Ljava/lang/String;Lcordis/kernel/Inject;Ljava/util/List;ILjava/lang/Object;)Lcordis/kernel/PluginInfo;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getId ()Lcordis/kernel/PluginId;
+	public final fun getInject ()Lcordis/kernel/Inject;
+	public final fun getKey-7FvoLxY ()Ljava/lang/String;
+	public final fun getMissing ()Ljava/util/List;
 	public final fun getName ()Ljava/lang/String;
 	public final fun getParent ()Lcordis/kernel/PluginId;
 	public final fun getStatus ()Lcordis/kernel/Fork$Status;
@@ -246,13 +260,30 @@ public final class cordis/kernel/PluginInfo {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class cordis/kernel/PluginKey {
+	public static final synthetic fun box-impl (Ljava/lang/String;)Lcordis/kernel/PluginKey;
+	public static fun constructor-impl (Ljava/lang/String;)Ljava/lang/String;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (Ljava/lang/String;Ljava/lang/Object;)Z
+	public static final fun equals-impl0 (Ljava/lang/String;Ljava/lang/String;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public static fun hashCode-impl (Ljava/lang/String;)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (Ljava/lang/String;)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()Ljava/lang/String;
+}
+
 public final class cordis/kernel/PluginStatusChanged : cordis/kernel/CordisEvent {
-	public fun <init> (Ljava/lang/String;Lcordis/kernel/Fork$Status;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcordis/kernel/Fork$Status;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcordis/kernel/Fork$Status;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lcordis/kernel/Fork$Status;
-	public final fun copy (Ljava/lang/String;Lcordis/kernel/Fork$Status;)Lcordis/kernel/PluginStatusChanged;
-	public static synthetic fun copy$default (Lcordis/kernel/PluginStatusChanged;Ljava/lang/String;Lcordis/kernel/Fork$Status;ILjava/lang/Object;)Lcordis/kernel/PluginStatusChanged;
+	public final fun component3-7FvoLxY ()Ljava/lang/String;
+	public final fun copy-W-5eHYg (Ljava/lang/String;Lcordis/kernel/Fork$Status;Ljava/lang/String;)Lcordis/kernel/PluginStatusChanged;
+	public static synthetic fun copy-W-5eHYg$default (Lcordis/kernel/PluginStatusChanged;Ljava/lang/String;Lcordis/kernel/Fork$Status;Ljava/lang/String;ILjava/lang/Object;)Lcordis/kernel/PluginStatusChanged;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getKey-7FvoLxY ()Ljava/lang/String;
 	public final fun getPlugin ()Ljava/lang/String;
 	public final fun getStatus ()Lcordis/kernel/Fork$Status;
 	public fun hashCode ()I
@@ -342,16 +373,18 @@ public final class cordis/kernel/Slot$Companion {
 }
 
 public final class cordis/kernel/SlotInfo {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lcordis/kernel/PluginId;I)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lcordis/kernel/PluginId;ILjava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Lcordis/kernel/PluginId;
 	public final fun component4 ()I
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lcordis/kernel/PluginId;I)Lcordis/kernel/SlotInfo;
-	public static synthetic fun copy$default (Lcordis/kernel/SlotInfo;Ljava/lang/String;Ljava/lang/String;Lcordis/kernel/PluginId;IILjava/lang/Object;)Lcordis/kernel/SlotInfo;
+	public final fun component5-7FvoLxY ()Ljava/lang/String;
+	public final fun copy-zseVy3Y (Ljava/lang/String;Ljava/lang/String;Lcordis/kernel/PluginId;ILjava/lang/String;)Lcordis/kernel/SlotInfo;
+	public static synthetic fun copy-zseVy3Y$default (Lcordis/kernel/SlotInfo;Ljava/lang/String;Ljava/lang/String;Lcordis/kernel/PluginId;ILjava/lang/String;ILjava/lang/Object;)Lcordis/kernel/SlotInfo;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getGeneration ()I
 	public final fun getProvider ()Lcordis/kernel/PluginId;
+	public final fun getProviderKey-7FvoLxY ()Ljava/lang/String;
 	public final fun getRealm ()Ljava/lang/String;
 	public final fun getService ()Ljava/lang/String;
 	public fun hashCode ()I
@@ -372,13 +405,16 @@ public final class cordis/kernel/TaskFailed : cordis/kernel/CordisEvent {
 }
 
 public final class cordis/kernel/TeardownFailed : cordis/kernel/CordisEvent {
-	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/Throwable;
-	public final fun copy (Ljava/lang/String;Ljava/lang/Throwable;)Lcordis/kernel/TeardownFailed;
-	public static synthetic fun copy$default (Lcordis/kernel/TeardownFailed;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)Lcordis/kernel/TeardownFailed;
+	public final fun component3-7FvoLxY ()Ljava/lang/String;
+	public final fun copy-W-5eHYg (Ljava/lang/String;Ljava/lang/Throwable;Ljava/lang/String;)Lcordis/kernel/TeardownFailed;
+	public static synthetic fun copy-W-5eHYg$default (Lcordis/kernel/TeardownFailed;Ljava/lang/String;Ljava/lang/Throwable;Ljava/lang/String;ILjava/lang/Object;)Lcordis/kernel/TeardownFailed;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getError ()Ljava/lang/Throwable;
+	public final fun getKey-7FvoLxY ()Ljava/lang/String;
 	public final fun getPlugin ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;

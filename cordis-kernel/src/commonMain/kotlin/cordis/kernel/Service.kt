@@ -113,6 +113,7 @@ public data class ServiceChanged(
 public data class PluginFailed(
     val plugin: String,
     val error: Throwable,
+    val key: PluginKey? = null,
 ) : CordisEvent
 
 /**
@@ -122,6 +123,7 @@ public data class PluginFailed(
 public data class TeardownFailed(
     val plugin: String,
     val error: Throwable,
+    val key: PluginKey? = null,
 ) : CordisEvent
 
 /**
@@ -153,4 +155,5 @@ public data class TaskFailed(
 public data class PluginStatusChanged(
     val plugin: String,
     val status: Fork.Status,
+    val key: PluginKey? = null,
 ) : CordisEvent

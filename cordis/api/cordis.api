@@ -9,6 +9,7 @@ public final class cordis/ServicePlugin$DefaultImpls {
 	public static fun apply (Lcordis/ServicePlugin;Lcordis/kernel/Context;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static fun getInject (Lcordis/ServicePlugin;)Lcordis/kernel/Inject;
 	public static fun getName (Lcordis/ServicePlugin;)Ljava/lang/String;
+	public static fun getPluginKey-7FvoLxY (Lcordis/ServicePlugin;)Ljava/lang/String;
 	public static fun validate (Lcordis/ServicePlugin;Ljava/lang/Object;)V
 }
 
@@ -30,6 +31,7 @@ public final class cordis/UnitServicePlugin$DefaultImpls {
 	public static fun apply (Lcordis/UnitServicePlugin;Lcordis/kernel/Context;Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static fun getInject (Lcordis/UnitServicePlugin;)Lcordis/kernel/Inject;
 	public static fun getName (Lcordis/UnitServicePlugin;)Ljava/lang/String;
+	public static fun getPluginKey-7FvoLxY (Lcordis/UnitServicePlugin;)Ljava/lang/String;
 	public static fun make (Lcordis/UnitServicePlugin;Lcordis/kernel/Context;Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static fun validate (Lcordis/UnitServicePlugin;Lkotlin/Unit;)V
 }

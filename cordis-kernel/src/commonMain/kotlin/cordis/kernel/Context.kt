@@ -11,6 +11,7 @@ import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
@@ -232,6 +233,7 @@ public class Context internal constructor(
                     name = plugin.name,
                     inject = plugin.inject,
                     parent = this@Context,
+                    key = plugin.pluginKey,
                     config = config,
                 ) { ctx ->
                     plugin.apply(ctx, config)
@@ -254,12 +256,14 @@ public class Context internal constructor(
     public suspend fun plugin(
         name: String,
         inject: Inject = Inject.NONE,
+        key: PluginKey? = null,
         apply: suspend (Context) -> Unit,
     ): PluginHandle<Unit> =
         plugin(
             object : Plugin<Unit> {
                 override val name = name
                 override val inject = inject
+                override val pluginKey = key
 
                 override suspend fun apply(
                     ctx: Context,
@@ -274,6 +278,13 @@ public class Context internal constructor(
      * Read-only view of the plugins and service slots of this graph.
      */
     public fun snapshot(): RuntimeSnapshot = registry.snapshot()
+
+    /**
+     * Live [snapshot] of the whole graph, shared by every context of it and ignoring zones.
+     * Republished on each registration, removal, status change, provide and withdraw, before the
+     * matching event is emitted; in-place [update] / [replaceValue] do not republish.
+     */
+    public fun snapshotFlow(): StateFlow<RuntimeSnapshot> = registry.snapshotFlow
 
     // MARK: Effects & events
 
