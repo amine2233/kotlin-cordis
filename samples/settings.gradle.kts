@@ -44,3 +44,4 @@ dependencyResolutionManagement {
 includeBuild("..")
 
 include("shared")
+include("ktor")

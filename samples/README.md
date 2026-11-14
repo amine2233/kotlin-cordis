@@ -43,6 +43,40 @@ The Android and Ktor sample apps are meant to:
 2. render `context.contributions(NavEntries)` as their navigation, and the runtime's `state` as a
    settings screen where every feature but the locked `logger` can be turned off.
 
+## `ktor`
+
+`samples/ktor` (package `cordis.samples.ktor`) is a Ktor 3 server (CIO engine) that runs a `PluginRuntimeDefault`
+over `sampleCatalog()` through `install(Cordis)`. All of its setup is `Application.sampleModule(storeFile)`.
+
+Run it from the repo root, then open <http://127.0.0.1:8080/admin>:
+
+```sh
+./gradlew -p samples :ktor:run
+```
+
+| Route | What it does |
+| --- | --- |
+| `GET /notes` | `200` with a JSON array of the notes; `503` while `notes` or `database` is off |
+| `POST /notes` | `{"text": "..."}` adds a note: `201`; `400` for a malformed body or blank text; `503` while `notes` is off |
+| `GET /weather` | `200` with `{"update": ..., "temperatureCelsius": ...}`; `503` while `weather` is off |
+| `GET /admin/plugins` | every plugin's state, in catalog order (`cordisAdmin`) |
+| `PUT /admin/plugins/{key}` | `{"enabled": <boolean>}` toggles a plugin: `400` / `404` / `409` (locked `logger`) / `503` |
+| `GET /admin/plugins/events` | server-sent events: the current plugin list on connect, then one event per state change |
+| `GET /admin` | a static HTML page that shows the plugins from the event stream, with a toggle per plugin |
+
+The toggles are saved in a JSON file mapping plugin key to boolean, e.g. `{"weather":false}`, so they survive a
+restart. It is `enabled-plugins.json` in the working directory (`samples/ktor/enabled-plugins.json` under
+`:ktor:run`, git-ignored), or the path in the `CORDIS_SAMPLE_STORE` environment variable when it is set.
+
+> **Local use only.** The admin routes and page have no authentication, authorization or CSRF protection: anyone
+> who can reach the server can turn features off. The server binds to `127.0.0.1` for that reason; do not expose it.
+
+Its tests alone:
+
+```sh
+./gradlew -p samples :ktor:check
+```
+
 ## Tests
 
 From the repo root:

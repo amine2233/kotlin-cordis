@@ -14,3 +14,4 @@ local.properties
 node_modules/
 /factory/jobs/
 /.worktrees/
+samples/ktor/enabled-plugins.json
