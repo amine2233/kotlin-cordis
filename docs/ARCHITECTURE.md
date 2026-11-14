@@ -91,10 +91,11 @@ A `Slot` is the combination of `(ServiceId, Realm)`.
 
 ## 10. Declarative Loading (`cordis-loader`)
 
-- `PluginRegistry` binds resolve keys (strings) to plugin singletons and their serializers.
-- `LoadPlan` defines a sequence of entries with keys, optional names, and serialized JSON configs.
+- `PluginFactoryRegistry` binds `PluginKey`s to plugin singletons and their config decoders. `register` takes an optional `key`; it defaults to the plugin's own `pluginKey`, and registering with neither throws `IllegalArgumentException`.
+- `LoadPlan` is `@Serializable`: a sequence of entries with a `PluginKey` (a plain JSON string), an optional name, and an optional `JsonElement` config. `LoadPlan.fromJson(text)` parses `{"entries":[...]}` strictly and throws `SerializationException` on malformed input.
+- A config registered with a serializer is decoded from the entry's `JsonElement`; a missing config decodes as `{}`, so a config type whose fields all have defaults loads with those defaults.
 - `plan.validate(against = registry)` validates all entries upfront: unknown keys, duplicate entry names, and JSON decoding errors are collected into `LoaderError`.
-- If validation finds any errors, `Context.load` aborts without loading any plugin.
+- `Context.load` returns one `LoadOutcome` per entry. If validation finds any errors it loads nothing: entries with errors are `Invalid(errors)` and the others `NotLoaded`. Otherwise each entry is `Loaded(handle)`, carrying the `PluginHandle` (`status`, `awaitActive`, `update`, `dispose`); a plugin that fails its own `validate` or `apply` is `Loaded` with a `Fork.Status.Failed` status.
 
 ## 11. Contribution Points
 

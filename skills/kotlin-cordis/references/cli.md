@@ -49,20 +49,22 @@ done.await()
 
 Let a JSON file choose which plugins run:
 ```jsonc
-// plugins.json  → LoadPlan.entries
-[{ "key": "http", "config": "{\"timeoutMs\":5000}" }, { "key": "export" }]
+// plugins.json  → LoadPlan
+{"entries":[{"key":"http","config":{"timeoutMs":5000}},{"key":"export"}]}
 ```
 ```kotlin
-val registry = PluginRegistry().apply {
-    register(HttpPlugin, key = "http", serializer = HttpConfig.serializer())
-    register(ExportPlugin, key = "export")
+val registry = PluginFactoryRegistry().apply {
+    register(HttpPlugin, serializer = HttpConfig.serializer(), key = PluginKey("http"))
+    register(ExportPlugin, key = PluginKey("export"))
 }
-val plan = Json.decodeFromString<LoadPlan>(File("plugins.json").readText())   // needs @Serializable on LoadPlan, else build entries by hand
+val plan = LoadPlan.fromJson(File("plugins.json").readText())   // throws SerializationException on a malformed file
 val errors = plan.validate(against = registry)
 if (errors.isNotEmpty()) { errors.forEach { System.err.println(it.message) }; exitProcess(64) }
-app.load(plan, registry).filter { it.status is Fork.Status.Failed }.forEach { /* report */ }
+app.load(plan, registry)
+    .filterIsInstance<LoadOutcome.Loaded>()
+    .filter { it.status is Fork.Status.Failed }
+    .forEach { /* report */ }
 ```
-`LoadPlan` is not annotated `@Serializable` in this repo: either parse your own file shape and map to `LoadPlan.Entry`, or use the `loadPlan { }` builder.
 
 ## Pitfalls
 - Exit codes: map `Fork.Status.Failed` / `LoaderError` to non-zero explicitly; plugin failures do not throw out of `ctx.plugin`.
