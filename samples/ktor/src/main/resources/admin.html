@@ -14,6 +14,17 @@
   th, td { text-align: left; padding: 0.5rem; border-bottom: 1px solid #ddd; vertical-align: top; }
   .description { color: #555; font-size: 0.9rem; }
   .error { color: #a00; }
+  @media (max-width: 480px) {
+    thead { display: none; }
+    tr { display: flex; flex-wrap: wrap; align-items: center; border-bottom: 1px solid #ddd; padding: 0.5rem 0; }
+    td { border-bottom: none; padding: 0.25rem 0.5rem; }
+    td:nth-child(1) { order: 1; }
+    td:nth-child(3) { order: 2; }
+    td:nth-child(3)::before { content: "Status: "; color: #555; }
+    td:nth-child(2) { order: 3; flex-basis: 100%; }
+    td:nth-child(4) { order: 4; flex-basis: 100%; }
+    td.error:empty { display: none; }
+  }
 </style>
 </head>
 <body>
