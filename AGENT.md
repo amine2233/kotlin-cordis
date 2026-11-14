@@ -22,6 +22,7 @@ with spatiotemporal composability), ported from `swift-cordis`.
 
 ## Conventions
 - Kotlin Multiplatform (JVM, macOS Arm64/X64, iOS Arm64/X64/Simulator, Linux Arm64/X64, JS/Node.js).
+- Build logic: the shared KMP targets, JVM 17 toolchain/`jvmTarget` and `commonTest` dependencies of the four library modules live in the `cordis.kmp-library` convention plugin, `build-logic/convention/KmpLibraryConventionPlugin.kt` (an included build). Add or change a target there, not in the module build files. `cordis-demo` is a plain Kotlin/JVM app that pins JVM 17 itself.
 - Concurrency: `provide`/`update`/`replaceValue`/`plugin`/`effect`/`emit`/`dispose` and `PluginHandle.update`/`dispose` run on the graph's serialized single-threaded CoroutineDispatcher (`Context.root()`); `on`/`onDispose`/`launch`, `Disposable` and `Scope` bookkeeping are lock-guarded and callable from any thread; `zone`/`isolate` are not yet thread-safe (see `docs/ARCHITECTURE.md`). Plugin lifecycle operations (`plugin`/`provide`/`dispose`, `PluginHandle.update`/`dispose`) run in a graph-owned job: cancelling the caller only stops its wait, and nested calls run inline.
 - Modules:
   - `cordis-kernel`: Zero-dependency kernel (pure Kotlin + kotlinx-coroutines).
