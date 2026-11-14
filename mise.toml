@@ -14,6 +14,15 @@ run = "./gradlew build --no-daemon"
 description = "Run the KMP tests for every target the host can execute."
 run = "./gradlew allTests --no-daemon"
 
+# Used by CI's Test job instead of `test` (enable-coverage), so it must still run allTests.
+[tasks.test-coverage]
+description = "Run all tests and write the aggregated Kover coverage reports to build/reports/kover."
+run = "./gradlew allTests koverHtmlReport koverXmlReport --no-daemon"
+
+[tasks.build_documentations]
+description = "Generate the aggregated Dokka API docs to build/dokka/html."
+run = "./gradlew dokkaGenerate --no-daemon"
+
 [tasks.format]
 description = "Format Kotlin sources with ktlint."
 run = "ktlint --format '**/*.kt' '**/*.kts' '!**/build/**'"
