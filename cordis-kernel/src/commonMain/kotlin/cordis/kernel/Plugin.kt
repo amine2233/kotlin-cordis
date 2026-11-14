@@ -131,11 +131,14 @@ class Fork(
             return
         }
         isReconciling = true
-        do {
-            needsReconcile = false
-            reconcile()
-        } while (needsReconcile)
-        isReconciling = false
+        try {
+            do {
+                needsReconcile = false
+                reconcile()
+            } while (needsReconcile)
+        } finally {
+            isReconciling = false
+        }
     }
 
     private suspend fun reconcile() {

@@ -125,6 +125,29 @@ data class TeardownFailed(
 ) : CordisEvent
 
 /**
+ * Emitted when a listener throws while [event] is being delivered. The remaining listeners still
+ * run and the emitter never sees the error. A listener that throws while handling a `ListenerFailed`
+ * is not reported again.
+ * Plugin status is unchanged: the plugin stays `Active`; only a throwing `apply` yields `Failed`
+ * and [PluginFailed].
+ */
+data class ListenerFailed(
+    val event: CordisEvent,
+    val error: Throwable,
+) : CordisEvent
+
+/**
+ * Emitted when a coroutine in the graph's scope fails: a `ctx.launch` body, a timer body or an
+ * internal launch. `plugin` is the name of the launching context (`root` when there is no owner).
+ * Plugin status is unchanged: the plugin stays `Active`; only a throwing `apply` yields `Failed`
+ * and [PluginFailed].
+ */
+data class TaskFailed(
+    val plugin: String,
+    val error: Throwable,
+) : CordisEvent
+
+/**
  * Emitted on every plugin status transition.
  */
 data class PluginStatusChanged(

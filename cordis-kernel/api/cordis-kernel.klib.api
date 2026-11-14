@@ -178,6 +178,22 @@ final class cordis.kernel/Inject { // cordis.kernel/Inject|null[0]
     }
 }
 
+final class cordis.kernel/ListenerFailed : cordis.kernel/CordisEvent { // cordis.kernel/ListenerFailed|null[0]
+    constructor <init>(cordis.kernel/CordisEvent, kotlin/Throwable) // cordis.kernel/ListenerFailed.<init>|<init>(cordis.kernel.CordisEvent;kotlin.Throwable){}[0]
+
+    final val error // cordis.kernel/ListenerFailed.error|{}error[0]
+        final fun <get-error>(): kotlin/Throwable // cordis.kernel/ListenerFailed.error.<get-error>|<get-error>(){}[0]
+    final val event // cordis.kernel/ListenerFailed.event|{}event[0]
+        final fun <get-event>(): cordis.kernel/CordisEvent // cordis.kernel/ListenerFailed.event.<get-event>|<get-event>(){}[0]
+
+    final fun component1(): cordis.kernel/CordisEvent // cordis.kernel/ListenerFailed.component1|component1(){}[0]
+    final fun component2(): kotlin/Throwable // cordis.kernel/ListenerFailed.component2|component2(){}[0]
+    final fun copy(cordis.kernel/CordisEvent = ..., kotlin/Throwable = ...): cordis.kernel/ListenerFailed // cordis.kernel/ListenerFailed.copy|copy(cordis.kernel.CordisEvent;kotlin.Throwable){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/ListenerFailed.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // cordis.kernel/ListenerFailed.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // cordis.kernel/ListenerFailed.toString|toString(){}[0]
+}
+
 final class cordis.kernel/OccurrenceId { // cordis.kernel/OccurrenceId|null[0]
     constructor <init>(kotlin/Int) // cordis.kernel/OccurrenceId.<init>|<init>(kotlin.Int){}[0]
 
@@ -416,6 +432,22 @@ final class cordis.kernel/SlotInfo { // cordis.kernel/SlotInfo|null[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/SlotInfo.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // cordis.kernel/SlotInfo.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // cordis.kernel/SlotInfo.toString|toString(){}[0]
+}
+
+final class cordis.kernel/TaskFailed : cordis.kernel/CordisEvent { // cordis.kernel/TaskFailed|null[0]
+    constructor <init>(kotlin/String, kotlin/Throwable) // cordis.kernel/TaskFailed.<init>|<init>(kotlin.String;kotlin.Throwable){}[0]
+
+    final val error // cordis.kernel/TaskFailed.error|{}error[0]
+        final fun <get-error>(): kotlin/Throwable // cordis.kernel/TaskFailed.error.<get-error>|<get-error>(){}[0]
+    final val plugin // cordis.kernel/TaskFailed.plugin|{}plugin[0]
+        final fun <get-plugin>(): kotlin/String // cordis.kernel/TaskFailed.plugin.<get-plugin>|<get-plugin>(){}[0]
+
+    final fun component1(): kotlin/String // cordis.kernel/TaskFailed.component1|component1(){}[0]
+    final fun component2(): kotlin/Throwable // cordis.kernel/TaskFailed.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/Throwable = ...): cordis.kernel/TaskFailed // cordis.kernel/TaskFailed.copy|copy(kotlin.String;kotlin.Throwable){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/TaskFailed.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // cordis.kernel/TaskFailed.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // cordis.kernel/TaskFailed.toString|toString(){}[0]
 }
 
 final class cordis.kernel/TeardownFailed : cordis.kernel/CordisEvent { // cordis.kernel/TeardownFailed|null[0]

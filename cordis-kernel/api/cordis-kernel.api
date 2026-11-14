@@ -159,6 +159,19 @@ public final class cordis/kernel/Inject$Companion {
 	public static synthetic fun of$default (Lcordis/kernel/Inject$Companion;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lcordis/kernel/Inject;
 }
 
+public final class cordis/kernel/ListenerFailed : cordis/kernel/CordisEvent {
+	public fun <init> (Lcordis/kernel/CordisEvent;Ljava/lang/Throwable;)V
+	public final fun component1 ()Lcordis/kernel/CordisEvent;
+	public final fun component2 ()Ljava/lang/Throwable;
+	public final fun copy (Lcordis/kernel/CordisEvent;Ljava/lang/Throwable;)Lcordis/kernel/ListenerFailed;
+	public static synthetic fun copy$default (Lcordis/kernel/ListenerFailed;Lcordis/kernel/CordisEvent;Ljava/lang/Throwable;ILjava/lang/Object;)Lcordis/kernel/ListenerFailed;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public final fun getEvent ()Lcordis/kernel/CordisEvent;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class cordis/kernel/OccurrenceId {
 	public fun <init> (I)V
 	public final fun component1 ()I
@@ -382,6 +395,19 @@ public final class cordis/kernel/SlotInfo {
 	public final fun getProvider ()Lcordis/kernel/PluginId;
 	public final fun getRealm ()Ljava/lang/String;
 	public final fun getService ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/kernel/TaskFailed : cordis/kernel/CordisEvent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Throwable;)Lcordis/kernel/TaskFailed;
+	public static synthetic fun copy$default (Lcordis/kernel/TaskFailed;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)Lcordis/kernel/TaskFailed;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public final fun getPlugin ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

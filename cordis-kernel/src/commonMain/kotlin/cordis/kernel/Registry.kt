@@ -1,10 +1,14 @@
 package cordis.kernel
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlin.concurrent.Volatile
+import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KClass
 
 /**
@@ -30,7 +34,10 @@ private data class ZoneKey(
 class Registry(
     val dispatcher: CoroutineDispatcher = Dispatchers.Default.limitedParallelism(1),
 ) {
-    val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
+    val coroutineScope =
+        CoroutineScope(
+            dispatcher + SupervisorJob() + CoroutineExceptionHandler { context, error -> reportTaskFailure(context, error) },
+        )
 
     class Entry(
         var value: Any,
@@ -304,8 +311,24 @@ class Registry(
             if (listenerZone != null && !isAncestorOrSelf(listenerZone, of = from)) {
                 continue
             }
-            listener.handler(event)
+            try {
+                listener.handler(event)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (t: Throwable) {
+                if (event !is ListenerFailed) {
+                    emit(ListenerFailed(event = event, error = t), from = from)
+                }
+            }
         }
+    }
+
+    private fun reportTaskFailure(
+        context: CoroutineContext,
+        error: Throwable,
+    ) {
+        val owner = context[LaunchMarker]?.owner ?: "root"
+        coroutineScope.launch { emit(TaskFailed(plugin = owner, error = error)) }
     }
 
     fun listenerCount(type: KClass<out CordisEvent>): Int = listeners[type]?.size ?: 0
