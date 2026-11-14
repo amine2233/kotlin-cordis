@@ -1,0 +1,25 @@
+public final class cordis/ktor/CordisAdminKt {
+	public static final fun cordisAdmin (Lio/ktor/server/routing/Route;Lcordis/runtime/PluginRuntime;)V
+}
+
+public final class cordis/ktor/CordisConfig {
+	public fun <init> ()V
+	public final fun getContext ()Lcordis/kernel/Context;
+	public final fun getRuntime ()Lkotlin/jvm/functions/Function1;
+	public final fun setContext (Lcordis/kernel/Context;)V
+	public final fun setRuntime (Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class cordis/ktor/CordisKt {
+	public static final fun getCordis ()Lio/ktor/server/application/ApplicationPlugin;
+	public static final fun getCordis (Lio/ktor/server/application/Application;)Lcordis/kernel/Context;
+	public static final fun getCordis (Lio/ktor/server/application/ApplicationCall;)Lcordis/kernel/Context;
+	public static final fun getCordisRuntime (Lio/ktor/server/application/Application;)Lcordis/runtime/PluginRuntime;
+	public static final fun getCordisRuntime (Lio/ktor/server/application/ApplicationCall;)Lcordis/runtime/PluginRuntime;
+}
+
+public final class cordis/ktor/RequireServiceKt {
+	public static final fun requireService (Lio/ktor/server/routing/Route;Lcordis/kernel/ServiceKey;Lio/ktor/http/HttpStatusCode;Lkotlin/jvm/functions/Function3;)V
+	public static synthetic fun requireService$default (Lio/ktor/server/routing/Route;Lcordis/kernel/ServiceKey;Lio/ktor/http/HttpStatusCode;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)V
+}
+

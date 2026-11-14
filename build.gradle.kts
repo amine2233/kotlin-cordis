@@ -13,6 +13,11 @@ apiValidation {
     }
 }
 
+// cordis-ktor is JVM-only, so it has no klib ABI to dump or check; its JVM API is still validated.
+project(":cordis-ktor") {
+    tasks.matching { it.name.startsWith("klibApi") }.configureEach { onlyIf { false } }
+}
+
 allprojects {
     group = "io.github.amine2233"
     version = (findProperty("version") as String?)?.takeIf { it.isNotBlank() } ?: "0.1.0-SNAPSHOT"
