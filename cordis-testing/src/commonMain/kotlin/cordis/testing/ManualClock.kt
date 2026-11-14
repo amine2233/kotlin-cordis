@@ -8,7 +8,7 @@ import kotlin.time.Duration
 /**
  * A deterministic clock that only moves when [advance] is called.
  */
-class ManualClock(
+public class ManualClock(
     initialOffset: Duration = Duration.ZERO,
 ) : CordisClock {
     private val lock = Lock()
@@ -25,7 +25,7 @@ class ManualClock(
     override val now: Duration
         get() = lock.withLock { current }
 
-    val sleeperCount: Int
+    public val sleeperCount: Int
         get() = lock.withLock { sleepers.size }
 
     override suspend fun delay(duration: Duration) {
@@ -71,7 +71,7 @@ class ManualClock(
     /**
      * Moves the clock forward and resumes every sleeper whose deadline has passed.
      */
-    fun advance(by: Duration) {
+    public fun advance(by: Duration) {
         val ready =
             lock.withLock {
                 current += by

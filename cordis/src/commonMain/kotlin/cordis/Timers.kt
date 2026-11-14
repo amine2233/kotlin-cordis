@@ -12,7 +12,7 @@ import kotlin.time.Duration
 /**
  * Runs [body] once after [delay]; cancelled when this context is disposed.
  */
-suspend fun Context.after(
+public suspend fun Context.after(
     delay: Duration,
     clock: CordisClock = DefaultClock,
     body: suspend () -> Unit,
@@ -32,7 +32,7 @@ suspend fun Context.after(
 /**
  * Runs [body] every [interval]; cancelled when this context is disposed.
  */
-suspend fun Context.every(
+public suspend fun Context.every(
     interval: Duration,
     clock: CordisClock = DefaultClock,
     body: suspend () -> Unit,

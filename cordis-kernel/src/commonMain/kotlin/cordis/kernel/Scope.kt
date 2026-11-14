@@ -7,24 +7,24 @@ import kotlin.concurrent.Volatile
 /**
  * Teardown action executed when a [Scope] or [Disposable] is disposed.
  */
-typealias Disposer = suspend () -> Unit
+public typealias Disposer = suspend () -> Unit
 
 private val disposableLock = Lock()
 
 /**
  * Idempotent teardown handle. Invoking it multiple times, even concurrently, runs the action once.
  */
-class Disposable(
+public class Disposable(
     action: Disposer?,
     private val failureHandler: suspend (Throwable) -> Unit = {},
 ) {
     @Volatile
     private var action: Disposer? = action
 
-    val isDisposed: Boolean
+    public val isDisposed: Boolean
         get() = action == null
 
-    suspend operator fun invoke() {
+    public suspend operator fun invoke() {
         val currentAction = disposableLock.withLock { action.also { action = null } } ?: return
         try {
             currentAction()
@@ -39,7 +39,7 @@ class Disposable(
  * every side effect registered in a scope is undone when the scope dies,
  * in reverse order of registration (LIFO, like `defer`).
  */
-class Scope(
+public class Scope(
     private val failureHandler: suspend (Throwable) -> Unit = {},
     private val coroutineScope: CoroutineScope,
 ) {
@@ -48,7 +48,7 @@ class Scope(
     private var counter = 0
 
     @Volatile
-    var isDisposed: Boolean = false
+    public var isDisposed: Boolean = false
         private set
 
     internal val size: Int
@@ -57,7 +57,7 @@ class Scope(
     /**
      * Registers a teardown. If the scope is already dead, the teardown is launched at once on [coroutineScope].
      */
-    fun collect(teardown: Disposer): Disposable {
+    public fun collect(teardown: Disposer): Disposable {
         val (handle, recorded) =
             lock.withLock {
                 counter++
@@ -81,7 +81,7 @@ class Scope(
         return handle
     }
 
-    suspend fun dispose() {
+    public suspend fun dispose() {
         val ordered =
             lock.withLock {
                 if (isDisposed) return@withLock null

@@ -10,23 +10,23 @@ import kotlin.reflect.KClass
  * object DatabaseKey : ServiceKey<Database>
  * ```
  */
-interface ServiceKey<T : Any> {
-    val serviceId: ServiceId get() = ServiceId.of(this::class)
+public interface ServiceKey<T : Any> {
+    public val serviceId: ServiceId get() = ServiceId.of(this::class)
 }
 
 /**
  * Type-erased identity of a service key.
  */
-data class ServiceId(
+public data class ServiceId(
     val raw: Any,
     val description: String = (raw as? KClass<*>)?.simpleName ?: raw.toString(),
 ) {
     override fun toString(): String = description
 
-    companion object {
-        fun of(kClass: KClass<*>): ServiceId = ServiceId(kClass, kClass.simpleName ?: "AnonymousKey")
+    public companion object {
+        public fun of(kClass: KClass<*>): ServiceId = ServiceId(kClass, kClass.simpleName ?: "AnonymousKey")
 
-        fun of(key: ServiceKey<*>): ServiceId = key.serviceId
+        public fun of(key: ServiceKey<*>): ServiceId = key.serviceId
     }
 }
 
@@ -35,16 +35,16 @@ data class ServiceId(
  * - `required`: the plugin stays pending until all of them exist, and stops if one disappears.
  * - `optional`: the plugin starts without them, but restarts when they appear / change / vanish.
  */
-data class Inject(
+public data class Inject(
     val required: List<ServiceId> = emptyList(),
     val optional: List<ServiceId> = emptyList(),
 ) {
     val all: List<ServiceId> get() = required + optional
 
-    companion object {
-        val NONE = Inject()
+    public companion object {
+        public val NONE: Inject = Inject()
 
-        fun of(
+        public fun of(
             required: List<ServiceKey<*>> = emptyList(),
             optional: List<ServiceKey<*>> = emptyList(),
         ): Inject =
@@ -59,36 +59,36 @@ data class Inject(
  * Address of a service instance: (which service, in which isolation realm).
  * Realms are the "space" half of spatiotemporal composability.
  */
-data class Slot(
+public data class Slot(
     val service: ServiceId,
     val realm: String = SHARED_REALM,
 ) {
     override fun toString(): String = if (realm == SHARED_REALM) service.toString() else "$service@$realm"
 
-    companion object {
-        const val SHARED_REALM = "shared"
+    public companion object {
+        public const val SHARED_REALM: String = "shared"
     }
 }
 
 /**
  * Errors thrown by Cordis operations.
  */
-sealed class CordisException(
+public sealed class CordisException(
     message: String,
 ) : Exception(message) {
-    class MissingService(
-        val service: ServiceId,
+    public class MissingService(
+        public val service: ServiceId,
     ) : CordisException("Service $service is not available in this context")
 
-    class ServiceConflict(
-        val slot: Slot,
-        val existingOwner: String,
+    public class ServiceConflict(
+        public val slot: Slot,
+        public val existingOwner: String,
     ) : CordisException("Service $slot is already provided by $existingOwner")
 
-    class Disposed : CordisException("Context has been disposed")
+    public class Disposed : CordisException("Context has been disposed")
 
-    class NotPublished(
-        val slot: Slot,
+    public class NotPublished(
+        public val slot: Slot,
     ) : CordisException("Service $slot is not published by this context")
 }
 
@@ -97,12 +97,12 @@ sealed class CordisException(
 /**
  * Marker interface for all Cordis events.
  */
-interface CordisEvent
+public interface CordisEvent
 
 /**
  * Emitted whenever a slot gets a new instance or loses it.
  */
-data class ServiceChanged(
+public data class ServiceChanged(
     val slot: Slot,
     val isAvailable: Boolean,
 ) : CordisEvent
@@ -110,7 +110,7 @@ data class ServiceChanged(
 /**
  * Emitted when a plugin's `apply` throws. The plugin's scope is rolled back.
  */
-data class PluginFailed(
+public data class PluginFailed(
     val plugin: String,
     val error: Throwable,
 ) : CordisEvent
@@ -119,7 +119,7 @@ data class PluginFailed(
  * Emitted when a teardown throws. Remaining teardowns of the same scope still run.
  * `plugin` is the name of the owning context (`root` for the graph root).
  */
-data class TeardownFailed(
+public data class TeardownFailed(
     val plugin: String,
     val error: Throwable,
 ) : CordisEvent
@@ -131,7 +131,7 @@ data class TeardownFailed(
  * Plugin status is unchanged: the plugin stays `Active`; only a throwing `apply` yields `Failed`
  * and [PluginFailed].
  */
-data class ListenerFailed(
+public data class ListenerFailed(
     val event: CordisEvent,
     val error: Throwable,
 ) : CordisEvent
@@ -142,7 +142,7 @@ data class ListenerFailed(
  * Plugin status is unchanged: the plugin stays `Active`; only a throwing `apply` yields `Failed`
  * and [PluginFailed].
  */
-data class TaskFailed(
+public data class TaskFailed(
     val plugin: String,
     val error: Throwable,
 ) : CordisEvent
@@ -150,7 +150,7 @@ data class TaskFailed(
 /**
  * Emitted on every plugin status transition.
  */
-data class PluginStatusChanged(
+public data class PluginStatusChanged(
     val plugin: String,
     val status: Fork.Status,
 ) : CordisEvent

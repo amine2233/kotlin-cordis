@@ -18,11 +18,11 @@ import kotlin.reflect.KClass
 /**
  * Identity of one successful `provide`; stable across in-place updates.
  */
-data class OccurrenceId(
+public data class OccurrenceId(
     val rawValue: Int,
 )
 
-data class ZoneId(
+public data class ZoneId(
     val rawValue: Int,
 )
 
@@ -35,7 +35,7 @@ private data class ZoneKey(
  * Shared state of one plugin graph: service slots, live forks, event listeners.
  * Internal — plugins only ever talk to [Context].
  */
-class Registry(
+internal class Registry(
     val dispatcher: CoroutineDispatcher = Dispatchers.Default.limitedParallelism(1),
 ) {
     val coroutineScope =

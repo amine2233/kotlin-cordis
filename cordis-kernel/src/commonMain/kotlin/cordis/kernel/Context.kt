@@ -25,23 +25,23 @@ import kotlin.reflect.KClass
  * - a scope (time): everything registered through it dies with it;
  * - a set of realms (space): which instance of each service it resolves to.
  */
-class Context internal constructor(
-    val registry: Registry,
-    val parent: Context?,
-    val fork: Fork?,
-    val scope: Scope,
+public class Context internal constructor(
+    internal val registry: Registry,
+    public val parent: Context?,
+    public val fork: Fork?,
+    public val scope: Scope,
     internal val realms: Map<ServiceId, String> = parent?.realms ?: emptyMap(),
     internal val layers: Map<ServiceId, List<(Any) -> Any>> = parent?.layers ?: emptyMap(),
-    val zoneId: ZoneId? = parent?.zoneId,
+    public val zoneId: ZoneId? = parent?.zoneId,
 ) {
-    val name: String
+    public val name: String
         get() = fork?.name ?: "root"
 
-    companion object {
+    public companion object {
         /**
          * Creates the root of a new plugin graph (your "App").
          */
-        fun root(dispatcher: CoroutineDispatcher = Dispatchers.Default.limitedParallelism(1)): Context {
+        public fun root(dispatcher: CoroutineDispatcher = Dispatchers.Default.limitedParallelism(1)): Context {
             val registry = Registry(dispatcher)
             val scope =
                 Scope(
@@ -64,31 +64,31 @@ class Context internal constructor(
     /**
      * Tears down the whole graph, children first. On the root, then cancels [Registry.coroutineScope].
      */
-    suspend fun dispose() {
+    public suspend fun dispose() {
         registry.lifecycle {
             scope.dispose()
             if (parent == null) registry.coroutineScope.cancel()
         }
     }
 
-    fun slot(service: ServiceId): Slot = Slot(service = service, realm = realms[service] ?: Slot.SHARED_REALM)
+    public fun slot(service: ServiceId): Slot = Slot(service = service, realm = realms[service] ?: Slot.SHARED_REALM)
 
     // MARK: Services
 
-    operator fun <T : Any> get(key: ServiceKey<T>): T? {
+    public operator fun <T : Any> get(key: ServiceKey<T>): T? {
         val entry = registry.entry(slot(key.serviceId)) ?: return null
         @Suppress("UNCHECKED_CAST")
         return entry.value as? T
     }
 
-    fun <T : Any> require(key: ServiceKey<T>): T = get(key) ?: throw CordisException.MissingService(key.serviceId)
+    public fun <T : Any> require(key: ServiceKey<T>): T = get(key) ?: throw CordisException.MissingService(key.serviceId)
 
     /**
      * Registers a service instance in this context's realm.
      * Withdrawn automatically when this context's scope is disposed,
      * which in turn stops/restarts every plugin that injected it.
      */
-    suspend fun <T : Any> provide(
+    public suspend fun <T : Any> provide(
         key: ServiceKey<T>,
         value: T,
     ) {
@@ -119,7 +119,7 @@ class Context internal constructor(
      * The occurrence is unchanged: dependents are not restarted and no `ServiceChanged` is emitted.
      * Throws [CordisException.NotPublished] when this context did not publish `key`.
      */
-    suspend fun <T : Any> update(
+    public suspend fun <T : Any> update(
         key: ServiceKey<T>,
         mutate: (T) -> Unit,
     ) {
@@ -134,7 +134,7 @@ class Context internal constructor(
      * The occurrence is unchanged: dependents are not restarted and no `ServiceChanged` is emitted.
      * Throws [CordisException.NotPublished] when this context did not publish `key`.
      */
-    suspend fun <T : Any> replaceValue(
+    public suspend fun <T : Any> replaceValue(
         key: ServiceKey<T>,
         mutate: (T) -> T,
     ) {
@@ -151,7 +151,7 @@ class Context internal constructor(
      * Same `label` => shared realm (e.g. one DB per tenant, shared by that tenant's plugins).
      * No label => a private, anonymous realm.
      */
-    fun isolate(
+    public fun isolate(
         key: ServiceKey<*>,
         label: String? = null,
     ): Context {
@@ -176,7 +176,7 @@ class Context internal constructor(
      * listeners with no zone hear everything. Independent of scope and realms; not an authorization
      * boundary.
      */
-    fun zone(label: String): Context =
+    public fun zone(label: String): Context =
         Context(
             registry = registry,
             parent = this,
@@ -195,7 +195,7 @@ class Context internal constructor(
      * wrapper.
      * Values already provided are never rewritten.
      */
-    fun <T : Any> intercept(
+    public fun <T : Any> intercept(
         key: ServiceKey<T>,
         layer: (T) -> T,
     ): Context {
@@ -223,7 +223,7 @@ class Context internal constructor(
      * Loads a sub-plugin. Its lifetime is bound to this context:
      * unloading the parent unloads the whole subtree.
      */
-    suspend fun <C> plugin(
+    public suspend fun <C> plugin(
         plugin: Plugin<C>,
         config: C,
     ): PluginHandle<C> =
@@ -256,12 +256,12 @@ class Context internal constructor(
             PluginHandle(newFork, plugin)
         }
 
-    suspend fun plugin(plugin: Plugin<Unit>): PluginHandle<Unit> = plugin(plugin, Unit)
+    public suspend fun plugin(plugin: Plugin<Unit>): PluginHandle<Unit> = plugin(plugin, Unit)
 
     /**
      * Loads an anonymous one-off plugin from a lambda.
      */
-    suspend fun plugin(
+    public suspend fun plugin(
         name: String,
         inject: Inject = Inject.NONE,
         apply: suspend (Context) -> Unit,
@@ -283,14 +283,14 @@ class Context internal constructor(
     /**
      * Read-only view of the plugins and service slots of this graph.
      */
-    fun snapshot(): RuntimeSnapshot = registry.snapshot()
+    public fun snapshot(): RuntimeSnapshot = registry.snapshot()
 
     // MARK: Effects & events
 
     /**
      * Registers a teardown for this context.
      */
-    fun onDispose(teardown: Disposer): Disposable = scope.collect(teardown)
+    public fun onDispose(teardown: Disposer): Disposable = scope.collect(teardown)
 
     /**
      * Cordis' `ctx.effect`: run setup now, run the returned teardown on dispose.
@@ -303,7 +303,7 @@ class Context internal constructor(
      * }
      * ```
      */
-    suspend fun effect(setup: suspend () -> Disposer): Disposable =
+    public suspend fun effect(setup: suspend () -> Disposer): Disposable =
         withContext(registry.dispatcher) {
             val teardown = setup()
             scope.collect(teardown)
@@ -312,7 +312,7 @@ class Context internal constructor(
     /**
      * Subscribes to an event type. Automatically unsubscribed with this context.
      */
-    fun <E : CordisEvent> on(
+    public fun <E : CordisEvent> on(
         type: KClass<E>,
         handler: suspend (E) -> Unit,
     ): Disposable {
@@ -323,9 +323,9 @@ class Context internal constructor(
     /**
      * Subscribes to an event type using reified generics.
      */
-    inline fun <reified E : CordisEvent> on(noinline handler: suspend (E) -> Unit): Disposable = on(E::class, handler)
+    public inline fun <reified E : CordisEvent> on(noinline handler: suspend (E) -> Unit): Disposable = on(E::class, handler)
 
-    suspend fun emit(event: CordisEvent) {
+    public suspend fun emit(event: CordisEvent) {
         withContext(registry.dispatcher) {
             registry.emit(event, from = zoneId)
         }
@@ -337,15 +337,15 @@ class Context internal constructor(
      * Cold flow of events of type [type]; the listener lives only while the flow is collected
      * (and no longer than this context).
      */
-    fun <E : CordisEvent> events(type: KClass<E>): Flow<E> = scopedFlow(type, zone = zoneId) { trySend(it) }
+    public fun <E : CordisEvent> events(type: KClass<E>): Flow<E> = scopedFlow(type, zone = zoneId) { trySend(it) }
 
-    inline fun <reified E : CordisEvent> events(): Flow<E> = events(E::class)
+    public inline fun <reified E : CordisEvent> events(): Flow<E> = events(E::class)
 
     /**
      * Emits the current value of [key] (null when unavailable), then again each time the slot is
      * provided or withdrawn. In-place [update] / [replaceValue] emit nothing, like `ServiceChanged`.
      */
-    fun <T : Any> serviceFlow(key: ServiceKey<T>): Flow<T?> {
+    public fun <T : Any> serviceFlow(key: ServiceKey<T>): Flow<T?> {
         val target = slot(key.serviceId)
         return scopedFlow(
             ServiceChanged::class,
@@ -383,7 +383,7 @@ class Context internal constructor(
      * An exception thrown by [block] is reported as [TaskFailed] with this context's name; the
      * plugin's status is unchanged and the job is still removed from the scope.
      */
-    fun launch(
+    public fun launch(
         context: CoroutineContext = EmptyCoroutineContext,
         block: suspend CoroutineScope.() -> Unit,
     ): Job {

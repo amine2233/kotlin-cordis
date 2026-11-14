@@ -18,7 +18,7 @@ In Swift, concurrency was managed via a single `@CordisActor`. In Kotlin Multipl
 |---|---|---|
 | `Scope.kt` | `Scope`, `Disposable`, `Disposer` | LIFO, idempotent teardown. Represents the time axis. `Disposable` is atomic: concurrent `invoke()` calls run its action once. `Scope` requires a `CoroutineScope`: a teardown registered after the scope is disposed is launched at once on it. The graph's scopes use the registry's never-cancelled lifecycle scope, so late teardowns run on the graph dispatcher, even after root dispose. |
 | `Service.kt` | `ServiceKey`, `ServiceId`, `Slot`, `Inject`, events, `CordisException` | Typed service identity and plugin dependency specifications. |
-| `Registry.kt` | `Registry` | Per-graph state: slots with generation counters, live forks, event listeners, zones. |
+| `Registry.kt` | `Registry` (internal to the kernel) | Per-graph state: slots with generation counters, live forks, event listeners, zones. |
 | `Plugin.kt` | `Plugin`, `Fork`, `PluginHandle`, `UpdateOutcome` | Plugin definition and its reactive lifecycle (`Pending`, `Loading`, `Active`, `Failed`, `Disposed`). |
 | `Context.kt` | `Context` | The primary API plugins interact with: service lookup, provision, events, isolation, interceptors. |
 | `Snapshot.kt` | `RuntimeSnapshot`, `PluginInfo`, `SlotInfo` | Read-only point-in-time snapshot of the graph structure and statuses. |

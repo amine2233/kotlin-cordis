@@ -16,6 +16,7 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
             val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
             extensions.configure<KotlinMultiplatformExtension> {
+                explicitApi()
                 jvmToolchain(17)
 
                 jvm {

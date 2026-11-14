@@ -6,13 +6,13 @@ import kotlinx.serialization.json.Json
 /**
  * An ordered, declarative list of plugins to load, resolved through a [PluginRegistry].
  */
-data class LoadPlan(
+public data class LoadPlan(
     val entries: List<Entry>,
 ) {
     /**
      * One plugin to load: a resolve key, an optional unique name and optional JSON config.
      */
-    data class Entry(
+    public data class Entry(
         val key: String,
         val name: String? = null,
         val config: String? = null,
@@ -21,7 +21,7 @@ data class LoadPlan(
     /**
      * Returns every error in the plan (unknown key, duplicate name, undecodable config); empty when valid.
      */
-    fun validate(against: PluginRegistry): List<LoaderError> {
+    public fun validate(against: PluginRegistry): List<LoaderError> {
         val errors = mutableListOf<LoaderError>()
         val seenNames = mutableSetOf<String>()
 
@@ -49,19 +49,19 @@ data class LoadPlan(
     }
 }
 
-class LoadPlanBuilder(
+public class LoadPlanBuilder(
     private val json: Json,
 ) {
     internal val entries = mutableListOf<LoadPlan.Entry>()
 
-    fun plugin(
+    public fun plugin(
         key: String,
         name: String? = null,
     ) {
         entries.add(LoadPlan.Entry(key = key, name = name))
     }
 
-    fun <C> plugin(
+    public fun <C> plugin(
         key: String,
         config: C,
         serializer: KSerializer<C>,
@@ -74,7 +74,7 @@ class LoadPlanBuilder(
 /**
  * Type-safe [LoadPlan] builder; configs are encoded to JSON with their serializer.
  */
-fun loadPlan(
+public fun loadPlan(
     json: Json = Json,
     block: LoadPlanBuilder.() -> Unit,
 ): LoadPlan = LoadPlan(LoadPlanBuilder(json).apply(block).entries.toList())
