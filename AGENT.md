@@ -8,7 +8,7 @@ with spatiotemporal composability), ported from `swift-cordis`.
 - Core principle: everything is a plugin composing across Time (scopes) and Space (realms), driven by Reactivity (forks).
 
 ## Build & Test Commands
-- Full project check (all platforms): `./gradlew check`
+- Full project check (the tests of every target the host can execute): `./gradlew check`
 - Fast JVM tests only: `./gradlew :cordis-kernel:jvmTest :cordis:jvmTest :cordis-testing:jvmTest :cordis-loader:jvmTest :cordis-runtime:jvmTest :cordis-ktor:jvmTest`
 - Native macOS tests: `./gradlew :cordis-kernel:macosArm64Test :cordis:macosArm64Test :cordis-testing:macosArm64Test :cordis-loader:macosArm64Test :cordis-runtime:macosArm64Test`
 - Interactive Demo: `./gradlew :cordis-demo:run`

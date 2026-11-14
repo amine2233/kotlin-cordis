@@ -19,20 +19,57 @@ Cordis' core idea: **everything is a plugin**, and plugins compose along two ort
 - **JVM** (Java 17, 21+)
 - **Apple Native**: `macosArm64`, `macosX64`, `iosArm64`, `iosSimulatorArm64`, `iosX64`
 - **Linux Native**: `linuxX64`, `linuxArm64`
-- **JavaScript**: Node.js & modern browsers
+- **JavaScript**: Node.js
 
 ---
 
 ## Modules
 
-- `cordis-kernel`: `Scope`, `Fork`, `Context`, `ServiceKey`, `Inject`, events, zones, intercept layers, snapshots. Zero sugar.
-- `cordis`: Re-exports the kernel and adds `ServicePlugin` and timer effects (`ctx.after`, `ctx.every`).
-- `cordis-loader`: Declarative JSON load-plan loader (`LoadPlan`, `PluginFactoryRegistry`, `Context.load`) with `kotlinx.serialization`.
-- `cordis-testing`: Test support module (`ManualClock`, `settle(until = ...)`, `withTestApp`, `RecordedEvents`).
-- `cordis-runtime`: Enables and disables catalog plugins by key at runtime (`pluginCatalog { }`, `EnabledPluginsStore`, `PluginRuntimeDefault`) with an observable `StateFlow<List<PluginState>>`.
-- `cordis-ktor`: Ktor 3 server integration, JVM only (`install(Cordis)`, `call.cordis`, `Route.requireService`, `Route.cordisAdmin`).
-- `cordis-android`: Android integration, opt-in and not published (`AppForegroundPlugin` / `installAppForeground()`, `AppForegroundKey`, `DataStoreEnabledPluginsStore`).
-- `cordis-demo`: Executable walkthrough showing the 6 core scenarios.
+| Module | Purpose | Platforms | Published |
+|---|---|---|---|
+| `cordis-kernel` | `Scope`, `Fork`, `Context`, `ServiceKey`, `Inject`, events, zones, intercept layers, snapshots. Zero sugar. | All KMP targets | Yes |
+| `cordis` | Re-exports the kernel and adds `ServicePlugin` and timer effects (`ctx.after`, `ctx.every`). | All KMP targets | Yes |
+| `cordis-loader` | Declarative JSON load-plan loader (`LoadPlan`, `PluginFactoryRegistry`, `Context.load`) with `kotlinx.serialization`. | All KMP targets | Yes |
+| `cordis-testing` | Test support module (`ManualClock`, `settle(until = ...)`, `withTestApp`, `RecordedEvents`). | All KMP targets | Yes |
+| `cordis-runtime` | Enables and disables catalog plugins by key at runtime (`pluginCatalog { }`, `EnabledPluginsStore`, `PluginRuntimeDefault`) with an observable `StateFlow<List<PluginState>>`. | All KMP targets | Yes |
+| `cordis-ktor` | Ktor 3 server integration (`install(Cordis)`, `call.cordis`, `Route.requireService`, `Route.cordisAdmin`). | JVM | Yes |
+| `cordis-android` | Android integration, opt-in (`AppForegroundPlugin` / `installAppForeground()`, `AppForegroundKey`, `DataStoreEnabledPluginsStore`). | Android | No |
+| `cordis-demo` | Executable walkthrough showing the 6 core scenarios. | JVM app | No |
+
+"All KMP targets" are the platforms listed above.
+
+---
+
+## Install
+
+The published modules are on GitHub Packages. Add its Maven repository to your build (`dependencyResolutionManagement.repositories` in `settings.gradle.kts`, or `repositories` in `build.gradle.kts`):
+
+```kotlin
+repositories {
+    mavenCentral()
+    maven {
+        url = uri("https://maven.pkg.github.com/amine2233/kotlin-cordis")
+        credentials {
+            username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GITHUB_ACTOR")
+            password = providers.gradleProperty("gpr.key").orNull ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
+}
+```
+
+GitHub Packages requires authentication even for public packages: use a personal access token with the `read:packages` scope, set as `gpr.user` / `gpr.key` in `~/.gradle/gradle.properties` or as `GITHUB_ACTOR` / `GITHUB_TOKEN`.
+
+```kotlin
+dependencies {
+    implementation("io.github.amine2233:cordis:<version>")          // pulls in cordis-kernel
+    implementation("io.github.amine2233:cordis-loader:<version>")
+    implementation("io.github.amine2233:cordis-runtime:<version>")
+    implementation("io.github.amine2233:cordis-ktor:<version>")     // JVM only
+    testImplementation("io.github.amine2233:cordis-testing:<version>")
+}
+```
+
+Replace `<version>` with a release from the [GitHub Releases](https://github.com/amine2233/kotlin-cordis/releases) page. `cordis-android` is not published: consume it as a project dependency (`implementation(project(":cordis-android"))`) in a build that has an Android SDK.
 
 ---
 
@@ -159,6 +196,9 @@ Full cheat sheet: [`skills/kotlin-cordis/SKILL.md`](skills/kotlin-cordis/SKILL.m
 Worked examples: [simple / medium / hard](skills/kotlin-cordis/references/examples.md).
 Platform recipes: [Android / Compose](skills/kotlin-cordis/references/android.md) ·
 [Ktor](skills/kotlin-cordis/references/ktor.md) · [CLI](skills/kotlin-cordis/references/cli.md).
+Runnable samples: [`samples/README.md`](samples/README.md).
+- Ktor: a server running a sample plugin catalog with routes gated by `requireService`, the `cordisAdmin` routes, an SSE stream and an admin page (`./gradlew -p samples :ktor:run`, then `http://127.0.0.1:8080/admin`).
+- Android: a Compose app whose drawer is built from the `NavEntries` contribution point, with a Settings screen that toggles the plugins, persisted in DataStore.
 
 ```kotlin
 val app = Context.root()
@@ -173,7 +213,7 @@ app.plugin("metrics", Inject.of(required = listOf(LoggerKey))) { ctx ->
 val signups: Flow<UserSignedUp> = app.events<UserSignedUp>()
 val db: Flow<Database?> = app.serviceFlow(DatabaseKey)   // current value, then each provide/withdraw
 val graph: StateFlow<RuntimeSnapshot> = app.snapshotFlow() // live snapshot(): plugins (key, status, missing) and slots
-// Both flows complete normally when their context is disposed.
+// events() and serviceFlow() complete normally when their context is disposed; snapshotFlow() never completes.
 
 // Await a plugin that may still be waiting for dependencies
 val status = app.plugin(Repo).awaitActive()              // Active | Failed | Disposed
@@ -201,7 +241,7 @@ The repo is a Claude Code plugin and ships an agent skill: `/plugin marketplace 
 # Build all KMP modules
 ./gradlew assemble
 
-# Run tests across all platforms (JVM, macOS Native, iOS Simulator, JS)
+# Run the tests of every target the host can execute (Apple targets only on macOS, Linux native only on Linux)
 ./gradlew check
 
 # Run the 6-scenario demo

@@ -3,6 +3,8 @@
 Use the JVM artifacts. One graph per `Application`; routes only read services. Plugins own long-lived
 resources (DB pool, HTTP client, scheduler) so config reloads and shutdown are automatic.
 
+Working server: `samples/ktor` (gated routes, `cordisAdmin`, an SSE stream and an admin page; `./gradlew -p samples :ktor:run`), see `samples/README.md`.
+
 ## Install the plugin
 
 Depend on `io.github.amine2233:cordis-ktor` (JVM only). `install(Cordis)` owns one root `Context` per

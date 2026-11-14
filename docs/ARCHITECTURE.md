@@ -4,13 +4,22 @@
 
 ## 1. Concurrency and Serial Execution
 
-In Swift, concurrency was managed via a single `@CordisActor`. In Kotlin Multiplatform:
-- **Dispatcher-confined**: `Context.provide`, `Context.update` (in place), `Context.replaceValue`, `Context.contribute`, `Context.plugin`, `Context.effect`, `Context.emit`, `Context.dispose`, `PluginHandle.update` and `PluginHandle.dispose` run on a dedicated serial dispatcher (`Dispatchers.Default.limitedParallelism(1)` by default, configurable in `Context.root(dispatcher)`). Withdrawals and fork reconciliation happen inside these calls, so they are serialized too.
+In Swift, concurrency was managed via a single `@CordisActor`. In Kotlin Multiplatform every call falls in one of three groups.
+
+**Safe from any thread**
+- **Lock-free reads**: `ctx[Key]` (and so `ctx.require(Key)`) reads the registry's copy-on-write slot map without a lock or a dispatcher switch, so handlers and UI threads can call it directly.
+- **Lock-guarded**: the non-suspending `Context.on`, `Context.onDispose`, `Context.launch` and `Context.contributions`, disposal of a contribution handle, `Disposable.invoke` (its action runs exactly once, however many callers race) and the `Scope.collect` / `Scope.dispose` bookkeeping. They take a short internal lock (`Registry` listeners and contributions, `Scope` handles) that never suspends nor runs user code; teardowns and handlers run after it is released.
+- **`cordis-runtime`**: `PluginRuntime.start`, `setEnabled` and `stop` are serialised by one `Mutex` and callable from any thread, and `PluginRuntime.state` is readable from any thread (see section 12).
+
+**Runs on the graph dispatcher**
+- **Dispatcher-confined**: `Context.provide`, `Context.update` (in place), `Context.replaceValue`, `Context.contribute`, `Context.plugin`, `Context.effect`, `Context.emit`, `Context.dispose`, `PluginHandle.update` and `PluginHandle.dispose` run on the graph's serial dispatcher. Withdrawals and fork reconciliation happen inside these calls, so they are serialized too.
 - **Graph-owned lifecycle job**: `Context.plugin`, `Context.provide`, `Context.dispose`, `PluginHandle.update` and `PluginHandle.dispose` start, stop, restart, reconfigure or dispose forks, so they run in a job of the registry's internal, never-cancelled lifecycle scope rather than in the caller's job. The caller suspends until the operation completes and gets its result or exception; cancelling the caller only ends that wait, and the plugin still reaches the status it would have reached. A lifecycle call made from inside a lifecycle job of the same registry (for example `ctx.plugin` or `ctx.provide` inside `apply`) runs inline in that job instead of scheduling a new one.
-- **Lock-guarded, callable from any thread**: the non-suspending `Context.on`, `Context.onDispose`, `Context.launch` and `Context.contributions`, disposal of a contribution handle, `Disposable.invoke` (its action runs exactly once, however many callers race) and the `Scope.collect` / `Scope.dispose` bookkeeping. They take a short internal lock (`Registry` listeners and contributions, `Scope` handles) that never suspends nor runs user code; teardowns and handlers run after it is released.
-- `Context.zone` and `Context.isolate` are not yet thread-safe: call them from the dispatcher (for example inside `apply`) or from a single thread.
-- Because `withContext(dispatcher)` enters immediately when already running on that dispatcher, nested calls (such as a plugin calling `ctx.provide()` inside `apply()`) run without thread-switching or queueing delays.
-- Heavy asynchronous workloads belong inside the services themselves, not in the plugin registration kernel.
+- **How the dispatcher orders steps**: it runs one step at a time. It is `Dispatchers.Default.limitedParallelism(1)` by default, configurable in `Context.root(dispatcher)`. Because `withContext(dispatcher)` enters immediately when already running on that dispatcher, nested calls (such as a plugin calling `ctx.provide()` inside `apply()`) run inline, without thread-switching or re-queueing.
+
+**Not thread-safe yet**
+- `Context.zone` and `Context.isolate`: call them from the dispatcher (for example inside `apply`) or from a single thread.
+
+Heavy asynchronous workloads belong inside the services themselves, not in the plugin registration kernel.
 
 ## 2. Building Blocks (`cordis-kernel`)
 
@@ -117,3 +126,31 @@ A contribution point is a typed list that many plugins add to, such as the items
 - Order of a toggle: save the new override set, then load the entry (`ctx.plugin`) or dispose its `PluginHandle`, then publish. A failing `save` propagates and leaves kernel and state unchanged. `stop()` disposes every loaded handle in reverse catalog order.
 - State: `state` is a `StateFlow<List<PluginState>>` with one entry per catalog entry, in catalog order. `status` and `missing` come from the entry's fork in the latest `RuntimeSnapshot`; `status` is `null` when the runtime holds no handle (disabled or not started). While started, a collector launched with `ctx.launch` follows `snapshotFlow()`, so kernel changes the runtime did not cause (a dependent going `Pending` when its provider is disabled) show up on their own. `MutableStateFlow` equality drops identical lists.
 - Serialisation: one `Mutex` orders `start`, `setEnabled` and `stop`, so concurrent calls from any thread end in the state of the last call to take the lock, with state, store and kernel in agreement. Publishing is guarded by a second mutex and always derives from the latest holdings and snapshot, so a stale list never lands last.
+
+## 13. Flows and Launch
+
+`Context` exposes the graph to coroutine code through four flows, a structured `launch` and `PluginHandle.awaitActive()`.
+- `ctx.events<E>()` / `ctx.events(KClass)`: a cold `Flow<E>` built on `callbackFlow` and buffered `Channel.UNLIMITED`. Each collection registers its own listener, filtered by the context's zone like `ctx.on`, and removes it when collection stops. It completes normally when the collector stops or the context is disposed.
+- `ctx.serviceFlow(Key)`: a cold `Flow<T?>` that emits the current value (`null` when the slot is empty), then the new value on each provide or withdraw of that slot. It ignores zones. In-place `update` / `replaceValue` emit nothing, like `ServiceChanged`. It completes normally when the context is disposed.
+- `ctx.snapshotFlow()`: a `StateFlow<RuntimeSnapshot>`, one per graph and shared by every context (see section 8 for when it is republished). It is a `StateFlow`, so it never completes, also after the context is disposed.
+- `ctx.contributions(Key)`: a `StateFlow<List<T>>`, one per graph and key (see section 11). It never completes; an entry is removed when its contributing scope is disposed.
+- `ctx.launch(context) { }`: starts a coroutine in the registry's coroutine scope and returns its `Job`. The job is cancelled and joined when the context's scope is disposed (plugin unloaded, restarted or failed). A thrown exception is reported as `TaskFailed` and leaves the plugin status unchanged. On a disposed context `launch` throws `CordisException.Disposed`.
+- `PluginHandle.awaitActive()`: suspends until the plugin's status is neither `Pending` nor `Loading`, then returns `Active`, `Failed` or `Disposed`; a plugin disposed while waiting returns `Disposed`. It must not be called from the plugin's own `apply`, which would wait on itself.
+
+## 14. Ktor Server (`cordis-ktor`)
+
+`cordis-ktor` ties a graph to a Ktor 3 server `Application`. It is JVM only.
+- `install(Cordis) { }` owns one root context: `context = ...` passes one in, and the default `null` makes the plugin create `Context.root()`. `runtime = { ctx -> ... }` optionally builds a `PluginRuntime` on that context.
+- The runtime is started with `runBlocking` before `install` returns, so the enabled catalog entries are loaded before the server handles a call.
+- On `ApplicationStopped` the runtime is stopped, then the context is disposed in a `finally`, so the context is disposed even if `stop()` throws.
+- `Application.cordis` / `ApplicationCall.cordis` return the root context and `Application.cordisRuntime` / `ApplicationCall.cordisRuntime` the runtime (`null` when none is configured). All of them throw `IllegalStateException` when `Cordis` is not installed.
+- `Route.requireService(key, whenMissing = HttpStatusCode.ServiceUnavailable) { service -> }` reads the slot on every call: while it is empty the call gets `whenMissing` (503 by default) with an empty body and the handler does not run.
+- `Route.cordisAdmin(runtime)` mounts `GET plugins` and `PUT plugins/{key}` as JSON. It has no authentication or authorization of its own and must be mounted behind the host's.
+
+## 15. Android (`cordis-android`)
+
+`cordis-android` is an Android library for the platform glue.
+- `AppForegroundPlugin` (a `Plugin<LifecycleOwner>`), loaded by `ctx.installAppForeground(owner)`, provides `AppForegroundKey` (value `AppForeground`) while the owner's lifecycle is at least `STARTED` and withdraws it below that, so plugins that require it pause in the background. The default owner is `ProcessLifecycleOwner.get()`.
+- Disposing the returned `PluginHandle` stops observing the owner and withdraws the service.
+- `DataStoreEnabledPluginsStore(dataStore)` is an `EnabledPluginsStore` on a Preferences `DataStore`. It persists overrides as booleans under its own `cordis.enabled.<key>` preferences and never reads or writes other keys.
+- The module is opt-in: `settings.gradle.kts` includes it only when an Android SDK is found (`sdk.dir` in `local.properties`, `ANDROID_HOME` or `ANDROID_SDK_ROOT`). It is not published; consume it as a project dependency.

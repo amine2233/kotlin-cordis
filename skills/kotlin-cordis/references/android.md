@@ -4,6 +4,8 @@ The KMP modules have no Android target; an Android module consumes their **JVM v
 
 For Android-specific glue use `cordis-android` (foreground bridge, DataStore-backed `EnabledPluginsStore`). It is not published yet: consume it as a project dependency, `implementation(project(":cordis-android"))`, in a build that has an Android SDK.
 
+Working app: `samples/android` (Compose drawer from the `NavEntries` contribution point, Settings toggles persisted with `DataStoreEnabledPluginsStore`), see `samples/README.md`.
+
 ## Foreground bridge
 
 `installAppForeground()` provides `AppForegroundKey` while `ProcessLifecycleOwner` is at least `STARTED` and withdraws it in the background, so plugins that require it pause and resume with the app. Dispose the returned handle to stop it.

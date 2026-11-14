@@ -17,9 +17,24 @@ Platform recipes (read the one that matches the task):
 - Ktor server → `references/ktor.md`
 - CLI → `references/cli.md`
 
+Runnable sample apps (Ktor server, Android Compose app, shared sample plugins): `samples/README.md`.
+
 ## Modules and coordinates
 
 Group `io.github.amine2233`, published to GitHub Packages (`https://maven.pkg.github.com/amine2233/kotlin-cordis`).
+GitHub Packages needs a token with `read:packages`, even for public packages:
+```kotlin
+repositories {
+    maven {
+        url = uri("https://maven.pkg.github.com/amine2233/kotlin-cordis")
+        credentials {
+            username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GITHUB_ACTOR")
+            password = providers.gradleProperty("gpr.key").orNull ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
+}
+dependencies { implementation("io.github.amine2233:cordis:<version>") }
+```
 
 | Module | Use |
 |---|---|
@@ -72,6 +87,14 @@ Reading and reacting:
 - `ctx.snapshotFlow(): StateFlow<RuntimeSnapshot>` — the live `snapshot()` of the whole graph (same instance from every context, ignores zones), updated before the matching event. `PluginInfo.missing` lists the required services a plugin is waiting for.
 - Give a plugin a stable, obfuscation-proof identity with `override val pluginKey = PluginKey("db")` (lambda plugins: `ctx.plugin("db", key = PluginKey("db")) { }`). It is optional and not unique, and shows up as `PluginInfo.key`, `SlotInfo.providerKey` and the `key` of the plugin events.
 - Built-in events: `ServiceChanged`, `PluginStatusChanged`, `PluginFailed`, `TeardownFailed`, `ListenerFailed`, `TaskFailed`.
+
+Contribution points (many providers, one list per graph):
+```kotlin
+object DrawerItems : ContributionKey<DrawerItem>          // declares a point
+val remove: Disposable = ctx.contribute(DrawerItems, item, order = 0)   // on the dispatcher; removed with the scope
+val items: StateFlow<List<DrawerItem>> = ctx.contributions(DrawerItems) // by `order`, then registration
+```
+Lists are per graph (not split by realms or zones) and drive no reactivity: no fork restarts, no events, not in `snapshot()`.
 
 Space and routing: `ctx.isolate(Key, label)` gives a child where `Key` resolves to a separate instance (same label = shared);
 `ctx.zone("ui")` scopes event delivery; `ctx.intercept(Key) { wrap(it) }` decorates future `provide`s.
