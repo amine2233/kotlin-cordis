@@ -1,7 +1,13 @@
 package cordis.ktor
 
+import cordis.kernel.Context
 import cordis.kernel.Fork
+import cordis.kernel.HealthVisitor
+import cordis.kernel.MermaidVisitor
+import cordis.kernel.PluginInfo
 import cordis.kernel.PluginKey
+import cordis.kernel.TextTreeVisitor
+import cordis.kernel.accept
 import cordis.runtime.PluginMetadata
 import cordis.runtime.PluginRuntime
 import cordis.runtime.PluginRuntimeException
@@ -39,6 +45,23 @@ internal data class PluginStateResponse(
     val status: String?,
     val error: String?,
     val missing: List<String>,
+)
+
+@Serializable
+internal data class HealthItemResponse(
+    val name: String,
+    val key: String?,
+    val status: String,
+    val reason: String?,
+    val missing: List<String>,
+)
+
+@Serializable
+internal data class HealthResponse(
+    val healthy: Boolean,
+    val failed: List<HealthItemResponse>,
+    val missingServices: List<HealthItemResponse>,
+    val pending: List<HealthItemResponse>,
 )
 
 /**
@@ -80,6 +103,57 @@ public fun Route.cordisAdmin(runtime: PluginRuntime) {
         call.respondText(Json.encodeToString(state.toResponse()), ContentType.Application.Json)
     }
 }
+
+/**
+ * Mounts read-only routes that render a fresh [Context.snapshot] of [context] relative to this route, walked with a
+ * new visitor on every request:
+ * - `GET snapshot/tree` answers the [TextTreeVisitor] tree as `text/plain`;
+ * - `GET snapshot/mermaid` answers the [MermaidVisitor] `flowchart TD` source as `text/plain`;
+ * - `GET health` answers the [HealthVisitor] report as JSON
+ *   `{"healthy": <boolean>, "failed": [...], "missingServices": [...], "pending": [...]}`, each item
+ *   `{"name", "key", "status", "reason", "missing"}`, with status 200 when healthy and 503 otherwise.
+ *
+ * These routes have no authentication or authorization: the host must mount them behind its own auth. They expose
+ * plugin names, keys and failure reasons.
+ */
+public fun Route.cordisSnapshot(context: Context) {
+    get("snapshot/tree") {
+        val visitor = TextTreeVisitor()
+        context.snapshot().accept(visitor)
+        call.respondText(visitor.render(), ContentType.Text.Plain)
+    }
+    get("snapshot/mermaid") {
+        val visitor = MermaidVisitor()
+        context.snapshot().accept(visitor)
+        call.respondText(visitor.render(), ContentType.Text.Plain)
+    }
+    get("health") {
+        val visitor = HealthVisitor()
+        context.snapshot().accept(visitor)
+        val report = visitor.report()
+        val response =
+            HealthResponse(
+                healthy = report.healthy,
+                failed = report.failed.map { it.toHealthItem() },
+                missingServices = report.missingServices.map { it.toHealthItem() },
+                pending = report.pending.map { it.toHealthItem() },
+            )
+        call.respondText(
+            Json.encodeToString(response),
+            ContentType.Application.Json,
+            if (report.healthy) HttpStatusCode.OK else HttpStatusCode.ServiceUnavailable,
+        )
+    }
+}
+
+private fun PluginInfo.toHealthItem(): HealthItemResponse =
+    HealthItemResponse(
+        name = name,
+        key = key?.value,
+        status = status::class.simpleName.orEmpty(),
+        reason = (status as? Fork.Status.Failed)?.reason,
+        missing = missing.map { it.description },
+    )
 
 private fun PluginState.toResponse(): PluginStateResponse =
     PluginStateResponse(

@@ -1,6 +1,7 @@
 package cordis.ktor
 
 import cordis.kernel.Context
+import cordis.kernel.Inject
 import cordis.kernel.Plugin
 import cordis.kernel.PluginKey
 import cordis.kernel.ServiceKey
@@ -27,6 +28,38 @@ object ProviderPlugin : Plugin<Int> {
 class FeaturePlugin(
     override val name: String,
 ) : Plugin<Unit> {
+    override suspend fun apply(
+        ctx: Context,
+        config: Unit,
+    ) {}
+}
+
+/** Loads [child] as its own sub-plugin. */
+class ParentPlugin(
+    private val child: Plugin<Unit>,
+) : Plugin<Unit> {
+    override suspend fun apply(
+        ctx: Context,
+        config: Unit,
+    ) {
+        ctx.plugin(child)
+    }
+}
+
+const val FAILURE_REASON = "apply failed"
+
+object FailingPlugin : Plugin<Unit> {
+    override suspend fun apply(
+        ctx: Context,
+        config: Unit,
+    ): Unit = throw IllegalStateException(FAILURE_REASON)
+}
+
+object DependentPlugin : Plugin<Unit> {
+    override val inject = Inject.of(required = listOf(ProvidedKey))
+
+    override val pluginKey = PluginKey("dependent")
+
     override suspend fun apply(
         ctx: Context,
         config: Unit,
