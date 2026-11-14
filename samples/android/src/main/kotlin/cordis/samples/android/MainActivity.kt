@@ -22,6 +22,7 @@ class MainActivity : ComponentActivity() {
                 initializer { SettingsViewModel(app.runtime) }
                 initializer { NotesViewModel(app.context.serviceFlow(NotesKey)) }
                 initializer { WeatherViewModel(app.context.serviceFlow(WeatherKey)) }
+                initializer { DebugViewModel(app.context.snapshotFlow()) }
             }
         setContent {
             MaterialTheme {

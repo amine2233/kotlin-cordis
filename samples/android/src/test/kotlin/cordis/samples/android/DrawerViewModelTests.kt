@@ -22,6 +22,35 @@ class DrawerViewModelTests {
         }
 
     @Test
+    fun selectingDebugSelectsIt() =
+        runViewModelTest {
+            val viewModel = DrawerViewModel(MutableStateFlow(listOf(notes)))
+            advanceUntilIdle()
+            assertEquals(Destination.Settings, viewModel.state.value.selected)
+
+            viewModel.select(Destination.Debug)
+            assertEquals(Destination.Debug, viewModel.state.value.selected)
+            assertEquals("Debug", viewModel.state.value.title)
+        }
+
+    @Test
+    fun debugStaysSelectedWhenTheEntriesChange() =
+        runViewModelTest {
+            val entries = MutableStateFlow(listOf(notes, weather))
+            val viewModel = DrawerViewModel(entries)
+            advanceUntilIdle()
+            viewModel.select(Destination.Debug)
+
+            entries.value = listOf(weather)
+            advanceUntilIdle()
+            assertEquals(Destination.Debug, viewModel.state.value.selected)
+
+            entries.value = emptyList()
+            advanceUntilIdle()
+            assertEquals(Destination.Debug, viewModel.state.value.selected)
+        }
+
+    @Test
     fun entriesFollowTheFlow() =
         runViewModelTest {
             val entries = MutableStateFlow(listOf(notes))

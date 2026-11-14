@@ -61,6 +61,12 @@ fun SampleApp(
                     onClick = { select(Destination.Settings) },
                     modifier = Modifier.testTag(TestTags.DRAWER_ITEM_SETTINGS),
                 )
+                NavigationDrawerItem(
+                    label = { Text(DrawerState.DEBUG_TITLE) },
+                    selected = state.selected == Destination.Debug,
+                    onClick = { select(Destination.Debug) },
+                    modifier = Modifier.testTag(TestTags.DRAWER_ITEM_DEBUG),
+                )
             }
         },
     ) {
@@ -80,6 +86,10 @@ fun SampleApp(
                 when (val selected = state.selected) {
                     Destination.Settings -> {
                         SettingsScreen(viewModel(factory = factory))
+                    }
+
+                    Destination.Debug -> {
+                        DebugScreen(viewModel(factory = factory))
                     }
 
                     is Destination.Feature -> {
