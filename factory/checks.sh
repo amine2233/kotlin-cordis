@@ -13,6 +13,10 @@ if ! java -version >/dev/null 2>&1; then
   done
 fi
 
+if [ -z "${ANDROID_HOME:-}" ] && [ -d "$HOME/Library/Android/sdk" ]; then
+  export ANDROID_HOME="$HOME/Library/Android/sdk"
+fi
+
 KTLINT="$(command -v ktlint 2>/dev/null || true)"
 if [ -z "$KTLINT" ] || ! "$KTLINT" --version >/dev/null 2>&1; then
   KTLINT="$(ls -d "$HOME"/.local/share/mise/installs/ktlint/*/ktlint-*/bin/ktlint 2>/dev/null | tail -1)"
