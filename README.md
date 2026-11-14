@@ -30,6 +30,7 @@ Cordis' core idea: **everything is a plugin**, and plugins compose along two ort
 - `cordis-loader`: Declarative JSON load-plan loader (`LoadPlan`, `PluginFactoryRegistry`, `Context.load`) with `kotlinx.serialization`.
 - `cordis-testing`: Test support module (`ManualClock`, `settle(until = ...)`, `withTestApp`, `RecordedEvents`).
 - `cordis-runtime`: Enables and disables catalog plugins by key at runtime (`pluginCatalog { }`, `EnabledPluginsStore`, `PluginRuntimeDefault`) with an observable `StateFlow<List<PluginState>>`.
+- `cordis-ktor`: Ktor 3 server integration, JVM only (`install(Cordis)`, `call.cordis`, `Route.requireService`, `Route.cordisAdmin`).
 - `cordis-demo`: Executable walkthrough showing the 6 core scenarios.
 
 ---
@@ -121,6 +122,23 @@ runtime.setEnabled(PluginKey("search"), false)
 runtime.state.collect { states -> render(states) }
 ```
 
+### Ktor Server
+`cordis-ktor` (JVM only) owns a root `Context` and an optional `PluginRuntime` for a Ktor 3 `Application`: `install(Cordis)` starts the runtime before it returns, and `ApplicationStopped` stops it and disposes the context. `requireService` answers 503 (or `whenMissing`) while a service slot is empty and runs the handler with the service once it is filled. `cordisAdmin` mounts `GET plugins` and `PUT plugins/{key}` as JSON, with no content negotiation needed.
+
+```kotlin
+fun Application.module() {
+    install(Cordis) { runtime = { ctx -> PluginRuntimeDefault(ctx, catalog, InMemoryEnabledPluginsStore()) } }
+    routing {
+        route("/search", HttpMethod.Get) {
+            requireService(SearchKey) { search -> call.respondText(search.query(call.parameters["q"].orEmpty())) }
+        }
+        authenticate("admin") {                          // the admin routes have no auth of their own
+            route("/admin") { cordisAdmin(checkNotNull(application.cordisRuntime)) }
+        }
+    }
+}
+```
+
 ### Deterministic Testing
 `cordis-testing` offers `ManualClock` for controlling virtual time without sleeping real wall-clock time, `settle { condition }` for bounded yielding, and `withTestApp { ctx, events -> ... }` which captures lifecycle and failure events in order and guarantees root disposal. Inside `runTest`, `withTestApp(StandardTestDispatcher(testScheduler)) { ctx, events -> ... }` runs the graph on the test scheduler, so `advanceUntilIdle()` settles it deterministically.
 
@@ -192,6 +210,6 @@ All logic lives in `mise.toml`:
 - **Actions → Release → Run workflow** runs semantic-release (or automatically
   on every push to `main` when the repo variable `AUTO_RELEASE=true` is set): it tags
   `vX.Y.Z`, updates `CHANGELOG.md`, publishes `io.github.amine2233:cordis-kernel`, `cordis`,
-  `cordis-loader`, `cordis-testing` and `cordis-runtime` to GitHub Packages and creates the GitHub release
+  `cordis-loader`, `cordis-testing`, `cordis-runtime` and `cordis-ktor` to GitHub Packages and creates the GitHub release
   with the jars attached.
 - `mise run release --dry-run` previews the next version locally.
