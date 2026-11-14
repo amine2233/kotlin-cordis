@@ -2,6 +2,7 @@ package cordis.samples.shared
 
 import cordis.kernel.Context
 import cordis.kernel.Plugin
+import cordis.kernel.PluginKey
 import cordis.kernel.ServiceKey
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -26,6 +27,8 @@ class InMemoryLogger : Logger {
 object LoggerKey : ServiceKey<Logger>
 
 object LoggerPlugin : Plugin<Unit> {
+    override val pluginKey: PluginKey = SampleKeys.logger
+
     override suspend fun apply(
         ctx: Context,
         config: Unit,

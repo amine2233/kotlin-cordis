@@ -2,6 +2,7 @@ package cordis.samples.shared
 
 import cordis.kernel.Context
 import cordis.kernel.Plugin
+import cordis.kernel.PluginKey
 import cordis.kernel.ServiceKey
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -37,6 +38,8 @@ class InMemoryDatabase : Database {
 object DatabaseKey : ServiceKey<Database>
 
 object DatabasePlugin : Plugin<Unit> {
+    override val pluginKey: PluginKey = SampleKeys.database
+
     override suspend fun apply(
         ctx: Context,
         config: Unit,

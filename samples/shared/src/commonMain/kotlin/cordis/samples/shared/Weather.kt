@@ -5,6 +5,7 @@ import cordis.kernel.Context
 import cordis.kernel.CordisClock
 import cordis.kernel.DefaultClock
 import cordis.kernel.Plugin
+import cordis.kernel.PluginKey
 import cordis.kernel.ServiceKey
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -49,6 +50,8 @@ data class WeatherConfig(
 object WeatherKey : ServiceKey<Weather>
 
 object WeatherPlugin : Plugin<WeatherConfig> {
+    override val pluginKey: PluginKey = SampleKeys.weather
+
     override suspend fun apply(
         ctx: Context,
         config: WeatherConfig,
