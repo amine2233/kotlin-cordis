@@ -79,7 +79,7 @@ class ReactiveApiTests {
 
             handle.dispose()
 
-            assertTrue(job!!.isCancelled)
+            assertTrue(job.isCancelled)
             app.dispose()
         }
 

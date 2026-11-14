@@ -54,7 +54,7 @@ class PluginRegistry(
         plugin: Plugin<Unit>,
         key: String,
     ) {
-        register(plugin, key) { Unit }
+        register(plugin, key) { }
     }
 
     fun isRegistered(key: String): Boolean = makers.containsKey(key)
