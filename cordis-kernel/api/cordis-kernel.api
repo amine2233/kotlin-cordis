@@ -142,6 +142,31 @@ public final class cordis/kernel/Fork$Status$Pending : cordis/kernel/Fork$Status
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class cordis/kernel/HealthReport {
+	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;Ljava/util/List;Ljava/util/List;)Lcordis/kernel/HealthReport;
+	public static synthetic fun copy$default (Lcordis/kernel/HealthReport;Ljava/util/List;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lcordis/kernel/HealthReport;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFailed ()Ljava/util/List;
+	public final fun getHealthy ()Z
+	public final fun getMissingServices ()Ljava/util/List;
+	public final fun getPending ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/kernel/HealthVisitor : cordis/kernel/SnapshotVisitor {
+	public fun <init> ()V
+	public fun enterPlugin (Lcordis/kernel/PluginInfo;I)V
+	public fun exitPlugin (Lcordis/kernel/PluginInfo;I)V
+	public final fun report ()Lcordis/kernel/HealthReport;
+	public fun visitMissing (Lcordis/kernel/ServiceId;Lcordis/kernel/PluginInfo;)V
+	public fun visitProvidedSlot (Lcordis/kernel/SlotInfo;Lcordis/kernel/PluginInfo;)V
+}
+
 public final class cordis/kernel/Inject {
 	public static final field Companion Lcordis/kernel/Inject$Companion;
 	public fun <init> ()V
@@ -179,6 +204,15 @@ public final class cordis/kernel/ListenerFailed : cordis/kernel/CordisEvent {
 	public final fun getEvent ()Lcordis/kernel/CordisEvent;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/kernel/MermaidVisitor : cordis/kernel/SnapshotVisitor {
+	public fun <init> ()V
+	public fun enterPlugin (Lcordis/kernel/PluginInfo;I)V
+	public fun exitPlugin (Lcordis/kernel/PluginInfo;I)V
+	public final fun render ()Ljava/lang/String;
+	public fun visitMissing (Lcordis/kernel/ServiceId;Lcordis/kernel/PluginInfo;)V
+	public fun visitProvidedSlot (Lcordis/kernel/SlotInfo;Lcordis/kernel/PluginInfo;)V
 }
 
 public final class cordis/kernel/OccurrenceId {
@@ -397,6 +431,24 @@ public final class cordis/kernel/SlotInfo {
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class cordis/kernel/SnapshotVisitor {
+	public fun enterPlugin (Lcordis/kernel/PluginInfo;I)V
+	public fun exitPlugin (Lcordis/kernel/PluginInfo;I)V
+	public fun visitMissing (Lcordis/kernel/ServiceId;Lcordis/kernel/PluginInfo;)V
+	public fun visitProvidedSlot (Lcordis/kernel/SlotInfo;Lcordis/kernel/PluginInfo;)V
+}
+
+public final class cordis/kernel/SnapshotVisitor$DefaultImpls {
+	public static fun enterPlugin (Lcordis/kernel/SnapshotVisitor;Lcordis/kernel/PluginInfo;I)V
+	public static fun exitPlugin (Lcordis/kernel/SnapshotVisitor;Lcordis/kernel/PluginInfo;I)V
+	public static fun visitMissing (Lcordis/kernel/SnapshotVisitor;Lcordis/kernel/ServiceId;Lcordis/kernel/PluginInfo;)V
+	public static fun visitProvidedSlot (Lcordis/kernel/SnapshotVisitor;Lcordis/kernel/SlotInfo;Lcordis/kernel/PluginInfo;)V
+}
+
+public final class cordis/kernel/SnapshotVisitorKt {
+	public static final fun accept (Lcordis/kernel/RuntimeSnapshot;Lcordis/kernel/SnapshotVisitor;)V
+}
+
 public final class cordis/kernel/TaskFailed : cordis/kernel/CordisEvent {
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -424,6 +476,15 @@ public final class cordis/kernel/TeardownFailed : cordis/kernel/CordisEvent {
 	public final fun getPlugin ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class cordis/kernel/TextTreeVisitor : cordis/kernel/SnapshotVisitor {
+	public fun <init> ()V
+	public fun enterPlugin (Lcordis/kernel/PluginInfo;I)V
+	public fun exitPlugin (Lcordis/kernel/PluginInfo;I)V
+	public final fun render ()Ljava/lang/String;
+	public fun visitMissing (Lcordis/kernel/ServiceId;Lcordis/kernel/PluginInfo;)V
+	public fun visitProvidedSlot (Lcordis/kernel/SlotInfo;Lcordis/kernel/PluginInfo;)V
 }
 
 public abstract class cordis/kernel/UpdateOutcome {
