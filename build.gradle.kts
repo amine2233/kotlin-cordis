@@ -29,10 +29,14 @@ plugins {
 val libraryModules =
     listOf("cordis-kernel", "cordis", "cordis-loader", "cordis-testing", "cordis-runtime", "cordis-ktor")
 
+// Kover instruments every test task it sees, so it is applied only when a Kover task is requested,
+// which keeps the agent and koverFindJar out of plain jvmTest/build runs.
+val koverRequested = gradle.startParameter.taskNames.any { it.substringAfterLast(':').startsWith("kover") }
+
 dependencies {
     libraryModules.forEach { module ->
         dokka(project(":$module"))
-        kover(project(":$module"))
+        if (koverRequested) kover(project(":$module"))
     }
 }
 
@@ -58,10 +62,6 @@ allprojects {
         compilerOptions.freeCompilerArgs.add("-Xexpect-actual-classes")
     }
 }
-
-// Kover instruments every test task it sees, so it is applied only when a Kover task is requested,
-// which keeps the agent and koverFindJar out of plain jvmTest/build runs.
-val koverRequested = gradle.startParameter.taskNames.any { it.substringAfterLast(':').startsWith("kover") }
 
 configure(subprojects.filter { it.name in libraryModules }) {
     apply(plugin = "org.jetbrains.dokka")
