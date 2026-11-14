@@ -178,7 +178,7 @@ fun Application.module() {
 ```
 
 ### Android
-`cordis-android` is included in the build only when an Android SDK is found (`sdk.dir` in `local.properties`, or `ANDROID_HOME`). `installAppForeground()` provides `AppForegroundKey` while `ProcessLifecycleOwner` (or the `LifecycleOwner` you pass) is at least `STARTED`, so plugins that require it pause in the background and resume in the foreground. `DataStoreEnabledPluginsStore` persists `PluginRuntimeDefault` overrides in a Preferences `DataStore`, touching only its own `cordis.enabled.*` keys. The module is not published yet: depend on it as a project dependency.
+`cordis-android` is included in the build only when an Android SDK is found (`sdk.dir` in `local.properties`, or `ANDROID_HOME`). `installAppForeground()` provides `AppForegroundKey` while `ProcessLifecycleOwner` (or the `LifecycleOwner` you pass) is at least `STARTED`, so plugins that require it pause in the background and resume in the foreground. `DataStoreEnabledPluginsStore` persists `PluginRuntimeDefault` overrides in a Preferences `DataStore`, touching only its own `cordis.enabled.*` keys. The module is not published yet: depend on it as a project dependency. To open the project in Android Studio with the mise-managed JDK, see [`docs/ANDROID-STUDIO.md`](docs/ANDROID-STUDIO.md).
 
 ```kotlin
 cordis.installAppForeground()
