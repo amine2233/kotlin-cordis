@@ -100,6 +100,26 @@ internal class Registry(
     private var occurrenceCounter = 0
     private var listenerCounter = 0
 
+    private class Contribution(
+        val sequence: Int,
+        val order: Int,
+        val item: Any,
+    )
+
+    private class ContributionPoint {
+        var entries: List<Contribution> = emptyList()
+        val state = MutableStateFlow<List<Any>>(emptyList())
+        val flow: StateFlow<List<Any>> = state.asStateFlow()
+
+        fun publication(): () -> Unit {
+            val items = entries.map { it.item }
+            return { state.value = items }
+        }
+    }
+
+    private val contributionPoints = mutableMapOf<KClass<*>, ContributionPoint>()
+    private var contributionCounter = 0
+
     @Volatile
     private var zoneParents: Map<ZoneId, ZoneId?> = emptyMap()
 
@@ -273,6 +293,57 @@ internal class Registry(
 
     fun publishSnapshot() {
         snapshotState.value = snapshot()
+    }
+
+    // MARK: Contributions
+
+    private fun contributionPoint(key: ContributionKey<*>): ContributionPoint =
+        contributionPoints.getOrPut(key::class) { ContributionPoint() }
+
+    fun <T : Any> contributions(key: ContributionKey<T>): StateFlow<List<T>> =
+        lock.withLock {
+            @Suppress("UNCHECKED_CAST")
+            contributionPoint(key).flow as StateFlow<List<T>>
+        }
+
+    /**
+     * Adds an entry and returns its sequence number. Call on [dispatcher]: the new list is published
+     * outside the lock, and stays in order because every add and remove runs there.
+     */
+    fun contribute(
+        key: ContributionKey<*>,
+        item: Any,
+        order: Int,
+    ): Int {
+        val (sequence, publish) =
+            lock.withLock {
+                val point = contributionPoint(key)
+                contributionCounter += 1
+                point.entries =
+                    (point.entries + Contribution(sequence = contributionCounter, order = order, item = item))
+                        .sortedWith(compareBy({ it.order }, { it.sequence }))
+                contributionCounter to point.publication()
+            }
+        publish()
+        return sequence
+    }
+
+    /**
+     * Removes the entry with [sequence], if still present. Call on [dispatcher], like [contribute].
+     */
+    fun withdrawContribution(
+        key: ContributionKey<*>,
+        sequence: Int,
+    ) {
+        val publish =
+            lock.withLock {
+                val point = contributionPoint(key)
+                val remaining = point.entries.filter { it.sequence != sequence }
+                if (remaining.size == point.entries.size) return@withLock null
+                point.entries = remaining
+                point.publication()
+            } ?: return
+        publish()
     }
 
     // MARK: Events

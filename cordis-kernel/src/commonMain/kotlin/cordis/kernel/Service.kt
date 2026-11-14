@@ -15,6 +15,17 @@ public interface ServiceKey<T : Any> {
 }
 
 /**
+ * Typed contribution point: many plugins add items, everyone reads one shared, ordered list.
+ * Its identity is the key's class.
+ *
+ * Example:
+ * ```kotlin
+ * object DrawerItems : ContributionKey<DrawerItem>
+ * ```
+ */
+public interface ContributionKey<T : Any>
+
+/**
  * Type-erased identity of a service key.
  */
 public data class ServiceId(

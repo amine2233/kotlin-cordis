@@ -10,6 +10,8 @@ open annotation class cordis.kernel/InternalCordisApi : kotlin/Annotation { // c
     constructor <init>() // cordis.kernel/InternalCordisApi.<init>|<init>(){}[0]
 }
 
+abstract interface <#A: kotlin/Any> cordis.kernel/ContributionKey // cordis.kernel/ContributionKey|null[0]
+
 abstract interface <#A: kotlin/Any> cordis.kernel/ServiceKey { // cordis.kernel/ServiceKey|null[0]
     open val serviceId // cordis.kernel/ServiceKey.serviceId|{}serviceId[0]
         open fun <get-serviceId>(): cordis.kernel/ServiceId // cordis.kernel/ServiceKey.serviceId.<get-serviceId>|<get-serviceId>(){}[0]
@@ -63,6 +65,7 @@ final class cordis.kernel/Context { // cordis.kernel/Context|null[0]
 
     final fun <#A1: cordis.kernel/CordisEvent> events(kotlin.reflect/KClass<#A1>): kotlinx.coroutines.flow/Flow<#A1> // cordis.kernel/Context.events|events(kotlin.reflect.KClass<0:0>){0§<cordis.kernel.CordisEvent>}[0]
     final fun <#A1: cordis.kernel/CordisEvent> on(kotlin.reflect/KClass<#A1>, kotlin.coroutines/SuspendFunction1<#A1, kotlin/Unit>): cordis.kernel/Disposable // cordis.kernel/Context.on|on(kotlin.reflect.KClass<0:0>;kotlin.coroutines.SuspendFunction1<0:0,kotlin.Unit>){0§<cordis.kernel.CordisEvent>}[0]
+    final fun <#A1: kotlin/Any> contributions(cordis.kernel/ContributionKey<#A1>): kotlinx.coroutines.flow/StateFlow<kotlin.collections/List<#A1>> // cordis.kernel/Context.contributions|contributions(cordis.kernel.ContributionKey<0:0>){0§<kotlin.Any>}[0]
     final fun <#A1: kotlin/Any> get(cordis.kernel/ServiceKey<#A1>): #A1? // cordis.kernel/Context.get|get(cordis.kernel.ServiceKey<0:0>){0§<kotlin.Any>}[0]
     final fun <#A1: kotlin/Any> intercept(cordis.kernel/ServiceKey<#A1>, kotlin/Function1<#A1, #A1>): cordis.kernel/Context // cordis.kernel/Context.intercept|intercept(cordis.kernel.ServiceKey<0:0>;kotlin.Function1<0:0,0:0>){0§<kotlin.Any>}[0]
     final fun <#A1: kotlin/Any> require(cordis.kernel/ServiceKey<#A1>): #A1 // cordis.kernel/Context.require|require(cordis.kernel.ServiceKey<0:0>){0§<kotlin.Any>}[0]
@@ -76,6 +79,7 @@ final class cordis.kernel/Context { // cordis.kernel/Context|null[0]
     final fun zone(kotlin/String): cordis.kernel/Context // cordis.kernel/Context.zone|zone(kotlin.String){}[0]
     final inline fun <#A1: reified cordis.kernel/CordisEvent> events(): kotlinx.coroutines.flow/Flow<#A1> // cordis.kernel/Context.events|events(){0§<cordis.kernel.CordisEvent>}[0]
     final inline fun <#A1: reified cordis.kernel/CordisEvent> on(noinline kotlin.coroutines/SuspendFunction1<#A1, kotlin/Unit>): cordis.kernel/Disposable // cordis.kernel/Context.on|on(kotlin.coroutines.SuspendFunction1<0:0,kotlin.Unit>){0§<cordis.kernel.CordisEvent>}[0]
+    final suspend fun <#A1: kotlin/Any> contribute(cordis.kernel/ContributionKey<#A1>, #A1, kotlin/Int = ...): cordis.kernel/Disposable // cordis.kernel/Context.contribute|contribute(cordis.kernel.ContributionKey<0:0>;0:0;kotlin.Int){0§<kotlin.Any>}[0]
     final suspend fun <#A1: kotlin/Any> provide(cordis.kernel/ServiceKey<#A1>, #A1) // cordis.kernel/Context.provide|provide(cordis.kernel.ServiceKey<0:0>;0:0){0§<kotlin.Any>}[0]
     final suspend fun <#A1: kotlin/Any> replaceValue(cordis.kernel/ServiceKey<#A1>, kotlin/Function1<#A1, #A1>) // cordis.kernel/Context.replaceValue|replaceValue(cordis.kernel.ServiceKey<0:0>;kotlin.Function1<0:0,0:0>){0§<kotlin.Any>}[0]
     final suspend fun <#A1: kotlin/Any> update(cordis.kernel/ServiceKey<#A1>, kotlin/Function1<#A1, kotlin/Unit>) // cordis.kernel/Context.update|update(cordis.kernel.ServiceKey<0:0>;kotlin.Function1<0:0,kotlin.Unit>){0§<kotlin.Any>}[0]
