@@ -91,13 +91,15 @@ found (see [Android target](#android-target)).
 - `SampleApplication` owns the root `Context` and a `PluginRuntimeDefault` over `sampleCatalog()`, and starts it
   on launch. The toggles are saved by `DataStoreEnabledPluginsStore` in a Preferences DataStore, so they survive
   a restart.
-- The navigation drawer lists `context.contributions(NavEntries)` live, followed by Settings, which is also the
-  first screen and where the app falls back when the selected feature is turned off.
+- The navigation drawer lists `context.contributions(NavEntries)` live, followed by the fixed Settings and Debug
+  items. Settings is the first screen and where the app falls back when the selected feature is turned off.
 - Settings lists every catalog plugin with its description, its status (Active, Waiting for the missing
   services, Starting, Failed or Disabled) and a switch to turn it on or off. The locked `logger` switch is
   disabled.
 - Notes lists the notes and adds new ones; Weather shows the current temperature in °C and the update number.
   `logger`, `database` and `analytics` open a shared info screen with the plugin's catalog description.
+- Debug, the fixed drawer item below Settings, shows the health report (Healthy or Not healthy, then the failed,
+  missing services and pending plugins) and the plugin text tree, both updated live from `context.snapshotFlow()`.
 
 Build it, install it on a running emulator or connected device, and run its JVM unit tests:
 
