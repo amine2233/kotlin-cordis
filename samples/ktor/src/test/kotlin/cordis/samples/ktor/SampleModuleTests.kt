@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.produceIn
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
@@ -198,6 +199,57 @@ class SampleModuleTests {
         }
     }
 
+    private suspend fun HttpResponse.json(): JsonObject = Json.parseToJsonElement(bodyAsText()).jsonObject
+
+    private fun JsonObject.isHealthy(): Boolean = getValue("healthy").jsonPrimitive.boolean
+
+    private fun JsonObject.keysIn(list: String): List<String> =
+        getValue(list).jsonArray.map {
+            it.jsonObject
+                .getValue("key")
+                .jsonPrimitive.content
+        }
+
+    @Test
+    fun snapshotRoutesDescribeTheDefaultSample() =
+        testApplication {
+            startSample()
+
+            val tree = client.get("/admin/snapshot/tree")
+            assertEquals(HttpStatusCode.OK, tree.status)
+            assertEquals(ContentType.Text.Plain, tree.contentType()?.withoutParameters())
+            assertTrue("NotesPlugin" in tree.bodyAsText())
+
+            val mermaid = client.get("/admin/snapshot/mermaid")
+            assertEquals(HttpStatusCode.OK, mermaid.status)
+            assertEquals(ContentType.Text.Plain, mermaid.contentType()?.withoutParameters())
+            assertTrue(mermaid.bodyAsText().startsWith("flowchart TD"))
+
+            val health = client.get("/admin/health")
+            assertEquals(HttpStatusCode.OK, health.status)
+            assertEquals(ContentType.Application.Json, health.contentType()?.withoutParameters())
+            assertTrue(health.json().isHealthy())
+        }
+
+    @Test
+    fun healthIsUnavailableWhileTheDatabaseIsDisabled() =
+        testApplication {
+            startSample()
+
+            assertEquals(HttpStatusCode.OK, client.setEnabled("database", false).status)
+            val unhealthy = client.get("/admin/health")
+            assertEquals(HttpStatusCode.ServiceUnavailable, unhealthy.status)
+            val report = unhealthy.json()
+            assertFalse(report.isHealthy())
+            assertTrue("notes" in report.keysIn("missingServices"))
+            assertTrue("notes" in report.keysIn("pending"))
+
+            assertEquals(HttpStatusCode.OK, client.setEnabled("database", true).status)
+            val healthy = client.get("/admin/health")
+            assertEquals(HttpStatusCode.OK, healthy.status)
+            assertTrue(healthy.json().isHealthy())
+        }
+
     @Test
     fun adminPageIsStaticHtmlOnTheEventStream() =
         testApplication {
@@ -208,6 +260,9 @@ class SampleModuleTests {
             assertEquals(ContentType.Text.Html, page.contentType()?.withoutParameters())
             val html = page.bodyAsText()
             assertTrue("EventSource" in html)
+            listOf("/admin/health", "/admin/snapshot/tree", "/admin/snapshot/mermaid").forEach { route ->
+                assertTrue(route in html, "admin page does not fetch $route")
+            }
             listOf("innerHTML", "outerHTML", "insertAdjacentHTML", "document.write").forEach { sink ->
                 assertFalse(sink in html, "admin page uses $sink")
             }
