@@ -5,6 +5,7 @@ import cordis.kernel.InternalCordisApi
 import cordis.kernel.Plugin
 import cordis.testing.ManualClock
 import cordis.testing.settle
+import cordis.testing.withTestApp
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.yield
 import kotlin.test.Test
@@ -44,98 +45,103 @@ class TimerTests {
     @Test
     fun afterFiresOnce() =
         runTest {
-            val app = Context.root()
-            val clock = ManualClock()
-            val counter = TimerCounter()
-            app.after(5.seconds, clock = clock) { counter.value += 1 }
-            waitForSleepers(clock, 1)
-            clock.advance(4.seconds)
-            yield()
-            assertEquals(0, counter.value)
-            clock.advance(1.seconds)
-            settle { counter.value == 1 }
-            clock.advance(60.seconds)
-            yield()
-            assertEquals(1, counter.value)
+            withTestApp { app, _ ->
+                val clock = ManualClock()
+                val counter = TimerCounter()
+                app.after(5.seconds, clock = clock) { counter.value += 1 }
+                waitForSleepers(clock, 1)
+                clock.advance(4.seconds)
+                yield()
+                assertEquals(0, counter.value)
+                clock.advance(1.seconds)
+                settle { counter.value == 1 }
+                clock.advance(60.seconds)
+                yield()
+                assertEquals(1, counter.value)
+            }
         }
 
     @Test
     fun everyFiresRepeatedly() =
         runTest {
-            val app = Context.root()
-            val clock = ManualClock()
-            val counter = TimerCounter()
-            app.every(1.seconds, clock = clock) { counter.value += 1 }
-            for (expected in 1..3) {
-                waitForSleepers(clock, 1)
-                clock.advance(1.seconds)
-                settle { counter.value == expected }
-                assertEquals(expected, counter.value)
+            withTestApp { app, _ ->
+                val clock = ManualClock()
+                val counter = TimerCounter()
+                app.every(1.seconds, clock = clock) { counter.value += 1 }
+                for (expected in 1..3) {
+                    waitForSleepers(clock, 1)
+                    clock.advance(1.seconds)
+                    settle { counter.value == expected }
+                    assertEquals(expected, counter.value)
+                }
             }
         }
 
     @Test
     fun nothingFiresAfterDispose() =
         runTest {
-            val app = Context.root()
-            val clock = ManualClock()
-            val counter = TimerCounter()
-            val timer = app.every(1.seconds, clock = clock) { counter.value += 1 }
-            waitForSleepers(clock, 1)
-            timer()
-            assertTrue(timer.isDisposed)
-            assertEquals(0, clock.sleeperCount)
-            clock.advance(10.seconds)
-            yield()
-            assertEquals(0, counter.value)
+            withTestApp { app, _ ->
+                val clock = ManualClock()
+                val counter = TimerCounter()
+                val timer = app.every(1.seconds, clock = clock) { counter.value += 1 }
+                waitForSleepers(clock, 1)
+                timer()
+                assertTrue(timer.isDisposed)
+                assertEquals(0, clock.sleeperCount)
+                clock.advance(10.seconds)
+                yield()
+                assertEquals(0, counter.value)
+            }
         }
 
     @Test
     fun scopeDisposeCancelsTimer() =
         runTest {
-            val app = Context.root()
-            val clock = ManualClock()
-            val counter = TimerCounter()
-            app.every(1.seconds, clock = clock) { counter.value += 1 }
-            waitForSleepers(clock, 1)
-            app.dispose()
-            clock.advance(10.seconds)
-            yield()
-            assertEquals(0, counter.value)
-            assertEquals(0, clock.sleeperCount)
+            withTestApp { app, _ ->
+                val clock = ManualClock()
+                val counter = TimerCounter()
+                app.every(1.seconds, clock = clock) { counter.value += 1 }
+                waitForSleepers(clock, 1)
+                app.dispose()
+                clock.advance(10.seconds)
+                yield()
+                assertEquals(0, counter.value)
+                assertEquals(0, clock.sleeperCount)
+            }
         }
 
     @Test
     fun pluginRestartCancelsOldTimer() =
         runTest {
-            val app = Context.root()
-            val clock = ManualClock()
-            val counter = TimerCounter()
-            val handle = app.plugin(TickerPlugin, TickerConfig(clock, counter))
-            waitForSleepers(clock, 1)
-            handle.update(TickerConfig(clock, counter))
-            waitForSleepers(clock, 1)
-            assertEquals(1, clock.sleeperCount)
-            clock.advance(1.seconds)
-            settle { counter.value >= 1 }
-            yield()
-            assertEquals(1, counter.value)
+            withTestApp { app, _ ->
+                val clock = ManualClock()
+                val counter = TimerCounter()
+                val handle = app.plugin(TickerPlugin, TickerConfig(clock, counter))
+                waitForSleepers(clock, 1)
+                handle.update(TickerConfig(clock, counter))
+                waitForSleepers(clock, 1)
+                assertEquals(1, clock.sleeperCount)
+                clock.advance(1.seconds)
+                settle { counter.value >= 1 }
+                yield()
+                assertEquals(1, counter.value)
+            }
         }
 
     @OptIn(InternalCordisApi::class)
     @Test
     fun firedAfterReleasesItsScopeEntry() =
         runTest {
-            val app = Context.root()
-            val clock = ManualClock()
-            val counter = TimerCounter()
-            val before = app.scope.size
-            app.after(1.seconds, clock = clock) { counter.value += 1 }
-            waitForSleepers(clock, 1)
-            clock.advance(1.seconds)
-            settle { counter.value == 1 }
-            settle { app.scope.size == before }
-            assertEquals(before, app.scope.size)
-            app.dispose()
+            withTestApp { app, _ ->
+                val clock = ManualClock()
+                val counter = TimerCounter()
+                val before = app.scope.size
+                app.after(1.seconds, clock = clock) { counter.value += 1 }
+                waitForSleepers(clock, 1)
+                clock.advance(1.seconds)
+                settle { counter.value == 1 }
+                settle { app.scope.size == before }
+                assertEquals(before, app.scope.size)
+            }
         }
 }
