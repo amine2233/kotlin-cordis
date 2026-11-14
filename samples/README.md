@@ -14,8 +14,9 @@ root build:
 
 The samples build looks for an Android SDK the same way the root build does: `sdk.dir` in
 `samples/local.properties` (git-ignored), `ANDROID_HOME` or `ANDROID_SDK_ROOT`. Only when one is found does it
-put the Android Gradle plugin on its classpath, add Google's Maven repository and give `shared` an Android
-target. Without an SDK, `shared` builds and tests on the JVM alone.
+put the Android Gradle plugin on its classpath, add Google's Maven repository, give `shared` an Android
+target and include the `android` app module. Without an SDK, the build has only `shared` and `ktor`, and
+`shared` builds and tests on the JVM alone.
 
 ## `shared`
 
@@ -75,6 +76,31 @@ Its tests alone:
 
 ```sh
 ./gradlew -p samples :ktor:check
+```
+
+## `android`
+
+`samples/android` (package and application id `cordis.samples.android`) is a single-activity Jetpack Compose
+(Material 3) app, "Cordis Sample". It needs an Android SDK: the module is only part of the build when one is
+found (see [Android target](#android-target)).
+
+- `SampleApplication` owns the root `Context` and a `PluginRuntimeDefault` over `sampleCatalog()`, and starts it
+  on launch. The toggles are saved by `DataStoreEnabledPluginsStore` in a Preferences DataStore, so they survive
+  a restart.
+- The navigation drawer lists `context.contributions(NavEntries)` live, followed by Settings, which is also the
+  first screen and where the app falls back when the selected feature is turned off.
+- Settings lists every catalog plugin with its description, its status (Active, Waiting for the missing
+  services, Starting, Failed or Disabled) and a switch to turn it on or off. The locked `logger` switch is
+  disabled.
+- Notes lists the notes and adds new ones; Weather shows the current temperature in °C and the update number.
+  `logger`, `database` and `analytics` open a shared info screen with the plugin's catalog description.
+
+Build it, install it on a running emulator or connected device, and run its JVM unit tests:
+
+```sh
+./gradlew -p samples :android:assembleDebug
+./gradlew -p samples :android:installDebug
+./gradlew -p samples :android:testDebugUnitTest
 ```
 
 ## Tests
