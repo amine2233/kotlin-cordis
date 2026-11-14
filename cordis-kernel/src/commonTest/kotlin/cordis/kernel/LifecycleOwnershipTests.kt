@@ -121,6 +121,7 @@ class LifecycleOwnershipTests {
             app.dispose()
         }
 
+    @OptIn(InternalCordisApi::class)
     @Test
     fun loadDisposeTogglesLeaveNoScopeEntries() =
         runTest {
@@ -132,6 +133,7 @@ class LifecycleOwnershipTests {
             app.dispose()
         }
 
+    @OptIn(InternalCordisApi::class)
     @Test
     fun reprovidingKeepsOneWithdrawEntry() =
         runTest {

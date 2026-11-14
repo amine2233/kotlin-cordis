@@ -51,7 +51,8 @@ public class Scope(
     public var isDisposed: Boolean = false
         private set
 
-    internal val size: Int
+    @InternalCordisApi
+    public val size: Int
         get() = lock.withLock { handles.size }
 
     /**
