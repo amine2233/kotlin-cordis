@@ -1,5 +1,6 @@
 public final class cordis/ktor/CordisAdminKt {
 	public static final fun cordisAdmin (Lio/ktor/server/routing/Route;Lcordis/runtime/PluginRuntime;)V
+	public static final fun cordisSnapshot (Lio/ktor/server/routing/Route;Lcordis/kernel/Context;)V
 }
 
 public final class cordis/ktor/CordisConfig {
