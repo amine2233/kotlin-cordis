@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
@@ -46,7 +47,7 @@ class Context internal constructor(
                     failureHandler = { error ->
                         registry.emit(TeardownFailed(plugin = "root", error = error))
                     },
-                    coroutineScope = registry.coroutineScope,
+                    coroutineScope = registry.lifecycleScope,
                 )
             return Context(
                 registry = registry,
@@ -57,12 +58,15 @@ class Context internal constructor(
         }
     }
 
+    private val withdrawals = mutableMapOf<Slot, Disposable>()
+
     /**
-     * Tears down the whole graph, children first.
+     * Tears down the whole graph, children first. On the root, then cancels [Registry.coroutineScope].
      */
     suspend fun dispose() {
-        withContext(registry.dispatcher) {
+        registry.lifecycle {
             scope.dispose()
+            if (parent == null) registry.coroutineScope.cancel()
         }
     }
 
@@ -87,7 +91,7 @@ class Context internal constructor(
         key: ServiceKey<T>,
         value: T,
     ) {
-        withContext(registry.dispatcher) {
+        registry.lifecycle {
             if (scope.isDisposed) throw CordisException.Disposed()
 
             val targetSlot = slot(key.serviceId)
@@ -98,10 +102,13 @@ class Context internal constructor(
                     .fold(value as Any) { current, layer -> layer(current) }
 
             registry.provide(targetSlot, wrapped, by = this@Context)
-            val ownerContext = this@Context
-            val forkId = fork?.id
-            scope.collect {
-                registry.withdraw(targetSlot, owner = ownerContext, fork = forkId)
+            if (withdrawals[targetSlot]?.isDisposed != false) {
+                val ownerContext = this@Context
+                val forkId = fork?.id
+                withdrawals[targetSlot] =
+                    scope.collect {
+                        registry.withdraw(targetSlot, owner = ownerContext, fork = forkId)
+                    }
             }
         }
     }
@@ -219,7 +226,7 @@ class Context internal constructor(
         plugin: Plugin<C>,
         config: C,
     ): PluginHandle<C> =
-        withContext(registry.dispatcher) {
+        registry.lifecycle {
             val newFork =
                 Fork(
                     name = plugin.name,
@@ -230,7 +237,7 @@ class Context internal constructor(
                     plugin.apply(ctx, config)
                 }
             registry.register(newFork)
-            scope.collect { newFork.dispose() }
+            newFork.parentEntry = scope.collect { newFork.dispose() }
             if (!scope.isDisposed) {
                 newFork.refresh()
             }
@@ -378,7 +385,7 @@ class Context internal constructor(
                     job.join()
                 }
             }
-        job.invokeOnCompletion { registry.coroutineScope.launch { teardown() } }
+        job.invokeOnCompletion { registry.lifecycleScope.launch { teardown() } }
         return job
     }
 }
@@ -391,4 +398,14 @@ internal class LaunchMarker(
     val owner: String,
 ) : AbstractCoroutineContextElement(LaunchMarker) {
     companion object Key : CoroutineContext.Key<LaunchMarker>
+}
+
+/**
+ * Marks a graph-owned lifecycle job of [registry], so nested lifecycle calls run inline instead of
+ * waiting on a new job.
+ */
+internal class LifecycleMarker(
+    val registry: Registry,
+) : AbstractCoroutineContextElement(LifecycleMarker) {
+    companion object Key : CoroutineContext.Key<LifecycleMarker>
 }

@@ -128,7 +128,7 @@ class ConcurrencyStressTests {
         runTest {
             val lock = Lock()
             var runs = 0
-            val scope = Scope()
+            val scope = Scope(coroutineScope = this)
 
             withContext(Dispatchers.Default) {
                 List(WORKERS) { async { scope.collect { lock.withLock { runs++ } } } }.awaitAll()

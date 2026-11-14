@@ -13,7 +13,7 @@ class ScopeTests {
     @Test
     fun disposeRunsTeardownsInLIFOOrder() =
         runTest {
-            val scope = Scope()
+            val scope = Scope(coroutineScope = this)
             val probe = Probe()
             scope.collect { probe.log.add("1") }
             scope.collect { probe.log.add("2") }
@@ -26,7 +26,7 @@ class ScopeTests {
     @Test
     fun disposableIsIdempotent() =
         runTest {
-            val scope = Scope()
+            val scope = Scope(coroutineScope = this)
             val probe = Probe()
             val handle = scope.collect { probe.log.add("x") }
             handle()
@@ -39,7 +39,7 @@ class ScopeTests {
     @Test
     fun disposeIsIdempotent() =
         runTest {
-            val scope = Scope()
+            val scope = Scope(coroutineScope = this)
             val probe = Probe()
             scope.collect { probe.log.add("x") }
             scope.dispose()

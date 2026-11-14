@@ -6,6 +6,7 @@
 
 In Swift, concurrency was managed via a single `@CordisActor`. In Kotlin Multiplatform:
 - **Dispatcher-confined**: `Context.provide`, `Context.update` (in place), `Context.replaceValue`, `Context.plugin`, `Context.effect`, `Context.emit`, `Context.dispose`, `PluginHandle.update` and `PluginHandle.dispose` run on a dedicated serial dispatcher (`Dispatchers.Default.limitedParallelism(1)` by default, configurable in `Context.root(dispatcher)`). Withdrawals and fork reconciliation happen inside these calls, so they are serialized too.
+- **Graph-owned lifecycle job**: `Context.plugin`, `Context.provide`, `Context.dispose`, `PluginHandle.update` and `PluginHandle.dispose` start, stop, restart, reconfigure or dispose forks, so they run in a job of the registry's internal, never-cancelled lifecycle scope rather than in the caller's job. The caller suspends until the operation completes and gets its result or exception; cancelling the caller only ends that wait, and the plugin still reaches the status it would have reached. A lifecycle call made from inside a lifecycle job of the same registry (for example `ctx.plugin` or `ctx.provide` inside `apply`) runs inline in that job instead of scheduling a new one.
 - **Lock-guarded, callable from any thread**: the non-suspending `Context.on`, `Context.onDispose` and `Context.launch`, `Disposable.invoke` (its action runs exactly once, however many callers race) and the `Scope.collect` / `Scope.dispose` bookkeeping. They take a short internal lock (`Registry` listeners, `Scope` handles) that never suspends nor runs user code; teardowns and handlers run after it is released.
 - `Context.zone` and `Context.isolate` are not yet thread-safe: call them from the dispatcher (for example inside `apply`) or from a single thread.
 - Because `withContext(dispatcher)` enters immediately when already running on that dispatcher, nested calls (such as a plugin calling `ctx.provide()` inside `apply()`) run without thread-switching or queueing delays.
@@ -15,7 +16,7 @@ In Swift, concurrency was managed via a single `@CordisActor`. In Kotlin Multipl
 
 | File / Component | Type | Role |
 |---|---|---|
-| `Scope.kt` | `Scope`, `Disposable`, `Disposer` | LIFO, idempotent teardown. Represents the time axis. `Disposable` is atomic: concurrent `invoke()` calls run its action once. |
+| `Scope.kt` | `Scope`, `Disposable`, `Disposer` | LIFO, idempotent teardown. Represents the time axis. `Disposable` is atomic: concurrent `invoke()` calls run its action once. `Scope` requires a `CoroutineScope`: a teardown registered after the scope is disposed is launched at once on it. The graph's scopes use the registry's never-cancelled lifecycle scope, so late teardowns run on the graph dispatcher, even after root dispose. |
 | `Service.kt` | `ServiceKey`, `ServiceId`, `Slot`, `Inject`, events, `CordisException` | Typed service identity and plugin dependency specifications. |
 | `Registry.kt` | `Registry` | Per-graph state: slots with generation counters, live forks, event listeners, zones. |
 | `Plugin.kt` | `Plugin`, `Fork`, `PluginHandle`, `UpdateOutcome` | Plugin definition and its reactive lifecycle (`Pending`, `Loading`, `Active`, `Failed`, `Disposed`). |
@@ -72,6 +73,9 @@ A `Slot` is the combination of `(ServiceId, Realm)`.
 - Teardowns may throw. `Scope.dispose` runs all registered disposables in reverse order, catching each error and emitting it as `TeardownFailed(plugin, error)` without aborting the remaining disposables.
 - Listeners are isolated from each other and from the emitter. `Registry.emit` calls each listener in its own `try`/`catch`: a throwing listener does not stop the remaining listeners, the emitter never sees the error, and the failure is emitted as `ListenerFailed(event, error)` from the same zone. A listener that throws while handling `ListenerFailed` is not reported again, so there is no recursion. `CancellationException` still propagates.
 - The graph's coroutine scope has a `CoroutineExceptionHandler`. A throwing `ctx.launch` body, timer body (`after` / `every`) or internal launch is reported as `TaskFailed(plugin, error)`, where `plugin` is the launching context's name (`root` when there is no owner). The exception never reaches the platform's uncaught-exception handler.
+- A `CancellationException` out of `apply` is never a failure: the run is rolled back, the fork returns to `Pending` (unless disposed), no `Failed` status is set and no `PluginFailed` is emitted.
+- `Disposed` is terminal: once a fork is `Disposed`, no further status change or `PluginFailed` is emitted for it. Disposing a fork while its `apply` is suspended cancels that `apply`, waits for its rollback and ends in `Disposed`.
+- Root `Context.dispose()` tears the graph down children first, then cancels the graph's coroutine scope (`Registry.coroutineScope`), so every `ctx.launch` job and timer stops. A second `dispose()` is a no-op.
 - Neither `ListenerFailed` nor `TaskFailed` changes plugin status: the plugin stays `Active`. Only a throwing `apply` yields `Failed` and `PluginFailed`.
 
 ## 9. Timer Effects (`cordis`)
