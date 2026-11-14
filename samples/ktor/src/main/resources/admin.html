@@ -2,12 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cordis sample admin</title>
 <style>
   body { font-family: system-ui, sans-serif; margin: 2rem auto; max-width: 48rem; padding: 0 1rem; color: #222; }
   h1 { font-size: 1.4rem; }
   #connection { color: #666; font-size: 0.9rem; }
   #failure { color: #a00; white-space: pre-wrap; min-height: 1.2em; }
+  .scroll { overflow-x: auto; }
   table { border-collapse: collapse; width: 100%; }
   th, td { text-align: left; padding: 0.5rem; border-bottom: 1px solid #ddd; vertical-align: top; }
   .description { color: #555; font-size: 0.9rem; }
@@ -16,57 +18,69 @@
 </head>
 <body>
 <h1>Cordis sample plugins</h1>
-<p id="connection">Connecting...</p>
+<p id="connection" aria-live="polite">Connecting...</p>
 <p id="failure" role="alert"></p>
+<div class="scroll">
 <table>
   <thead>
     <tr><th>Enabled</th><th>Plugin</th><th>Status</th><th>Error</th></tr>
   </thead>
   <tbody id="plugins"></tbody>
 </table>
+</div>
 <script>
   const rows = document.getElementById("plugins");
   const connection = document.getElementById("connection");
   const failure = document.getElementById("failure");
   let latest = [];
 
-  function cell(text, className) {
-    const td = document.createElement("td");
-    if (className) td.className = className;
-    td.textContent = text;
-    return td;
+  // Rows are kept per plugin key and updated in place, so a focused toggle keeps focus across events.
+  const views = new Map();
+
+  function createView(key) {
+    const row = document.createElement("tr");
+
+    const toggleCell = document.createElement("td");
+    const toggle = document.createElement("input");
+    toggle.type = "checkbox";
+    toggle.addEventListener("change", () => setEnabled(key, toggle.checked));
+    toggleCell.appendChild(toggle);
+
+    const about = document.createElement("td");
+    const title = document.createElement("strong");
+    const description = document.createElement("div");
+    description.className = "description";
+    about.appendChild(title);
+    about.appendChild(description);
+
+    const status = document.createElement("td");
+    const error = document.createElement("td");
+    error.className = "error";
+
+    row.append(toggleCell, about, status, error);
+    return { row, toggle, title, description, status, error };
+  }
+
+  function update(view, plugin) {
+    view.toggle.checked = plugin.enabled;
+    view.toggle.disabled = plugin.metadata.locked;
+    view.toggle.setAttribute("aria-label", "Enable " + plugin.metadata.title);
+    view.title.textContent = plugin.metadata.title + (plugin.metadata.locked ? " (locked)" : "");
+    view.description.textContent = plugin.metadata.description;
+    view.status.textContent = plugin.status ?? "Not loaded";
+    view.error.textContent = plugin.error ?? "";
   }
 
   function render(plugins) {
     latest = plugins;
-    const fresh = plugins.map((plugin) => {
-      const row = document.createElement("tr");
-
-      const toggleCell = document.createElement("td");
-      const toggle = document.createElement("input");
-      toggle.type = "checkbox";
-      toggle.checked = plugin.enabled;
-      toggle.disabled = plugin.metadata.locked;
-      toggle.setAttribute("aria-label", "Enable " + plugin.metadata.title);
-      toggle.addEventListener("change", () => setEnabled(plugin.key, toggle.checked));
-      toggleCell.appendChild(toggle);
-      row.appendChild(toggleCell);
-
-      const about = document.createElement("td");
-      const title = document.createElement("strong");
-      title.textContent = plugin.metadata.title + (plugin.metadata.locked ? " (locked)" : "");
-      const description = document.createElement("div");
-      description.className = "description";
-      description.textContent = plugin.metadata.description;
-      about.appendChild(title);
-      about.appendChild(description);
-      row.appendChild(about);
-
-      row.appendChild(cell(plugin.status ?? "Not loaded"));
-      row.appendChild(cell(plugin.error ?? "", "error"));
-      return row;
-    });
-    rows.replaceChildren(...fresh);
+    const keys = plugins.map((plugin) => plugin.key);
+    const sameRows = keys.length === views.size && keys.every((key, index) => [...views.keys()][index] === key);
+    if (!sameRows) {
+      views.clear();
+      keys.forEach((key) => views.set(key, createView(key)));
+      rows.replaceChildren(...[...views.values()].map((view) => view.row));
+    }
+    plugins.forEach((plugin) => update(views.get(plugin.key), plugin));
   }
 
   async function setEnabled(key, enabled) {
