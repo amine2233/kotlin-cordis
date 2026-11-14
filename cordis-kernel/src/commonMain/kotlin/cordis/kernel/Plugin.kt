@@ -1,10 +1,18 @@
 package cordis.kernel
 
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.job
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.AbstractCoroutineContextElement
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Everything is a plugin: features, services, adapters, even the app shell.
@@ -97,6 +105,14 @@ class Fork(
     private var isReconciling = false
     private var needsReconcile = false
     private var forceRestart = false
+    private var isDisposing = false
+
+    /** The job running the in-flight `apply`, and one that completes once that run is settled. */
+    private var applyJob: Job? = null
+    private var runSettled: Job? = null
+
+    /** This fork's teardown entry in the parent scope. */
+    internal var parentEntry: Disposable? = null
 
     // MARK: Reactive core
 
@@ -142,7 +158,7 @@ class Fork(
     }
 
     private suspend fun reconcile() {
-        if (status == Status.Disposed) return
+        if (isDisposing) return
 
         val wanted = resolve()
         val current = runtime
@@ -176,7 +192,7 @@ class Fork(
                 failureHandler = { error ->
                     registry.emit(TeardownFailed(plugin = name, error = error))
                 },
-                coroutineScope = registry.coroutineScope,
+                coroutineScope = registry.lifecycleScope,
             )
         val ctx =
             Context(
@@ -190,16 +206,37 @@ class Fork(
             )
         runtime = Runtime(context = ctx, snapshot = snapshot)
         setStatus(Status.Loading)
+        val settled = Job()
+        runSettled = settled
+        val marker = ApplyMarker(fork = this, outer = currentCoroutineContext()[ApplyMarker])
         try {
-            body(ctx)
-            if (status == Status.Loading) {
+            coroutineScope {
+                applyJob = coroutineContext.job
+                withContext(marker) { body(ctx) }
+            }
+            applyJob = null
+            if (status == Status.Loading && !isDisposing) {
                 appliedConfig = config
                 setStatus(Status.Active)
             }
+        } catch (e: CancellationException) {
+            applyJob = null
+            withContext(NonCancellable) {
+                stop()
+                if (!isDisposing) setStatus(Status.Pending)
+            }
+            if (!isDisposing) throw e
         } catch (t: Throwable) {
-            stop()
-            setStatus(Status.Failed(t.message ?: t.toString()))
-            parent.emit(PluginFailed(plugin = name, error = t))
+            applyJob = null
+            withContext(NonCancellable) {
+                stop()
+                if (!isDisposing) {
+                    setStatus(Status.Failed(t.message ?: t.toString()))
+                    parent.emit(PluginFailed(plugin = name, error = t))
+                }
+            }
+        } finally {
+            settled.complete()
         }
     }
 
@@ -210,7 +247,7 @@ class Fork(
     }
 
     private suspend fun setStatus(newStatus: Status) {
-        if (newStatus == status) return
+        if (newStatus == status || status == Status.Disposed) return
         statusState.value = newStatus
         parent.emit(PluginStatusChanged(plugin = name, status = newStatus))
     }
@@ -235,11 +272,36 @@ class Fork(
         return true
     }
 
+    /**
+     * Cancels an in-flight `apply` and waits for its rollback, unless called from inside that `apply`.
+     */
     internal suspend fun dispose() {
-        if (status == Status.Disposed) return
+        if (isDisposing) return
+        isDisposing = true
+        val running = applyJob
+        if (running != null && !ApplyMarker.isInside(this, currentCoroutineContext())) {
+            running.cancel()
+            runSettled?.join()
+        }
         stop()
         setStatus(Status.Disposed)
         registry.unregister(this)
+        parentEntry?.invoke()
+    }
+}
+
+/**
+ * Marks the coroutine running a fork's `apply`, chained to the enclosing fork's marker.
+ */
+private class ApplyMarker(
+    val fork: Fork,
+    val outer: ApplyMarker?,
+) : AbstractCoroutineContextElement(ApplyMarker) {
+    companion object Key : CoroutineContext.Key<ApplyMarker> {
+        fun isInside(
+            fork: Fork,
+            context: CoroutineContext,
+        ): Boolean = generateSequence(context[ApplyMarker]) { it.outer }.any { it.fork === fork }
     }
 }
 
@@ -270,7 +332,7 @@ class PluginHandle<C>(
             return UpdateOutcome.Rejected(t)
         }
         val restarted =
-            withContext(fork.parent.registry.dispatcher) {
+            fork.parent.registry.lifecycle {
                 fork.reconfigure(config) { ctx ->
                     plugin.apply(ctx, config)
                 }
@@ -282,7 +344,7 @@ class PluginHandle<C>(
      * Hot-unload: every side effect of this plugin (and its sub-plugins) is rolled back.
      */
     suspend fun dispose() {
-        withContext(fork.parent.registry.dispatcher) {
+        fork.parent.registry.lifecycle {
             fork.dispose()
         }
     }

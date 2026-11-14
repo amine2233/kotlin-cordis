@@ -26,9 +26,12 @@ class TeardownFailureTests {
             val probe = Probe()
             val reported = mutableListOf<TeardownBoom>()
             val scope =
-                Scope(failureHandler = { error ->
-                    if (error is TeardownBoom) reported.add(error)
-                })
+                Scope(
+                    failureHandler = { error ->
+                        if (error is TeardownBoom) reported.add(error)
+                    },
+                    coroutineScope = this,
+                )
             scope.collect { probe.log.add("first") }
             scope.collect { throw TeardownBoom(1) }
             scope.collect { probe.log.add("last") }
@@ -74,7 +77,7 @@ class TeardownFailureTests {
     fun disposableCallReportsOnceAndStaysNonThrowing() =
         runTest {
             var count = 0
-            val scope = Scope(failureHandler = { count++ })
+            val scope = Scope(failureHandler = { count++ }, coroutineScope = this)
             val handle = scope.collect { throw TeardownBoom(1) }
             handle()
             handle()

@@ -1,8 +1,6 @@
 package cordis.kernel
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.concurrent.Volatile
 
@@ -43,7 +41,7 @@ class Disposable(
  */
 class Scope(
     private val failureHandler: suspend (Throwable) -> Unit = {},
-    private val coroutineScope: CoroutineScope? = null,
+    private val coroutineScope: CoroutineScope,
 ) {
     private val lock = Lock()
     private val handles = mutableMapOf<Int, Disposable>()
@@ -53,8 +51,11 @@ class Scope(
     var isDisposed: Boolean = false
         private set
 
+    internal val size: Int
+        get() = lock.withLock { handles.size }
+
     /**
-     * Registers a teardown. If the scope is already dead, the teardown runs immediately.
+     * Registers a teardown. If the scope is already dead, the teardown is launched at once on [coroutineScope].
      */
     fun collect(teardown: Disposer): Disposable {
         val (handle, recorded) =
@@ -75,8 +76,7 @@ class Scope(
             }
 
         if (!recorded) {
-            val scope = coroutineScope ?: CoroutineScope(Dispatchers.Default)
-            scope.launch { handle() }
+            coroutineScope.launch { handle() }
         }
         return handle
     }

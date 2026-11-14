@@ -6,9 +6,13 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.concurrent.Volatile
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
 
 /**
@@ -38,6 +42,26 @@ class Registry(
         CoroutineScope(
             dispatcher + SupervisorJob() + CoroutineExceptionHandler { context, error -> reportTaskFailure(context, error) },
         )
+
+    /**
+     * Never cancelled: runs plugin lifecycle operations and teardowns registered after dispose,
+     * so they outlive both the caller's job and [coroutineScope].
+     */
+    internal val lifecycleScope = CoroutineScope(dispatcher + SupervisorJob())
+
+    /**
+     * Runs [block] in a graph-owned lifecycle job; cancelling the caller only ends its wait.
+     * Called from inside a lifecycle job of this registry, [block] runs inline instead.
+     * The caller's [LaunchMarker] is carried over, so a launched job disposing its own context skips the self-join.
+     */
+    internal suspend fun <T> lifecycle(block: suspend () -> T): T {
+        val caller = currentCoroutineContext()
+        if (caller[LifecycleMarker]?.registry === this) {
+            return withContext(dispatcher) { block() }
+        }
+        val launchMarker = caller[LaunchMarker] ?: EmptyCoroutineContext
+        return lifecycleScope.async(LifecycleMarker(this) + launchMarker) { block() }.await()
+    }
 
     class Entry(
         var value: Any,
