@@ -22,7 +22,7 @@ final class cordis.testing/RecordedEvents { // cordis.testing/RecordedEvents|nul
     constructor <init>() // cordis.testing/RecordedEvents.<init>|<init>(){}[0]
 
     final val all // cordis.testing/RecordedEvents.all|{}all[0]
-        final fun <get-all>(): kotlin.collections/MutableList<cordis.kernel/CordisEvent> // cordis.testing/RecordedEvents.all.<get-all>|<get-all>(){}[0]
+        final fun <get-all>(): kotlin.collections/List<cordis.kernel/CordisEvent> // cordis.testing/RecordedEvents.all.<get-all>|<get-all>(){}[0]
     final val failures // cordis.testing/RecordedEvents.failures|{}failures[0]
         final fun <get-failures>(): kotlin.collections/List<cordis.kernel/CordisEvent> // cordis.testing/RecordedEvents.failures.<get-failures>|<get-failures>(){}[0]
 
