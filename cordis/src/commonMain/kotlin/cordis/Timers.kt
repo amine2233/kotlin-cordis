@@ -6,7 +6,6 @@ import cordis.kernel.DefaultClock
 import cordis.kernel.Disposable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import kotlin.coroutines.coroutineContext
 import kotlin.time.Duration
 
@@ -54,7 +53,7 @@ suspend fun Context.every(
 private suspend fun Context.ownTask(run: suspend CoroutineScope.() -> Unit): Disposable {
     return effect {
         val job =
-            registry.coroutineScope.launch {
+            launch {
                 run()
             }
         return@effect {

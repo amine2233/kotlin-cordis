@@ -361,13 +361,15 @@ class Context internal constructor(
     /**
      * Launches a coroutine bound to this context's scope: it is cancelled and joined when the
      * plugin unloads, restarts or fails.
+     * An exception thrown by [block] is reported as [TaskFailed] with this context's name; the
+     * plugin's status is unchanged and the job is still removed from the scope.
      */
     fun launch(
         context: CoroutineContext = EmptyCoroutineContext,
         block: suspend CoroutineScope.() -> Unit,
     ): Job {
         if (scope.isDisposed) throw CordisException.Disposed()
-        val marker = LaunchMarker()
+        val marker = LaunchMarker(owner = name)
         val job = registry.coroutineScope.launch(context + marker, block = block)
         val teardown =
             scope.collect {
@@ -381,7 +383,12 @@ class Context internal constructor(
     }
 }
 
-/** Identifies one `Context.launch` coroutine, surviving `withContext`, so its teardown can skip a self-join. */
-private class LaunchMarker : AbstractCoroutineContextElement(LaunchMarker) {
+/**
+ * Identifies one `Context.launch` coroutine, surviving `withContext`, so its teardown can skip a self-join.
+ * [owner] names the launching context for [TaskFailed].
+ */
+internal class LaunchMarker(
+    val owner: String,
+) : AbstractCoroutineContextElement(LaunchMarker) {
     companion object Key : CoroutineContext.Key<LaunchMarker>
 }

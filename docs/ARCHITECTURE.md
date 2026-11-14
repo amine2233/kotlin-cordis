@@ -30,7 +30,7 @@ In Swift, concurrency was managed via a single `@CordisActor`. In Kotlin Multipl
    - Missing required service: fork stops and returns to `Pending`.
    - Changed service occurrence: fork stops and starts afresh.
    - All services present and unchanged: no-op.
-4. **Re-entrancy Safety**: If a cascading restart or dependency provision triggers another `refresh()` while `reconcile()` is in-flight, an internal flag `needsReconcile` is set and processed iteratively by a `do-while` loop.
+4. **Re-entrancy Safety**: If a cascading restart or dependency provision triggers another `refresh()` while `reconcile()` is in-flight, an internal flag `needsReconcile` is set and processed iteratively by a `do-while` loop. `refresh()` clears its re-entrancy flag in a `finally` block, so an exception during reconciliation never leaves a fork unable to reconcile again.
 5. `Context.provide` automatically registers a withdraw hook in the context's `Scope`. Unloading a provider withdraws the service, automatically cascading to its dependents.
 
 ## 4. Convergence and In-Place Mutation
@@ -70,6 +70,9 @@ A `Slot` is the combination of `(ServiceId, Realm)`.
 - `PluginHandle.update` runs `Plugin.validate(config)` before tearing anything down. If validation throws, `UpdateOutcome.Rejected` is returned and the running plugin is untouched.
 - Conflicting providers for the same slot throw `CordisException.ServiceConflict`, failing the incoming plugin while keeping the original provider active.
 - Teardowns may throw. `Scope.dispose` runs all registered disposables in reverse order, catching each error and emitting it as `TeardownFailed(plugin, error)` without aborting the remaining disposables.
+- Listeners are isolated from each other and from the emitter. `Registry.emit` calls each listener in its own `try`/`catch`: a throwing listener does not stop the remaining listeners, the emitter never sees the error, and the failure is emitted as `ListenerFailed(event, error)` from the same zone. A listener that throws while handling `ListenerFailed` is not reported again, so there is no recursion. `CancellationException` still propagates.
+- The graph's coroutine scope has a `CoroutineExceptionHandler`. A throwing `ctx.launch` body, timer body (`after` / `every`) or internal launch is reported as `TaskFailed(plugin, error)`, where `plugin` is the launching context's name (`root` when there is no owner). The exception never reaches the platform's uncaught-exception handler.
+- Neither `ListenerFailed` nor `TaskFailed` changes plugin status: the plugin stays `Active`. Only a throwing `apply` yields `Failed` and `PluginFailed`.
 
 ## 9. Timer Effects (`cordis`)
 
