@@ -185,9 +185,9 @@ public final class cordis/kernel/OccurrenceId {
 
 public abstract interface class cordis/kernel/Plugin {
 	public abstract fun apply (Lcordis/kernel/Context;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun getInject ()Lcordis/kernel/Inject;
-	public abstract fun getName ()Ljava/lang/String;
-	public abstract fun validate (Ljava/lang/Object;)V
+	public fun getInject ()Lcordis/kernel/Inject;
+	public fun getName ()Ljava/lang/String;
+	public fun validate (Ljava/lang/Object;)V
 }
 
 public final class cordis/kernel/Plugin$DefaultImpls {
@@ -355,7 +355,7 @@ public final class cordis/kernel/ServiceId$Companion {
 }
 
 public abstract interface class cordis/kernel/ServiceKey {
-	public abstract fun getServiceId ()Lcordis/kernel/ServiceId;
+	public fun getServiceId ()Lcordis/kernel/ServiceId;
 }
 
 public final class cordis/kernel/ServiceKey$DefaultImpls {
