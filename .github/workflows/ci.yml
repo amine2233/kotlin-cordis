@@ -15,3 +15,14 @@ jobs:
     with:
       enable-lint: true
       enable-title-check: true
+
+  samples-ktor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Ktor sample check
+        run: ./gradlew -p samples :ktor:check --console=plain
