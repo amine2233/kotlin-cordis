@@ -3,6 +3,7 @@ package cordis.kernel
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ShapeException : Exception("empty")
@@ -20,6 +21,22 @@ object ValidatedProvider : Plugin<Pair<Probe, String>> {
         ctx.provide(ValueKey, value)
         probe.log.add("provide:$value")
         ctx.onDispose { probe.log.add("withdraw:$value") }
+    }
+}
+
+object ValidatedConsumer : Plugin<Pair<Probe, String>> {
+    override val inject = Inject.of(required = listOf(ValueKey))
+
+    override fun validate(config: Pair<Probe, String>) {
+        if (config.second.isEmpty()) throw ShapeException()
+    }
+
+    override suspend fun apply(
+        ctx: Context,
+        config: Pair<Probe, String>,
+    ) {
+        val (probe, label) = config
+        probe.log.add("start:$label:${ctx.require(ValueKey)}")
     }
 }
 
@@ -90,5 +107,123 @@ class ValidateTests {
 
             assertTrue(outcome is UpdateOutcome.Applied)
             assertTrue(handle.status is Fork.Status.Failed)
+        }
+
+    @Test
+    fun invalidInitialConfigFailsWithoutApply() =
+        runTest {
+            val app = Context.root()
+            val probe = Probe()
+            val failures = mutableListOf<PluginFailed>()
+            app.on<PluginFailed> { failures.add(it) }
+
+            val handle = app.plugin(ValidatedProvider, Pair(probe, ""))
+
+            assertEquals(Fork.Status.Failed("empty"), handle.status)
+            assertEquals(1, failures.size)
+            assertEquals(ValidatedProvider.name, failures.single().plugin)
+            assertTrue(failures.single().error is ShapeException)
+            assertTrue(probe.log.isEmpty())
+            assertNull(app[ValueKey])
+        }
+
+    @Test
+    fun invalidInitialConfigFailsEvenWithMissingDependency() =
+        runTest {
+            val app = Context.root()
+            val probe = Probe()
+            val failures = mutableListOf<PluginFailed>()
+            app.on<PluginFailed> { failures.add(it) }
+
+            val handle = app.plugin(ValidatedConsumer, Pair(probe, ""))
+
+            assertEquals(Fork.Status.Failed("empty"), handle.status)
+            assertEquals(1, failures.size)
+            assertEquals(ValidatedConsumer.name, failures.single().plugin)
+            assertTrue(probe.log.isEmpty())
+        }
+
+    @Test
+    fun rejectedForkStaysFailedWhenDependencyAppears() =
+        runTest {
+            val app = Context.root()
+            val probe = Probe()
+            val failures = mutableListOf<PluginFailed>()
+            app.on<PluginFailed> { failures.add(it) }
+            val handle = app.plugin(ValidatedConsumer, Pair(probe, ""))
+
+            val provider = app.plugin(Provider, ProviderConfig(Probe(), "A"))
+            provider.update(ProviderConfig(Probe(), "B"))
+            provider.dispose()
+
+            assertEquals(Fork.Status.Failed("empty"), handle.status)
+            assertEquals(1, failures.size)
+            assertTrue(probe.log.isEmpty())
+        }
+
+    @Test
+    fun validUpdateRecoversRejectedFork() =
+        runTest {
+            val app = Context.root()
+            val probe = Probe()
+            app.plugin(Provider, ProviderConfig(Probe(), "A"))
+            val handle = app.plugin(ValidatedConsumer, Pair(probe, ""))
+
+            val outcome = handle.update(Pair(probe, "ok"))
+
+            assertEquals(UpdateOutcome.Applied, outcome)
+            assertEquals(Fork.Status.Active, handle.status)
+            assertEquals(listOf("start:ok:A"), probe.log)
+        }
+
+    @Test
+    fun validUpdateWithoutDependencyGoesPending() =
+        runTest {
+            val app = Context.root()
+            val probe = Probe()
+            val handle = app.plugin(ValidatedConsumer, Pair(probe, ""))
+
+            val outcome = handle.update(Pair(probe, "ok"))
+
+            assertEquals(UpdateOutcome.Applied, outcome)
+            assertEquals(Fork.Status.Pending, handle.status)
+            assertTrue(probe.log.isEmpty())
+        }
+
+    @Test
+    fun invalidUpdateKeepsRejectedForkFailed() =
+        runTest {
+            val app = Context.root()
+            val probe = Probe()
+            val handle = app.plugin(ValidatedProvider, Pair(probe, ""))
+
+            val outcome = handle.update(Pair(probe, ""))
+
+            assertTrue(outcome is UpdateOutcome.Rejected)
+            assertEquals(Fork.Status.Failed("empty"), handle.status)
+            assertTrue(probe.log.isEmpty())
+        }
+
+    @Test
+    fun disposeRejectedFork() =
+        runTest {
+            val app = Context.root()
+            val handle = app.plugin(ValidatedProvider, Pair(Probe(), ""))
+
+            handle.dispose()
+
+            assertEquals(Fork.Status.Disposed, handle.status)
+            assertTrue(app.snapshot().plugins.isEmpty())
+        }
+
+    @Test
+    fun disposingParentDisposesRejectedFork() =
+        runTest {
+            val app = Context.root()
+            val handle = app.plugin(ValidatedProvider, Pair(Probe(), ""))
+
+            app.dispose()
+
+            assertEquals(Fork.Status.Disposed, handle.status)
         }
 }
