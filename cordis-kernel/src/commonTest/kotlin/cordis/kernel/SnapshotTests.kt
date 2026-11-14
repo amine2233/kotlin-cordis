@@ -39,69 +39,77 @@ object SnapshotFailing : Plugin<Unit> {
 
 class SnapshotTests {
     @Test
-    fun emptyRootHasEmptySnapshot() {
-        val snapshot = Context.root().snapshot()
-        assertTrue(snapshot.plugins.isEmpty())
-        assertTrue(snapshot.slots.isEmpty())
-    }
+    fun emptyRootHasEmptySnapshot() =
+        runTest {
+            withRoot { app ->
+                val snapshot = app.snapshot()
+                assertTrue(snapshot.plugins.isEmpty())
+                assertTrue(snapshot.slots.isEmpty())
+            }
+        }
 
     @Test
     fun reportsPendingActiveAndFailedStatuses() =
         runTest {
-            val app = Context.root()
-            app.plugin(SnapshotWaiting)
-            app.plugin(SnapshotFailing)
+            withRoot { app ->
+                app.plugin(SnapshotWaiting)
+                app.plugin(SnapshotFailing)
 
-            val snap1 = app.snapshot()
-            assertEquals(Fork.Status.Pending, snap1.plugins[0].status)
-            assertTrue(snap1.plugins[1].status is Fork.Status.Failed)
+                val snap1 = app.snapshot()
+                assertEquals(Fork.Status.Pending, snap1.plugins[0].status)
+                assertTrue(snap1.plugins[1].status is Fork.Status.Failed)
 
-            app.plugin(SnapshotProvider)
-            val snap2 = app.snapshot()
-            assertEquals(Fork.Status.Active, snap2.plugins[0].status)
-            assertTrue(snap2.plugins[1].status is Fork.Status.Failed)
-            assertEquals(Fork.Status.Active, snap2.plugins[2].status)
+                app.plugin(SnapshotProvider)
+                val snap2 = app.snapshot()
+                assertEquals(Fork.Status.Active, snap2.plugins[0].status)
+                assertTrue(snap2.plugins[1].status is Fork.Status.Failed)
+                assertEquals(Fork.Status.Active, snap2.plugins[2].status)
+            }
         }
 
     @Test
     fun disposedPluginsAreNotListed() =
         runTest {
-            val app = Context.root()
-            val handle = app.plugin(SnapshotProvider)
-            handle.dispose()
-            assertEquals(Fork.Status.Disposed, handle.status)
-            assertTrue(app.snapshot().plugins.isEmpty())
+            withRoot { app ->
+                val handle = app.plugin(SnapshotProvider)
+                handle.dispose()
+                assertEquals(Fork.Status.Disposed, handle.status)
+                assertTrue(app.snapshot().plugins.isEmpty())
+            }
         }
 
     @Test
     fun slotAppearsAfterProvideAndDisappearsAfterDispose() =
         runTest {
-            val app = Context.root()
-            val handle = app.plugin(SnapshotProvider)
-            val snapshot = app.snapshot()
-            assertEquals(1, snapshot.slots.size)
-            assertEquals(SnapshotKey.serviceId.description, snapshot.slots[0].service)
-            assertEquals(Slot.SHARED_REALM, snapshot.slots[0].realm)
-            assertEquals(snapshot.plugins[0].id, snapshot.slots[0].provider)
+            withRoot { app ->
+                val handle = app.plugin(SnapshotProvider)
+                val snapshot = app.snapshot()
+                assertEquals(1, snapshot.slots.size)
+                assertEquals(SnapshotKey.serviceId.description, snapshot.slots[0].service)
+                assertEquals(Slot.SHARED_REALM, snapshot.slots[0].realm)
+                assertEquals(snapshot.plugins[0].id, snapshot.slots[0].provider)
 
-            handle.dispose()
-            assertTrue(app.snapshot().slots.isEmpty())
+                handle.dispose()
+                assertTrue(app.snapshot().slots.isEmpty())
+            }
         }
 
     @Test
     fun rootProvidedSlotHasNoProvider() =
         runTest {
-            val app = Context.root()
-            app.provide(SnapshotKey, 1)
-            assertNull(app.snapshot().slots[0].provider)
+            withRoot { app ->
+                app.provide(SnapshotKey, 1)
+                assertNull(app.snapshot().slots[0].provider)
+            }
         }
 
     @Test
     fun isolatedContextsShowTheirRealms() =
         runTest {
-            val app = Context.root()
-            app.provide(SnapshotKey, 1)
-            app.isolate(SnapshotKey, label = "tenant").provide(SnapshotKey, 2)
-            assertEquals(listOf(Slot.SHARED_REALM, "tenant"), app.snapshot().slots.map { it.realm })
+            withRoot { app ->
+                app.provide(SnapshotKey, 1)
+                app.isolate(SnapshotKey, label = "tenant").provide(SnapshotKey, 2)
+                assertEquals(listOf(Slot.SHARED_REALM, "tenant"), app.snapshot().slots.map { it.realm })
+            }
         }
 }

@@ -74,121 +74,131 @@ class LifecycleTests {
     @Test
     fun optionalDependencyRestartsWhenItAppearsAndVanishes() =
         runTest {
-            val app = Context.root()
-            val probe = Probe()
-            val consumer = app.plugin(OptionalConsumer, probe)
-            assertEquals(Fork.Status.Active, consumer.status)
+            withRoot { app ->
+                val probe = Probe()
+                val consumer = app.plugin(OptionalConsumer, probe)
+                assertEquals(Fork.Status.Active, consumer.status)
 
-            val provider = app.plugin(Provider, ProviderConfig(probe, "A"))
-            provider.dispose()
+                val provider = app.plugin(Provider, ProviderConfig(probe, "A"))
+                provider.dispose()
 
-            assertEquals(
-                listOf("start:none", "start:A", "start:none"),
-                probe.log.filter { it.startsWith("start") },
-            )
+                assertEquals(
+                    listOf("start:none", "start:A", "start:none"),
+                    probe.log.filter { it.startsWith("start") },
+                )
+            }
         }
 
     @Test
     fun cascadeGoesPendingAndComesBack() =
         runTest {
-            val app = Context.root()
-            val probe = Probe()
-            val leaf = app.plugin(Leaf, probe)
-            val mid = app.plugin(Mid, probe)
-            val provider = app.plugin(Provider, ProviderConfig(probe, "AB"))
+            withRoot { app ->
+                val probe = Probe()
+                val leaf = app.plugin(Leaf, probe)
+                val mid = app.plugin(Mid, probe)
+                val provider = app.plugin(Provider, ProviderConfig(probe, "AB"))
 
-            assertEquals(Fork.Status.Active, mid.status)
-            assertEquals(Fork.Status.Active, leaf.status)
+                assertEquals(Fork.Status.Active, mid.status)
+                assertEquals(Fork.Status.Active, leaf.status)
 
-            provider.dispose()
-            assertEquals(Fork.Status.Pending, mid.status)
-            assertEquals(Fork.Status.Pending, leaf.status)
+                provider.dispose()
+                assertEquals(Fork.Status.Pending, mid.status)
+                assertEquals(Fork.Status.Pending, leaf.status)
 
-            app.plugin(Provider, ProviderConfig(probe, "ABC"))
-            assertEquals(Fork.Status.Active, leaf.status)
-            assertTrue(probe.log.contains("leaf:3"))
+                app.plugin(Provider, ProviderConfig(probe, "ABC"))
+                assertEquals(Fork.Status.Active, leaf.status)
+                assertTrue(probe.log.contains("leaf:3"))
+            }
         }
 
     @Test
     fun disposingParentDisposesSubtree() =
         runTest {
-            val app = Context.root()
-            val probe = Probe()
-            app.plugin(Provider, ProviderConfig(probe, "A"))
-            val parent = app.plugin(Parent, probe)
-            probe.log.clear()
+            withRoot { app ->
+                val probe = Probe()
+                app.plugin(Provider, ProviderConfig(probe, "A"))
+                val parent = app.plugin(Parent, probe)
+                probe.log.clear()
 
-            parent.dispose()
-            assertTrue(probe.log.contains("parent-stop"))
-            assertEquals(0, app.registry.listenerCount(Ping::class))
-            assertEquals(Fork.Status.Disposed, parent.status)
+                parent.dispose()
+                assertTrue(probe.log.contains("parent-stop"))
+                assertEquals(0, app.registry.listenerCount(Ping::class))
+                assertEquals(Fork.Status.Disposed, parent.status)
+            }
         }
 
     @Test
     fun updatingPendingPluginDoesNotStartIt() =
         runTest {
-            val app = Context.root()
-            val probe = Probe()
-            val consumer = app.plugin(Consumer, probe)
-            consumer.update(probe)
-            assertEquals(Fork.Status.Pending, consumer.status)
-            assertTrue(probe.log.isEmpty())
+            withRoot { app ->
+                val probe = Probe()
+                val consumer = app.plugin(Consumer, probe)
+                consumer.update(probe)
+                assertEquals(Fork.Status.Pending, consumer.status)
+                assertTrue(probe.log.isEmpty())
+            }
         }
 
     @Test
     fun unrelatedSlotChangeDoesNotRestart() =
         runTest {
-            val app = Context.root()
-            val probe = Probe()
-            app.plugin(Provider, ProviderConfig(probe, "A"))
-            app.plugin(Consumer, probe)
-            probe.log.clear()
+            withRoot { app ->
+                val probe = Probe()
+                app.plugin(Provider, ProviderConfig(probe, "A"))
+                app.plugin(Consumer, probe)
+                probe.log.clear()
 
-            app.provide(OtherKey, "x")
-            assertTrue(probe.log.isEmpty())
+                app.provide(OtherKey, "x")
+                assertTrue(probe.log.isEmpty())
+            }
         }
 
     @Test
     fun effectTeardownRunsExactlyOnce() =
         runTest {
-            val app = Context.root()
-            val probe = Probe()
-            val handle = app.plugin(Effecting, probe)
-            handle.dispose()
-            handle.dispose()
-            app.dispose()
-            assertEquals(listOf("setup", "teardown"), probe.log)
+            withRoot { app ->
+                val probe = Probe()
+                val handle = app.plugin(Effecting, probe)
+                handle.dispose()
+                handle.dispose()
+                app.dispose()
+                assertEquals(listOf("setup", "teardown"), probe.log)
+            }
         }
 
     @Test
     fun listenerAddedDuringDispatchMissesCurrentEvent() =
         runTest {
-            val app = Context.root()
-            val counter = Probe()
-            app.on<Ping> {
-                app.on<Ping> { counter.log.add("late") }
+            withRoot { app ->
+                val counter = Probe()
+                app.on<Ping> {
+                    app.on<Ping> { counter.log.add("late") }
+                }
+                app.emit(Ping())
+                assertTrue(counter.log.isEmpty())
+                app.emit(Ping())
+                assertEquals(listOf("late"), counter.log)
             }
-            app.emit(Ping())
-            assertTrue(counter.log.isEmpty())
-            app.emit(Ping())
-            assertEquals(listOf("late"), counter.log)
         }
 
     @Test
     fun providingAfterDisposeThrows() =
         runTest {
-            val app = Context.root()
-            app.dispose()
-            assertFailsWith<CordisException.Disposed> {
-                app.provide(OtherKey, "x")
+            withRoot { app ->
+                app.dispose()
+                assertFailsWith<CordisException.Disposed> {
+                    app.provide(OtherKey, "x")
+                }
             }
         }
 
     @Test
-    fun requireThrowsWhenMissing() {
-        val app = Context.root()
-        assertFailsWith<CordisException.MissingService> {
-            app.require(OtherKey)
+    fun requireThrowsWhenMissing() =
+        runTest {
+            withRoot { app ->
+                assertFailsWith<CordisException.MissingService> {
+                    app.require(OtherKey)
+                }
+            }
         }
-    }
 }

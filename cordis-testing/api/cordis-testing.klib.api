@@ -33,3 +33,4 @@ final class cordis.testing/RecordedEvents { // cordis.testing/RecordedEvents|nul
 
 final suspend fun cordis.testing/settle(kotlin/Function0<kotlin/Boolean>): kotlin/Boolean // cordis.testing/settle|settle(kotlin.Function0<kotlin.Boolean>){}[0]
 final suspend fun cordis.testing/withTestApp(kotlin.coroutines/SuspendFunction2<cordis.kernel/Context, cordis.testing/RecordedEvents, kotlin/Unit>): cordis.testing/RecordedEvents // cordis.testing/withTestApp|withTestApp(kotlin.coroutines.SuspendFunction2<cordis.kernel.Context,cordis.testing.RecordedEvents,kotlin.Unit>){}[0]
+final suspend fun cordis.testing/withTestApp(kotlinx.coroutines/CoroutineDispatcher, kotlin.coroutines/SuspendFunction2<cordis.kernel/Context, cordis.testing/RecordedEvents, kotlin/Unit>): cordis.testing/RecordedEvents // cordis.testing/withTestApp|withTestApp(kotlinx.coroutines.CoroutineDispatcher;kotlin.coroutines.SuspendFunction2<cordis.kernel.Context,cordis.testing.RecordedEvents,kotlin.Unit>){}[0]

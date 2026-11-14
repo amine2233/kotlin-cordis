@@ -1,6 +1,6 @@
 package cordis
 
-import cordis.kernel.Context
+import cordis.testing.withTestApp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -20,8 +20,7 @@ class DefaultClockTimerTests {
     @Test
     fun afterFiresExactlyOnce() =
         runTest {
-            val app = Context.root()
-            try {
+            withTestApp { app, _ ->
                 val fires = Channel<Unit>(Channel.UNLIMITED)
                 app.after(interval) { fires.trySend(Unit) }
                 withContext(Dispatchers.Default) {
@@ -31,16 +30,13 @@ class DefaultClockTimerTests {
                     }
                 }
                 assertTrue(fires.tryReceive().isFailure, "after fired more than once")
-            } finally {
-                app.dispose()
             }
         }
 
     @Test
     fun everyFiresRepeatedly() =
         runTest {
-            val app = Context.root()
-            try {
+            withTestApp { app, _ ->
                 val fires = Channel<Unit>(Channel.UNLIMITED)
                 app.every(interval) { fires.trySend(Unit) }
                 withContext(Dispatchers.Default) {
@@ -49,16 +45,13 @@ class DefaultClockTimerTests {
                         fires.receive()
                     }
                 }
-            } finally {
-                app.dispose()
             }
         }
 
     @Test
     fun everyStopsAfterDispose() =
         runTest {
-            val app = Context.root()
-            try {
+            withTestApp { app, _ ->
                 val fires = Channel<Unit>(Channel.UNLIMITED)
                 val timer = app.every(interval) { fires.trySend(Unit) }
                 withContext(Dispatchers.Default) {
@@ -72,8 +65,6 @@ class DefaultClockTimerTests {
                     }
                 }
                 assertTrue(fires.tryReceive().isFailure, "every fired after dispose")
-            } finally {
-                app.dispose()
             }
         }
 }

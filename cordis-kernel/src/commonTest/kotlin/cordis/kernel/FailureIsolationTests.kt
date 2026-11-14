@@ -17,104 +17,104 @@ class FailureIsolationTests {
     @Test
     fun throwingListenerDoesNotStopOthersOrReachEmitter() =
         runTest {
-            val app = Context.root()
-            val probe = Probe()
-            val failures = mutableListOf<ListenerFailed>()
-            app.on<ListenerFailed> { failures.add(it) }
-            app.on<IsolationPing> { throw IsolationBoom(it.n) }
-            app.on<IsolationPing> { probe.log.add("ping:${it.n}") }
-            app.on<ServiceChanged> { throw IsolationBoom(0) }
-            app.on<ServiceChanged> { probe.log.add("changed:${it.isAvailable}") }
+            withRoot { app ->
+                val probe = Probe()
+                val failures = mutableListOf<ListenerFailed>()
+                app.on<ListenerFailed> { failures.add(it) }
+                app.on<IsolationPing> { throw IsolationBoom(it.n) }
+                app.on<IsolationPing> { probe.log.add("ping:${it.n}") }
+                app.on<ServiceChanged> { throw IsolationBoom(0) }
+                app.on<ServiceChanged> { probe.log.add("changed:${it.isAvailable}") }
 
-            app.emit(IsolationPing(1))
-            app.provide(ValueKey, "x")
+                app.emit(IsolationPing(1))
+                app.provide(ValueKey, "x")
 
-            assertEquals(listOf("ping:1", "changed:true"), probe.log)
-            val changed = ServiceChanged(slot = app.slot(ValueKey.serviceId), isAvailable = true)
-            assertEquals(
-                listOf(
-                    ListenerFailed(event = IsolationPing(1), error = IsolationBoom(1)),
-                    ListenerFailed(event = changed, error = IsolationBoom(0)),
-                ),
-                failures,
-            )
-            app.dispose()
+                assertEquals(listOf("ping:1", "changed:true"), probe.log)
+                val changed = ServiceChanged(slot = app.slot(ValueKey.serviceId), isAvailable = true)
+                assertEquals(
+                    listOf(
+                        ListenerFailed(event = IsolationPing(1), error = IsolationBoom(1)),
+                        ListenerFailed(event = changed, error = IsolationBoom(0)),
+                    ),
+                    failures,
+                )
+            }
         }
 
     @Test
     fun throwingStatusListenerDoesNotWedgeReconciliation() =
         runTest {
-            val app = Context.root()
-            val statuses = mutableListOf<Fork.Status>()
-            app.on<PluginStatusChanged> { throw IsolationBoom(1) }
-            app.on<PluginStatusChanged> { if (it.plugin == NeedsValue.name) statuses.add(it.status) }
+            withRoot { app ->
+                val statuses = mutableListOf<Fork.Status>()
+                app.on<PluginStatusChanged> { throw IsolationBoom(1) }
+                app.on<PluginStatusChanged> { if (it.plugin == NeedsValue.name) statuses.add(it.status) }
 
-            val dependent = app.plugin(NeedsValue)
-            val provider = app.plugin("provider") { it.provide(ValueKey, "x") }
-            assertEquals(Fork.Status.Active, dependent.awaitActive())
+                val dependent = app.plugin(NeedsValue)
+                val provider = app.plugin("provider") { it.provide(ValueKey, "x") }
+                assertEquals(Fork.Status.Active, dependent.awaitActive())
 
-            provider.dispose()
-            assertEquals(Fork.Status.Pending, dependent.status)
+                provider.dispose()
+                assertEquals(Fork.Status.Pending, dependent.status)
 
-            app.provide(ValueKey, "y")
-            assertEquals(Fork.Status.Active, dependent.awaitActive())
-            assertEquals(
-                listOf(Fork.Status.Loading, Fork.Status.Active, Fork.Status.Pending, Fork.Status.Loading, Fork.Status.Active),
-                statuses,
-            )
-            app.dispose()
+                app.provide(ValueKey, "y")
+                assertEquals(Fork.Status.Active, dependent.awaitActive())
+                assertEquals(
+                    listOf(Fork.Status.Loading, Fork.Status.Active, Fork.Status.Pending, Fork.Status.Loading, Fork.Status.Active),
+                    statuses,
+                )
+            }
         }
 
     @Test
     fun throwingListenerFailedListenerIsNotReportedAgain() =
         runTest {
-            val app = Context.root()
-            var reported = 0
-            app.on<IsolationPing> { throw IsolationBoom(it.n) }
-            app.on<ListenerFailed> { throw IsolationBoom(-1) }
-            app.on<ListenerFailed> { reported += 1 }
+            withRoot { app ->
+                var reported = 0
+                app.on<IsolationPing> { throw IsolationBoom(it.n) }
+                app.on<ListenerFailed> { throw IsolationBoom(-1) }
+                app.on<ListenerFailed> { reported += 1 }
 
-            app.emit(IsolationPing(1))
+                app.emit(IsolationPing(1))
 
-            assertEquals(1, reported)
-            app.dispose()
+                assertEquals(1, reported)
+            }
         }
 
     @Test
     fun throwingLaunchInPluginReportsTaskFailed() =
         runTest {
-            val app = Context.root()
-            val failed = CompletableDeferred<TaskFailed>()
-            app.on<TaskFailed> { failed.complete(it) }
+            withRoot { app ->
+                val failed = CompletableDeferred<TaskFailed>()
+                app.on<TaskFailed> { failed.complete(it) }
 
-            val dependent = app.plugin(NeedsValue)
-            val worker =
-                app.plugin("worker") { ctx ->
-                    ctx.provide(ValueKey, "x")
-                    ctx.launch { throw IsolationBoom(1) }
-                }
+                val dependent = app.plugin(NeedsValue)
+                val worker =
+                    app.plugin("worker") { ctx ->
+                        ctx.provide(ValueKey, "x")
+                        ctx.launch { throw IsolationBoom(1) }
+                    }
 
-            assertEquals(TaskFailed(plugin = "worker", error = IsolationBoom(1)), failed.await())
-            assertEquals(Fork.Status.Active, worker.status)
-            assertEquals(Fork.Status.Active, dependent.awaitActive())
+                assertEquals(TaskFailed(plugin = "worker", error = IsolationBoom(1)), failed.await())
+                assertEquals(Fork.Status.Active, worker.status)
+                assertEquals(Fork.Status.Active, dependent.awaitActive())
 
-            worker.dispose()
-            assertEquals(Fork.Status.Pending, dependent.status)
-            app.provide(ValueKey, "y")
-            assertEquals(Fork.Status.Active, dependent.awaitActive())
-            app.dispose()
+                worker.dispose()
+                assertEquals(Fork.Status.Pending, dependent.status)
+                app.provide(ValueKey, "y")
+                assertEquals(Fork.Status.Active, dependent.awaitActive())
+            }
         }
 
     @Test
     fun throwingLaunchOnRootReportsRoot() =
         runTest {
-            val app = Context.root()
-            val failed = CompletableDeferred<TaskFailed>()
-            app.on<TaskFailed> { failed.complete(it) }
+            withRoot { app ->
+                val failed = CompletableDeferred<TaskFailed>()
+                app.on<TaskFailed> { failed.complete(it) }
 
-            app.launch { throw IsolationBoom(2) }
+                app.launch { throw IsolationBoom(2) }
 
-            assertEquals(TaskFailed(plugin = "root", error = IsolationBoom(2)), failed.await())
-            app.dispose()
+                assertEquals(TaskFailed(plugin = "root", error = IsolationBoom(2)), failed.await())
+            }
         }
 }

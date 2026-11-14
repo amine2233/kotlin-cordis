@@ -9,10 +9,15 @@ import cordis.kernel.PluginStatusChanged
 import cordis.kernel.ServiceChanged
 import cordis.kernel.ServiceKey
 import cordis.kernel.TeardownFailed
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlin.coroutines.ContinuationInterceptor
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class TestBoomException : Exception("Boom")
@@ -106,5 +111,41 @@ class TestAppTests {
             assertEquals("root", failures.first().plugin)
             assertTrue(failures.first().error is TestBoomException)
             assertEquals(1, events.failures.size)
+        }
+
+    @Test
+    fun dispatcherOverloadRunsApplyOnTheSuppliedDispatcher() =
+        runTest {
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            var interceptor: ContinuationInterceptor? = null
+            withTestApp(dispatcher) { ctx, _ ->
+                ctx.plugin("probe") { interceptor = currentCoroutineContext()[ContinuationInterceptor] }
+            }
+            assertEquals<ContinuationInterceptor?>(dispatcher, interceptor)
+        }
+
+    @Test
+    fun dispatcherOverloadRunsLaunchedWorkOnlyWhenAdvanced() =
+        runTest {
+            withTestApp(StandardTestDispatcher(testScheduler)) { ctx, _ ->
+                var ran = false
+                ctx.launch { ran = true }
+                assertFalse(ran)
+                advanceUntilIdle()
+                assertTrue(ran)
+            }
+        }
+
+    @Test
+    fun dispatcherOverloadDisposesWhenBodyThrows() =
+        runTest {
+            var disposed = false
+            assertFailsWith<TestBoomException> {
+                withTestApp(StandardTestDispatcher(testScheduler)) { ctx, _ ->
+                    ctx.onDispose { disposed = true }
+                    throw TestBoomException()
+                }
+            }
+            assertTrue(disposed)
         }
 }

@@ -31,4 +31,4 @@ with spatiotemporal composability), ported from `swift-cordis`.
   - `cordis-loader`: Declarative JSON loading with `kotlinx-serialization`.
   - `cordis-testing`: `ManualClock`, `settle`, `withTestApp`.
   - `cordis-demo`: 6-scenario walkthrough.
-- Tests: Pure Kotlin test suite (`kotlin.test` + `kotlinx.coroutines.test.runTest`).
+- Tests: Pure Kotlin test suite (`kotlin.test` + `kotlinx.coroutines.test.runTest`). Every root a test creates must be disposed, even when the test fails: kernel tests create roots through `withRoot` (`cordis-kernel/src/commonTest/kotlin/cordis/kernel/TestRoot.kt`), other modules' tests through `withTestApp`.

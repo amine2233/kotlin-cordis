@@ -46,31 +46,33 @@ class TeardownFailureTests {
     @Test
     fun rootScopeEmitsTeardownFailedWithRootName() =
         runTest {
-            val app = Context.root()
-            val probe = Probe()
-            app.on<TeardownFailed> { event ->
-                val id = (event.error as? TeardownBoom)?.id ?: -1
-                probe.log.add("${event.plugin}:$id")
+            withRoot { app ->
+                val probe = Probe()
+                app.on<TeardownFailed> { event ->
+                    val id = (event.error as? TeardownBoom)?.id ?: -1
+                    probe.log.add("${event.plugin}:$id")
+                }
+                app.onDispose { throw TeardownBoom(7) }
+
+                app.dispose()
+
+                assertEquals(listOf("root:7"), probe.log)
             }
-            app.onDispose { throw TeardownBoom(7) }
-
-            app.dispose()
-
-            assertEquals(listOf("root:7"), probe.log)
         }
 
     @Test
     fun forkScopeEmitsTeardownFailedWithPluginName() =
         runTest {
-            val app = Context.root()
-            val probe = Probe()
-            app.on<TeardownFailed> { event ->
-                probe.log.add(event.plugin)
-            }
-            app.plugin(FailingTeardownPlugin, probe)
-            app.dispose()
+            withRoot { app ->
+                val probe = Probe()
+                app.on<TeardownFailed> { event ->
+                    probe.log.add(event.plugin)
+                }
+                app.plugin(FailingTeardownPlugin, probe)
+                app.dispose()
 
-            assertEquals(listOf(FailingTeardownPlugin.name, "ok"), probe.log)
+                assertEquals(listOf(FailingTeardownPlugin.name, "ok"), probe.log)
+            }
         }
 
     @Test

@@ -115,3 +115,4 @@ Raw JSON is also fine: `LoadPlan(listOf(LoadPlan.Entry(key = "db", config = """{
 ```
 `settle { condition }` yields until true (bounded); `ManualClock` drives `ctx.after`/`ctx.every` without wall time
 (`ctx.every(1.seconds, clock = manualClock) { … }`, then advance the clock).
+`withTestApp(StandardTestDispatcher(testScheduler)) { app, events -> … }` runs the graph on the test scheduler; settle it with `advanceUntilIdle()`.

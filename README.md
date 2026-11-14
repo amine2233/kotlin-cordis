@@ -107,7 +107,7 @@ Any side effect registered inside `Plugin.apply` (event listeners, provided serv
 `cordis-loader` validates a `LoadPlan` before loading any plugin. If unknown keys, duplicate entry names, or undecodable configs exist, validation rejects the entire plan and loads nothing.
 
 ### Deterministic Testing
-`cordis-testing` offers `ManualClock` for controlling virtual time without sleeping real wall-clock time, `settle { condition }` for bounded yielding, and `withTestApp { ctx, events -> ... }` which captures lifecycle and failure events in order and guarantees root disposal.
+`cordis-testing` offers `ManualClock` for controlling virtual time without sleeping real wall-clock time, `settle { condition }` for bounded yielding, and `withTestApp { ctx, events -> ... }` which captures lifecycle and failure events in order and guarantees root disposal. Inside `runTest`, `withTestApp(StandardTestDispatcher(testScheduler)) { ctx, events -> ... }` runs the graph on the test scheduler, so `advanceUntilIdle()` settles it deterministically.
 
 ---
 
