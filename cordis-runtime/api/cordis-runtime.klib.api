@@ -1,0 +1,142 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, macosX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.amine2233:cordis-runtime>
+abstract interface cordis.runtime/EnabledPluginsStore { // cordis.runtime/EnabledPluginsStore|null[0]
+    abstract suspend fun load(): kotlin.collections/Map<cordis.kernel/PluginKey, kotlin/Boolean> // cordis.runtime/EnabledPluginsStore.load|load(){}[0]
+    abstract suspend fun save(kotlin.collections/Map<cordis.kernel/PluginKey, kotlin/Boolean>) // cordis.runtime/EnabledPluginsStore.save|save(kotlin.collections.Map<cordis.kernel.PluginKey,kotlin.Boolean>){}[0]
+}
+
+abstract interface cordis.runtime/PluginRuntime { // cordis.runtime/PluginRuntime|null[0]
+    abstract val state // cordis.runtime/PluginRuntime.state|{}state[0]
+        abstract fun <get-state>(): kotlinx.coroutines.flow/StateFlow<kotlin.collections/List<cordis.runtime/PluginState>> // cordis.runtime/PluginRuntime.state.<get-state>|<get-state>(){}[0]
+
+    abstract suspend fun setEnabled(cordis.kernel/PluginKey, kotlin/Boolean) // cordis.runtime/PluginRuntime.setEnabled|setEnabled(cordis.kernel.PluginKey;kotlin.Boolean){}[0]
+    abstract suspend fun start() // cordis.runtime/PluginRuntime.start|start(){}[0]
+    abstract suspend fun stop() // cordis.runtime/PluginRuntime.stop|stop(){}[0]
+}
+
+final class cordis.runtime/InMemoryEnabledPluginsStore : cordis.runtime/EnabledPluginsStore { // cordis.runtime/InMemoryEnabledPluginsStore|null[0]
+    constructor <init>(kotlin.collections/Map<cordis.kernel/PluginKey, kotlin/Boolean> = ...) // cordis.runtime/InMemoryEnabledPluginsStore.<init>|<init>(kotlin.collections.Map<cordis.kernel.PluginKey,kotlin.Boolean>){}[0]
+
+    final suspend fun load(): kotlin.collections/Map<cordis.kernel/PluginKey, kotlin/Boolean> // cordis.runtime/InMemoryEnabledPluginsStore.load|load(){}[0]
+    final suspend fun save(kotlin.collections/Map<cordis.kernel/PluginKey, kotlin/Boolean>) // cordis.runtime/InMemoryEnabledPluginsStore.save|save(kotlin.collections.Map<cordis.kernel.PluginKey,kotlin.Boolean>){}[0]
+}
+
+final class cordis.runtime/PluginCatalog { // cordis.runtime/PluginCatalog|null[0]
+    final val entries // cordis.runtime/PluginCatalog.entries|{}entries[0]
+        final fun <get-entries>(): kotlin.collections/List<cordis.runtime/PluginCatalog.Entry> // cordis.runtime/PluginCatalog.entries.<get-entries>|<get-entries>(){}[0]
+
+    final class Entry { // cordis.runtime/PluginCatalog.Entry|null[0]
+        final val key // cordis.runtime/PluginCatalog.Entry.key|{}key[0]
+            final fun <get-key>(): cordis.kernel/PluginKey // cordis.runtime/PluginCatalog.Entry.key.<get-key>|<get-key>(){}[0]
+        final val metadata // cordis.runtime/PluginCatalog.Entry.metadata|{}metadata[0]
+            final fun <get-metadata>(): cordis.runtime/PluginMetadata // cordis.runtime/PluginCatalog.Entry.metadata.<get-metadata>|<get-metadata>(){}[0]
+    }
+}
+
+final class cordis.runtime/PluginCatalogBuilder { // cordis.runtime/PluginCatalogBuilder|null[0]
+    final fun <#A1: kotlin/Any?> plugin(cordis.kernel/PluginKey, cordis.kernel/Plugin<#A1>, #A1, cordis.runtime/PluginMetadata) // cordis.runtime/PluginCatalogBuilder.plugin|plugin(cordis.kernel.PluginKey;cordis.kernel.Plugin<0:0>;0:0;cordis.runtime.PluginMetadata){0§<kotlin.Any?>}[0]
+    final fun plugin(cordis.kernel/PluginKey, cordis.kernel/Plugin<kotlin/Unit>, cordis.runtime/PluginMetadata) // cordis.runtime/PluginCatalogBuilder.plugin|plugin(cordis.kernel.PluginKey;cordis.kernel.Plugin<kotlin.Unit>;cordis.runtime.PluginMetadata){}[0]
+}
+
+final class cordis.runtime/PluginMetadata { // cordis.runtime/PluginMetadata|null[0]
+    constructor <init>(kotlin/String, kotlin/String, kotlin/Boolean = ..., kotlin/Boolean = ...) // cordis.runtime/PluginMetadata.<init>|<init>(kotlin.String;kotlin.String;kotlin.Boolean;kotlin.Boolean){}[0]
+
+    final val description // cordis.runtime/PluginMetadata.description|{}description[0]
+        final fun <get-description>(): kotlin/String // cordis.runtime/PluginMetadata.description.<get-description>|<get-description>(){}[0]
+    final val enabledByDefault // cordis.runtime/PluginMetadata.enabledByDefault|{}enabledByDefault[0]
+        final fun <get-enabledByDefault>(): kotlin/Boolean // cordis.runtime/PluginMetadata.enabledByDefault.<get-enabledByDefault>|<get-enabledByDefault>(){}[0]
+    final val locked // cordis.runtime/PluginMetadata.locked|{}locked[0]
+        final fun <get-locked>(): kotlin/Boolean // cordis.runtime/PluginMetadata.locked.<get-locked>|<get-locked>(){}[0]
+    final val title // cordis.runtime/PluginMetadata.title|{}title[0]
+        final fun <get-title>(): kotlin/String // cordis.runtime/PluginMetadata.title.<get-title>|<get-title>(){}[0]
+
+    final fun component1(): kotlin/String // cordis.runtime/PluginMetadata.component1|component1(){}[0]
+    final fun component2(): kotlin/String // cordis.runtime/PluginMetadata.component2|component2(){}[0]
+    final fun component3(): kotlin/Boolean // cordis.runtime/PluginMetadata.component3|component3(){}[0]
+    final fun component4(): kotlin/Boolean // cordis.runtime/PluginMetadata.component4|component4(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/Boolean = ..., kotlin/Boolean = ...): cordis.runtime/PluginMetadata // cordis.runtime/PluginMetadata.copy|copy(kotlin.String;kotlin.String;kotlin.Boolean;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // cordis.runtime/PluginMetadata.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // cordis.runtime/PluginMetadata.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // cordis.runtime/PluginMetadata.toString|toString(){}[0]
+}
+
+final class cordis.runtime/PluginRuntimeDefault : cordis.runtime/PluginRuntime { // cordis.runtime/PluginRuntimeDefault|null[0]
+    constructor <init>(cordis.kernel/Context, cordis.runtime/PluginCatalog, cordis.runtime/EnabledPluginsStore) // cordis.runtime/PluginRuntimeDefault.<init>|<init>(cordis.kernel.Context;cordis.runtime.PluginCatalog;cordis.runtime.EnabledPluginsStore){}[0]
+
+    final val state // cordis.runtime/PluginRuntimeDefault.state|{}state[0]
+        final fun <get-state>(): kotlinx.coroutines.flow/StateFlow<kotlin.collections/List<cordis.runtime/PluginState>> // cordis.runtime/PluginRuntimeDefault.state.<get-state>|<get-state>(){}[0]
+
+    final suspend fun setEnabled(cordis.kernel/PluginKey, kotlin/Boolean) // cordis.runtime/PluginRuntimeDefault.setEnabled|setEnabled(cordis.kernel.PluginKey;kotlin.Boolean){}[0]
+    final suspend fun start() // cordis.runtime/PluginRuntimeDefault.start|start(){}[0]
+    final suspend fun stop() // cordis.runtime/PluginRuntimeDefault.stop|stop(){}[0]
+}
+
+final class cordis.runtime/PluginState { // cordis.runtime/PluginState|null[0]
+    constructor <init>(cordis.kernel/PluginKey, cordis.runtime/PluginMetadata, kotlin/Boolean, cordis.kernel/Fork.Status?, kotlin.collections/List<cordis.kernel/ServiceId>) // cordis.runtime/PluginState.<init>|<init>(cordis.kernel.PluginKey;cordis.runtime.PluginMetadata;kotlin.Boolean;cordis.kernel.Fork.Status?;kotlin.collections.List<cordis.kernel.ServiceId>){}[0]
+
+    final val enabled // cordis.runtime/PluginState.enabled|{}enabled[0]
+        final fun <get-enabled>(): kotlin/Boolean // cordis.runtime/PluginState.enabled.<get-enabled>|<get-enabled>(){}[0]
+    final val key // cordis.runtime/PluginState.key|{}key[0]
+        final fun <get-key>(): cordis.kernel/PluginKey // cordis.runtime/PluginState.key.<get-key>|<get-key>(){}[0]
+    final val metadata // cordis.runtime/PluginState.metadata|{}metadata[0]
+        final fun <get-metadata>(): cordis.runtime/PluginMetadata // cordis.runtime/PluginState.metadata.<get-metadata>|<get-metadata>(){}[0]
+    final val missing // cordis.runtime/PluginState.missing|{}missing[0]
+        final fun <get-missing>(): kotlin.collections/List<cordis.kernel/ServiceId> // cordis.runtime/PluginState.missing.<get-missing>|<get-missing>(){}[0]
+    final val status // cordis.runtime/PluginState.status|{}status[0]
+        final fun <get-status>(): cordis.kernel/Fork.Status? // cordis.runtime/PluginState.status.<get-status>|<get-status>(){}[0]
+
+    final fun component1(): cordis.kernel/PluginKey // cordis.runtime/PluginState.component1|component1(){}[0]
+    final fun component2(): cordis.runtime/PluginMetadata // cordis.runtime/PluginState.component2|component2(){}[0]
+    final fun component3(): kotlin/Boolean // cordis.runtime/PluginState.component3|component3(){}[0]
+    final fun component4(): cordis.kernel/Fork.Status? // cordis.runtime/PluginState.component4|component4(){}[0]
+    final fun component5(): kotlin.collections/List<cordis.kernel/ServiceId> // cordis.runtime/PluginState.component5|component5(){}[0]
+    final fun copy(cordis.kernel/PluginKey = ..., cordis.runtime/PluginMetadata = ..., kotlin/Boolean = ..., cordis.kernel/Fork.Status? = ..., kotlin.collections/List<cordis.kernel/ServiceId> = ...): cordis.runtime/PluginState // cordis.runtime/PluginState.copy|copy(cordis.kernel.PluginKey;cordis.runtime.PluginMetadata;kotlin.Boolean;cordis.kernel.Fork.Status?;kotlin.collections.List<cordis.kernel.ServiceId>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // cordis.runtime/PluginState.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // cordis.runtime/PluginState.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // cordis.runtime/PluginState.toString|toString(){}[0]
+}
+
+sealed class cordis.runtime/PluginRuntimeException : kotlin/Exception { // cordis.runtime/PluginRuntimeException|null[0]
+    open val message // cordis.runtime/PluginRuntimeException.message|{}message[0]
+        open fun <get-message>(): kotlin/String // cordis.runtime/PluginRuntimeException.message.<get-message>|<get-message>(){}[0]
+
+    final class LockedPlugin : cordis.runtime/PluginRuntimeException { // cordis.runtime/PluginRuntimeException.LockedPlugin|null[0]
+        constructor <init>(cordis.kernel/PluginKey) // cordis.runtime/PluginRuntimeException.LockedPlugin.<init>|<init>(cordis.kernel.PluginKey){}[0]
+
+        final val key // cordis.runtime/PluginRuntimeException.LockedPlugin.key|{}key[0]
+            final fun <get-key>(): cordis.kernel/PluginKey // cordis.runtime/PluginRuntimeException.LockedPlugin.key.<get-key>|<get-key>(){}[0]
+
+        final fun component1(): cordis.kernel/PluginKey // cordis.runtime/PluginRuntimeException.LockedPlugin.component1|component1(){}[0]
+        final fun copy(cordis.kernel/PluginKey = ...): cordis.runtime/PluginRuntimeException.LockedPlugin // cordis.runtime/PluginRuntimeException.LockedPlugin.copy|copy(cordis.kernel.PluginKey){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // cordis.runtime/PluginRuntimeException.LockedPlugin.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // cordis.runtime/PluginRuntimeException.LockedPlugin.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // cordis.runtime/PluginRuntimeException.LockedPlugin.toString|toString(){}[0]
+    }
+
+    final class UnknownPlugin : cordis.runtime/PluginRuntimeException { // cordis.runtime/PluginRuntimeException.UnknownPlugin|null[0]
+        constructor <init>(cordis.kernel/PluginKey) // cordis.runtime/PluginRuntimeException.UnknownPlugin.<init>|<init>(cordis.kernel.PluginKey){}[0]
+
+        final val key // cordis.runtime/PluginRuntimeException.UnknownPlugin.key|{}key[0]
+            final fun <get-key>(): cordis.kernel/PluginKey // cordis.runtime/PluginRuntimeException.UnknownPlugin.key.<get-key>|<get-key>(){}[0]
+
+        final fun component1(): cordis.kernel/PluginKey // cordis.runtime/PluginRuntimeException.UnknownPlugin.component1|component1(){}[0]
+        final fun copy(cordis.kernel/PluginKey = ...): cordis.runtime/PluginRuntimeException.UnknownPlugin // cordis.runtime/PluginRuntimeException.UnknownPlugin.copy|copy(cordis.kernel.PluginKey){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // cordis.runtime/PluginRuntimeException.UnknownPlugin.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // cordis.runtime/PluginRuntimeException.UnknownPlugin.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // cordis.runtime/PluginRuntimeException.UnknownPlugin.toString|toString(){}[0]
+    }
+
+    final object NotStarted : cordis.runtime/PluginRuntimeException { // cordis.runtime/PluginRuntimeException.NotStarted|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // cordis.runtime/PluginRuntimeException.NotStarted.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // cordis.runtime/PluginRuntimeException.NotStarted.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // cordis.runtime/PluginRuntimeException.NotStarted.toString|toString(){}[0]
+    }
+}
+
+final fun cordis.runtime/pluginCatalog(kotlin/Function1<cordis.runtime/PluginCatalogBuilder, kotlin/Unit>): cordis.runtime/PluginCatalog // cordis.runtime/pluginCatalog|pluginCatalog(kotlin.Function1<cordis.runtime.PluginCatalogBuilder,kotlin.Unit>){}[0]

@@ -25,10 +25,11 @@ Group `io.github.amine2233`, published to GitHub Packages (`https://maven.pkg.gi
 |---|---|
 | `cordis` | what apps depend on: re-exports the kernel, adds `ServicePlugin`, `ctx.after`, `ctx.every` |
 | `cordis-loader` | `LoadPlan`, `loadPlan { }`, `LoadPlan.fromJson`, `PluginFactoryRegistry`, `ctx.load(...)` (kotlinx-serialization JSON) |
+| `cordis-runtime` | `pluginCatalog { }`, `PluginMetadata`, `EnabledPluginsStore`, `PluginRuntimeDefault`: enable/disable plugins by key, observable `StateFlow<List<PluginState>>` |
 | `cordis-testing` | `withTestApp`, `settle`, `ManualClock` (test scope only) |
 | `cordis-kernel` | zero-sugar core; pulled in by `cordis` |
 
-Packages: `cordis.kernel.*` (Context, Plugin, Inject, ServiceKey, events), `cordis.*` (ServicePlugin, timers), `cordis.loader.*`.
+Packages: `cordis.kernel.*` (Context, Plugin, Inject, ServiceKey, events), `cordis.*` (ServicePlugin, timers), `cordis.loader.*`, `cordis.runtime.*`.
 
 ## Core API cheat sheet
 

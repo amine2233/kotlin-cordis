@@ -29,6 +29,7 @@ Cordis' core idea: **everything is a plugin**, and plugins compose along two ort
 - `cordis`: Re-exports the kernel and adds `ServicePlugin` and timer effects (`ctx.after`, `ctx.every`).
 - `cordis-loader`: Declarative JSON load-plan loader (`LoadPlan`, `PluginFactoryRegistry`, `Context.load`) with `kotlinx.serialization`.
 - `cordis-testing`: Test support module (`ManualClock`, `settle(until = ...)`, `withTestApp`, `RecordedEvents`).
+- `cordis-runtime`: Enables and disables catalog plugins by key at runtime (`pluginCatalog { }`, `EnabledPluginsStore`, `PluginRuntimeDefault`) with an observable `StateFlow<List<PluginState>>`.
 - `cordis-demo`: Executable walkthrough showing the 6 core scenarios.
 
 ---
@@ -106,6 +107,20 @@ Any side effect registered inside `Plugin.apply` (event listeners, provided serv
 ### Declarative Loading
 `cordis-loader` resolves each `LoadPlan` entry's `PluginKey` through a `PluginFactoryRegistry` and validates the whole plan before loading any plugin. If unknown keys, duplicate entry names, or undecodable configs exist, the plan loads nothing: entries with errors are reported `LoadOutcome.Invalid` (with their `LoaderError`s) and the rest `LoadOutcome.NotLoaded`. A valid plan reports `LoadOutcome.Loaded` with the plugin's `PluginHandle`. Plans are `@Serializable` and can be parsed with `LoadPlan.fromJson(text)`.
 
+### Runtime Toggles
+`cordis-runtime` turns a keyed `PluginCatalog` on and off while the app runs. The store keeps only the user's overrides of the catalog defaults, locked entries cannot be disabled, and `state` follows `snapshotFlow()`, so a dependent plugin shows as `Pending` with its `missing` services while its provider is off. `start`, `setEnabled` and `stop` are serialised by a mutex and can be called from any thread; refusals throw `PluginRuntimeException` (`UnknownPlugin`, `LockedPlugin`, `NotStarted`).
+
+```kotlin
+val catalog = pluginCatalog {
+    plugin(PluginKey("db"), DatabasePlugin, DatabaseConfig(url), PluginMetadata("Database", "Storage", locked = true))
+    plugin(PluginKey("search"), SearchPlugin, PluginMetadata("Search", "Full-text search"))
+}
+val runtime = PluginRuntimeDefault(ctx, catalog, InMemoryEnabledPluginsStore())
+runtime.start()
+runtime.setEnabled(PluginKey("search"), false)
+runtime.state.collect { states -> render(states) }
+```
+
 ### Deterministic Testing
 `cordis-testing` offers `ManualClock` for controlling virtual time without sleeping real wall-clock time, `settle { condition }` for bounded yielding, and `withTestApp { ctx, events -> ... }` which captures lifecycle and failure events in order and guarantees root disposal. Inside `runTest`, `withTestApp(StandardTestDispatcher(testScheduler)) { ctx, events -> ... }` runs the graph on the test scheduler, so `advanceUntilIdle()` settles it deterministically.
 
@@ -177,6 +192,6 @@ All logic lives in `mise.toml`:
 - **Actions → Release → Run workflow** runs semantic-release (or automatically
   on every push to `main` when the repo variable `AUTO_RELEASE=true` is set): it tags
   `vX.Y.Z`, updates `CHANGELOG.md`, publishes `io.github.amine2233:cordis-kernel`, `cordis`,
-  `cordis-loader` and `cordis-testing` to GitHub Packages and creates the GitHub release
+  `cordis-loader`, `cordis-testing` and `cordis-runtime` to GitHub Packages and creates the GitHub release
   with the jars attached.
 - `mise run release --dry-run` previews the next version locally.
