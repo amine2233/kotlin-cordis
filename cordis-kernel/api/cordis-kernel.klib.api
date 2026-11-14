@@ -38,6 +38,13 @@ abstract interface cordis.kernel/CordisClock { // cordis.kernel/CordisClock|null
 
 abstract interface cordis.kernel/CordisEvent // cordis.kernel/CordisEvent|null[0]
 
+abstract interface cordis.kernel/SnapshotVisitor { // cordis.kernel/SnapshotVisitor|null[0]
+    open fun enterPlugin(cordis.kernel/PluginInfo, kotlin/Int) // cordis.kernel/SnapshotVisitor.enterPlugin|enterPlugin(cordis.kernel.PluginInfo;kotlin.Int){}[0]
+    open fun exitPlugin(cordis.kernel/PluginInfo, kotlin/Int) // cordis.kernel/SnapshotVisitor.exitPlugin|exitPlugin(cordis.kernel.PluginInfo;kotlin.Int){}[0]
+    open fun visitMissing(cordis.kernel/ServiceId, cordis.kernel/PluginInfo) // cordis.kernel/SnapshotVisitor.visitMissing|visitMissing(cordis.kernel.ServiceId;cordis.kernel.PluginInfo){}[0]
+    open fun visitProvidedSlot(cordis.kernel/SlotInfo, cordis.kernel/PluginInfo) // cordis.kernel/SnapshotVisitor.visitProvidedSlot|visitProvidedSlot(cordis.kernel.SlotInfo;cordis.kernel.PluginInfo){}[0]
+}
+
 final class <#A: kotlin/Any?> cordis.kernel/PluginHandle { // cordis.kernel/PluginHandle|null[0]
     constructor <init>(cordis.kernel/Fork, cordis.kernel/Plugin<#A>) // cordis.kernel/PluginHandle.<init>|<init>(cordis.kernel.Fork;cordis.kernel.Plugin<1:0>){}[0]
 
@@ -162,6 +169,34 @@ final class cordis.kernel/Fork { // cordis.kernel/Fork|null[0]
     }
 }
 
+final class cordis.kernel/HealthReport { // cordis.kernel/HealthReport|null[0]
+    constructor <init>(kotlin.collections/List<cordis.kernel/PluginInfo>, kotlin.collections/List<cordis.kernel/PluginInfo>, kotlin.collections/List<cordis.kernel/PluginInfo>) // cordis.kernel/HealthReport.<init>|<init>(kotlin.collections.List<cordis.kernel.PluginInfo>;kotlin.collections.List<cordis.kernel.PluginInfo>;kotlin.collections.List<cordis.kernel.PluginInfo>){}[0]
+
+    final val failed // cordis.kernel/HealthReport.failed|{}failed[0]
+        final fun <get-failed>(): kotlin.collections/List<cordis.kernel/PluginInfo> // cordis.kernel/HealthReport.failed.<get-failed>|<get-failed>(){}[0]
+    final val healthy // cordis.kernel/HealthReport.healthy|{}healthy[0]
+        final fun <get-healthy>(): kotlin/Boolean // cordis.kernel/HealthReport.healthy.<get-healthy>|<get-healthy>(){}[0]
+    final val missingServices // cordis.kernel/HealthReport.missingServices|{}missingServices[0]
+        final fun <get-missingServices>(): kotlin.collections/List<cordis.kernel/PluginInfo> // cordis.kernel/HealthReport.missingServices.<get-missingServices>|<get-missingServices>(){}[0]
+    final val pending // cordis.kernel/HealthReport.pending|{}pending[0]
+        final fun <get-pending>(): kotlin.collections/List<cordis.kernel/PluginInfo> // cordis.kernel/HealthReport.pending.<get-pending>|<get-pending>(){}[0]
+
+    final fun component1(): kotlin.collections/List<cordis.kernel/PluginInfo> // cordis.kernel/HealthReport.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/List<cordis.kernel/PluginInfo> // cordis.kernel/HealthReport.component2|component2(){}[0]
+    final fun component3(): kotlin.collections/List<cordis.kernel/PluginInfo> // cordis.kernel/HealthReport.component3|component3(){}[0]
+    final fun copy(kotlin.collections/List<cordis.kernel/PluginInfo> = ..., kotlin.collections/List<cordis.kernel/PluginInfo> = ..., kotlin.collections/List<cordis.kernel/PluginInfo> = ...): cordis.kernel/HealthReport // cordis.kernel/HealthReport.copy|copy(kotlin.collections.List<cordis.kernel.PluginInfo>;kotlin.collections.List<cordis.kernel.PluginInfo>;kotlin.collections.List<cordis.kernel.PluginInfo>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/HealthReport.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // cordis.kernel/HealthReport.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // cordis.kernel/HealthReport.toString|toString(){}[0]
+}
+
+final class cordis.kernel/HealthVisitor : cordis.kernel/SnapshotVisitor { // cordis.kernel/HealthVisitor|null[0]
+    constructor <init>() // cordis.kernel/HealthVisitor.<init>|<init>(){}[0]
+
+    final fun enterPlugin(cordis.kernel/PluginInfo, kotlin/Int) // cordis.kernel/HealthVisitor.enterPlugin|enterPlugin(cordis.kernel.PluginInfo;kotlin.Int){}[0]
+    final fun report(): cordis.kernel/HealthReport // cordis.kernel/HealthVisitor.report|report(){}[0]
+}
+
 final class cordis.kernel/Inject { // cordis.kernel/Inject|null[0]
     constructor <init>(kotlin.collections/List<cordis.kernel/ServiceId> = ..., kotlin.collections/List<cordis.kernel/ServiceId> = ...) // cordis.kernel/Inject.<init>|<init>(kotlin.collections.List<cordis.kernel.ServiceId>;kotlin.collections.List<cordis.kernel.ServiceId>){}[0]
 
@@ -201,6 +236,14 @@ final class cordis.kernel/ListenerFailed : cordis.kernel/CordisEvent { // cordis
     final fun equals(kotlin/Any?): kotlin/Boolean // cordis.kernel/ListenerFailed.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // cordis.kernel/ListenerFailed.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // cordis.kernel/ListenerFailed.toString|toString(){}[0]
+}
+
+final class cordis.kernel/MermaidVisitor : cordis.kernel/SnapshotVisitor { // cordis.kernel/MermaidVisitor|null[0]
+    constructor <init>() // cordis.kernel/MermaidVisitor.<init>|<init>(){}[0]
+
+    final fun enterPlugin(cordis.kernel/PluginInfo, kotlin/Int) // cordis.kernel/MermaidVisitor.enterPlugin|enterPlugin(cordis.kernel.PluginInfo;kotlin.Int){}[0]
+    final fun render(): kotlin/String // cordis.kernel/MermaidVisitor.render|render(){}[0]
+    final fun visitProvidedSlot(cordis.kernel/SlotInfo, cordis.kernel/PluginInfo) // cordis.kernel/MermaidVisitor.visitProvidedSlot|visitProvidedSlot(cordis.kernel.SlotInfo;cordis.kernel.PluginInfo){}[0]
 }
 
 final class cordis.kernel/OccurrenceId { // cordis.kernel/OccurrenceId|null[0]
@@ -445,6 +488,13 @@ final class cordis.kernel/TeardownFailed : cordis.kernel/CordisEvent { // cordis
     final fun toString(): kotlin/String // cordis.kernel/TeardownFailed.toString|toString(){}[0]
 }
 
+final class cordis.kernel/TextTreeVisitor : cordis.kernel/SnapshotVisitor { // cordis.kernel/TextTreeVisitor|null[0]
+    constructor <init>() // cordis.kernel/TextTreeVisitor.<init>|<init>(){}[0]
+
+    final fun enterPlugin(cordis.kernel/PluginInfo, kotlin/Int) // cordis.kernel/TextTreeVisitor.enterPlugin|enterPlugin(cordis.kernel.PluginInfo;kotlin.Int){}[0]
+    final fun render(): kotlin/String // cordis.kernel/TextTreeVisitor.render|render(){}[0]
+}
+
 final class cordis.kernel/ZoneId { // cordis.kernel/ZoneId|null[0]
     constructor <init>(kotlin/Int) // cordis.kernel/ZoneId.<init>|<init>(kotlin.Int){}[0]
 
@@ -531,3 +581,5 @@ final object cordis.kernel/DefaultClock : cordis.kernel/CordisClock { // cordis.
 
     final suspend fun delay(kotlin.time/Duration) // cordis.kernel/DefaultClock.delay|delay(kotlin.time.Duration){}[0]
 }
+
+final fun (cordis.kernel/RuntimeSnapshot).cordis.kernel/accept(cordis.kernel/SnapshotVisitor) // cordis.kernel/accept|accept@cordis.kernel.RuntimeSnapshot(cordis.kernel.SnapshotVisitor){}[0]
