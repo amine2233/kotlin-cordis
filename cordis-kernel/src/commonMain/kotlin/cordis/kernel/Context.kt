@@ -1,5 +1,6 @@
 package cordis.kernel
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -227,6 +228,15 @@ class Context internal constructor(
         config: C,
     ): PluginHandle<C> =
         registry.lifecycle {
+            val rejection =
+                try {
+                    plugin.validate(config)
+                    null
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (t: Throwable) {
+                    t
+                }
             val newFork =
                 Fork(
                     name = plugin.name,
@@ -238,7 +248,9 @@ class Context internal constructor(
                 }
             registry.register(newFork)
             newFork.parentEntry = scope.collect { newFork.dispose() }
-            if (!scope.isDisposed) {
+            if (rejection != null) {
+                newFork.reject(rejection)
+            } else if (!scope.isDisposed) {
                 newFork.refresh()
             }
             PluginHandle(newFork, plugin)

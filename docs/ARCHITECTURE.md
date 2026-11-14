@@ -69,6 +69,7 @@ A `Slot` is the combination of `(ServiceId, Realm)`.
 
 - If `Plugin.apply` throws, the fork's scope is immediately rolled back (all `onDispose` hooks executed), its status is set to `Failed`, and `PluginFailed` is emitted. The rest of the graph remains stable.
 - `PluginHandle.update` runs `Plugin.validate(config)` before tearing anything down. If validation throws, `UpdateOutcome.Rejected` is returned and the running plugin is untouched.
+- `Context.plugin(plugin, config)` (and so `cordis-loader`) also runs `Plugin.validate(config)` before the first `apply`. If validation throws, the fork is still registered and a handle is returned, but `apply` is never called: the status is set to `Failed` and `PluginFailed` is emitted, even when required services are missing. The fork stays `Failed` while its injected services appear, change or go away, until a valid `PluginHandle.update` reconfigures it; `dispose` works as usual.
 - Conflicting providers for the same slot throw `CordisException.ServiceConflict`, failing the incoming plugin while keeping the original provider active.
 - Teardowns may throw. `Scope.dispose` runs all registered disposables in reverse order, catching each error and emitting it as `TeardownFailed(plugin, error)` without aborting the remaining disposables.
 - Listeners are isolated from each other and from the emitter. `Registry.emit` calls each listener in its own `try`/`catch`: a throwing listener does not stop the remaining listeners, the emitter never sees the error, and the failure is emitted as `ListenerFailed(event, error)` from the same zone. A listener that throws while handling `ListenerFailed` is not reported again, so there is no recursion. `CancellationException` still propagates.
@@ -76,7 +77,7 @@ A `Slot` is the combination of `(ServiceId, Realm)`.
 - A `CancellationException` out of `apply` is never a failure: the run is rolled back, the fork returns to `Pending` (unless disposed), no `Failed` status is set and no `PluginFailed` is emitted.
 - `Disposed` is terminal: once a fork is `Disposed`, no further status change or `PluginFailed` is emitted for it. Disposing a fork while its `apply` is suspended cancels that `apply`, waits for its rollback and ends in `Disposed`.
 - Root `Context.dispose()` tears the graph down children first, then cancels the graph's coroutine scope (`Registry.coroutineScope`), so every `ctx.launch` job and timer stops. A second `dispose()` is a no-op.
-- Neither `ListenerFailed` nor `TaskFailed` changes plugin status: the plugin stays `Active`. Only a throwing `apply` yields `Failed` and `PluginFailed`.
+- Neither `ListenerFailed` nor `TaskFailed` changes plugin status: the plugin stays `Active`. Only a throwing `apply` or a config rejected by `validate` on load yields `Failed` and `PluginFailed`.
 
 ## 9. Timer Effects (`cordis`)
 

@@ -41,7 +41,9 @@ interface Plugin<C> {
     )
 
     /**
-     * Checks the shape of a config before `update` tears anything down; throw to reject it.
+     * Checks the shape of a config before its first `apply` (in `Context.plugin`) and before
+     * `update` tears anything down; throw to reject it.
+     * Throwing on load marks the plugin `Failed` and emits `PluginFailed` without calling `apply`.
      */
     fun validate(config: C) {}
 }
@@ -106,6 +108,7 @@ class Fork(
     private var needsReconcile = false
     private var forceRestart = false
     private var isDisposing = false
+    private var isRejected = false
 
     /** The job running the in-flight `apply`, and one that completes once that run is settled. */
     private var applyJob: Job? = null
@@ -158,7 +161,7 @@ class Fork(
     }
 
     private suspend fun reconcile() {
-        if (isDisposing) return
+        if (isDisposing || isRejected) return
 
         val wanted = resolve()
         val current = runtime
@@ -267,9 +270,19 @@ class Fork(
         }
         this.config = config
         this.body = body
+        isRejected = false
         forceRestart = true
         refresh()
         return true
+    }
+
+    /**
+     * Marks the fork `Failed` because its config was rejected by validation; it stays failed until `reconfigure`.
+     */
+    internal suspend fun reject(error: Throwable) {
+        isRejected = true
+        setStatus(Status.Failed(error.message ?: error.toString()))
+        parent.emit(PluginFailed(plugin = name, error = error))
     }
 
     /**
