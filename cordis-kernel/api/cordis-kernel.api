@@ -1,5 +1,8 @@
 public final class cordis/kernel/Context {
 	public static final field Companion Lcordis/kernel/Context$Companion;
+	public final fun contribute (Lcordis/kernel/ContributionKey;Ljava/lang/Object;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun contribute$default (Lcordis/kernel/Context;Lcordis/kernel/ContributionKey;Ljava/lang/Object;ILkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun contributions (Lcordis/kernel/ContributionKey;)Lkotlinx/coroutines/flow/StateFlow;
 	public final fun dispose (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun effect (Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun emit (Lcordis/kernel/CordisEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -35,6 +38,9 @@ public final class cordis/kernel/Context {
 public final class cordis/kernel/Context$Companion {
 	public final fun root (Lkotlinx/coroutines/CoroutineDispatcher;)Lcordis/kernel/Context;
 	public static synthetic fun root$default (Lcordis/kernel/Context$Companion;Lkotlinx/coroutines/CoroutineDispatcher;ILjava/lang/Object;)Lcordis/kernel/Context;
+}
+
+public abstract interface class cordis/kernel/ContributionKey {
 }
 
 public abstract interface class cordis/kernel/CordisClock {

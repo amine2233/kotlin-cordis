@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ProducerScope
@@ -144,6 +145,32 @@ public class Context internal constructor(
             registry.replaceValue(slot(key.serviceId), by = this@Context, mutate = mutate)
         }
     }
+
+    // MARK: Contributions
+
+    /**
+     * Adds [item] to the contribution point [key]; many contexts may contribute to the same key.
+     * Removed when the returned [Disposable] is invoked or this context's scope is disposed.
+     * Lists are sorted by ascending [order], then by registration order.
+     */
+    public suspend fun <T : Any> contribute(
+        key: ContributionKey<T>,
+        item: T,
+        order: Int = 0,
+    ): Disposable =
+        withContext(registry.dispatcher) {
+            if (scope.isDisposed) throw CordisException.Disposed()
+            val sequence = registry.contribute(key, item, order)
+            // NonCancellable: a cancelled caller must not skip the removal, the handle runs only once.
+            scope.collect { withContext(NonCancellable + registry.dispatcher) { registry.withdrawContribution(key, sequence) } }
+        }
+
+    /**
+     * Live list of the items contributed to [key], shared by every context of this graph and not
+     * split by realms or zones. Adding or removing items emits no events and does not republish
+     * [snapshotFlow].
+     */
+    public fun <T : Any> contributions(key: ContributionKey<T>): StateFlow<List<T>> = registry.contributions(key)
 
     // MARK: Space — isolation
 
