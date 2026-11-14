@@ -1,5 +1,6 @@
 public abstract interface class cordis/ServicePlugin : cordis/kernel/Plugin {
-	public abstract fun apply (Lcordis/kernel/Context;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun apply (Lcordis/kernel/Context;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun apply$suspendImpl (Lcordis/ServicePlugin;Lcordis/kernel/Context;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getKey ()Lcordis/kernel/ServiceKey;
 	public abstract fun make (Lcordis/kernel/Context;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -19,8 +20,10 @@ public final class cordis/TimersKt {
 }
 
 public abstract interface class cordis/UnitServicePlugin : cordis/ServicePlugin {
-	public abstract fun make (Lcordis/kernel/Context;Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public synthetic fun make (Lcordis/kernel/Context;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun make (Lcordis/kernel/Context;Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun make (Lcordis/kernel/Context;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun make$suspendImpl (Lcordis/UnitServicePlugin;Lcordis/kernel/Context;Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class cordis/UnitServicePlugin$DefaultImpls {
