@@ -32,7 +32,7 @@ Cordis' core idea: **everything is a plugin**, and plugins compose along two ort
 | `cordis-loader` | Declarative JSON load-plan loader (`LoadPlan`, `PluginFactoryRegistry`, `Context.load`) with `kotlinx.serialization`. | All KMP targets | Yes |
 | `cordis-testing` | Test support module (`ManualClock`, `settle(until = ...)`, `withTestApp`, `RecordedEvents`). | All KMP targets | Yes |
 | `cordis-runtime` | Enables and disables catalog plugins by key at runtime (`pluginCatalog { }`, `EnabledPluginsStore`, `PluginRuntimeDefault`) with an observable `StateFlow<List<PluginState>>`. | All KMP targets | Yes |
-| `cordis-ktor` | Ktor 3 server integration (`install(Cordis)`, `call.cordis`, `Route.requireService`, `Route.cordisAdmin`). | JVM | Yes |
+| `cordis-ktor` | Ktor 3 server integration (`install(Cordis)`, `call.cordis`, `Route.requireService`, `Route.cordisAdmin`, `Route.cordisSnapshot`). | JVM | Yes |
 | `cordis-android` | Android integration, opt-in (`AppForegroundPlugin` / `installAppForeground()`, `AppForegroundKey`, `DataStoreEnabledPluginsStore`). | Android | No |
 | `cordis-demo` | Executable walkthrough showing the 6 core scenarios. | JVM app | No |
 
@@ -161,7 +161,7 @@ runtime.state.collect { states -> render(states) }
 ```
 
 ### Ktor Server
-`cordis-ktor` (JVM only) owns a root `Context` and an optional `PluginRuntime` for a Ktor 3 `Application`: `install(Cordis)` starts the runtime before it returns, and `ApplicationStopped` stops it and disposes the context. `requireService` answers 503 (or `whenMissing`) while a service slot is empty and runs the handler with the service once it is filled. `cordisAdmin` mounts `GET plugins` and `PUT plugins/{key}` as JSON, with no content negotiation needed.
+`cordis-ktor` (JVM only) owns a root `Context` and an optional `PluginRuntime` for a Ktor 3 `Application`: `install(Cordis)` starts the runtime before it returns, and `ApplicationStopped` stops it and disposes the context. `requireService` answers 503 (or `whenMissing`) while a service slot is empty and runs the handler with the service once it is filled. `cordisAdmin` mounts `GET plugins` and `PUT plugins/{key}` as JSON, with no content negotiation needed. `cordisSnapshot` mounts read-only `GET snapshot/tree` and `GET snapshot/mermaid` (`text/plain`) and `GET health` (JSON, 200 when healthy and 503 otherwise), each rendered from a fresh `Context.snapshot()`. Neither has auth of its own.
 
 ```kotlin
 fun Application.module() {
@@ -171,7 +171,10 @@ fun Application.module() {
             requireService(SearchKey) { search -> call.respondText(search.query(call.parameters["q"].orEmpty())) }
         }
         authenticate("admin") {                          // the admin routes have no auth of their own
-            route("/admin") { cordisAdmin(checkNotNull(application.cordisRuntime)) }
+            route("/admin") {
+                cordisAdmin(checkNotNull(application.cordisRuntime))
+                cordisSnapshot(application.cordis)
+            }
         }
     }
 }
@@ -197,7 +200,7 @@ Worked examples: [simple / medium / hard](skills/kotlin-cordis/references/exampl
 Platform recipes: [Android / Compose](skills/kotlin-cordis/references/android.md) ·
 [Ktor](skills/kotlin-cordis/references/ktor.md) · [CLI](skills/kotlin-cordis/references/cli.md).
 Runnable samples: [`samples/README.md`](samples/README.md).
-- Ktor: a server running a sample plugin catalog with routes gated by `requireService`, the `cordisAdmin` routes, an SSE stream and an admin page (`./gradlew -p samples :ktor:run`, then `http://127.0.0.1:8080/admin`).
+- Ktor: a server running a sample plugin catalog with routes gated by `requireService`, the `cordisAdmin` and `cordisSnapshot` routes, an SSE stream and an admin page with the plugin table, health and the plugin graph (`./gradlew -p samples :ktor:run`, then `http://127.0.0.1:8080/admin`).
 - Android: a Compose app whose drawer is built from the `NavEntries` contribution point, with a Settings screen that toggles the plugins, persisted in DataStore.
 
 ```kotlin

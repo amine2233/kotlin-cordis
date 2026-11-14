@@ -147,6 +147,7 @@ A contribution point is a typed list that many plugins add to, such as the items
 - `Application.cordis` / `ApplicationCall.cordis` return the root context and `Application.cordisRuntime` / `ApplicationCall.cordisRuntime` the runtime (`null` when none is configured). All of them throw `IllegalStateException` when `Cordis` is not installed.
 - `Route.requireService(key, whenMissing = HttpStatusCode.ServiceUnavailable) { service -> }` reads the slot on every call: while it is empty the call gets `whenMissing` (503 by default) with an empty body and the handler does not run.
 - `Route.cordisAdmin(runtime)` mounts `GET plugins` and `PUT plugins/{key}` as JSON. It has no authentication or authorization of its own and must be mounted behind the host's.
+- `Route.cordisSnapshot(context)` mounts read-only `GET snapshot/tree` (`TextTreeVisitor`), `GET snapshot/mermaid` (`MermaidVisitor`), both `text/plain`, and `GET health` (`HealthVisitor`) as JSON. Every request takes one fresh `context.snapshot()` and walks it with a new visitor, since the visitors accumulate. `health` answers 200 when the report is healthy and 503 otherwise, with the same body. It works without a runtime, has no authentication or authorization of its own, exposes plugin names, keys and failure reasons, and must be mounted behind the host's auth.
 
 ## 15. Android (`cordis-android`)
 

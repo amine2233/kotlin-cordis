@@ -63,14 +63,18 @@ Run it from the repo root, then open <http://127.0.0.1:8080/admin>:
 | `GET /admin/plugins` | every plugin's state, in catalog order (`cordisAdmin`) |
 | `PUT /admin/plugins/{key}` | `{"enabled": <boolean>}` toggles a plugin: `400` / `404` / `409` (locked `logger`) / `503` |
 | `GET /admin/plugins/events` | server-sent events: the current plugin list on connect, then one event per state change |
-| `GET /admin` | a static HTML page that shows the plugins from the event stream, with a toggle per plugin |
+| `GET /admin/snapshot/tree` | `200` with the plugin tree as `text/plain` (`cordisSnapshot`) |
+| `GET /admin/snapshot/mermaid` | `200` with the Mermaid `flowchart TD` source of the plugin graph as `text/plain` (`cordisSnapshot`) |
+| `GET /admin/health` | `{"healthy": ..., "failed": [...], "missingServices": [...], "pending": [...]}`: `200` when healthy, `503` otherwise (e.g. `notes` pending while `database` is off) (`cordisSnapshot`) |
+| `GET /admin` | a static HTML page that shows the plugins from the event stream, with a toggle per plugin, plus the health report, the plugin tree and the Mermaid source, refreshed after every event |
 
 The toggles are saved in a JSON file mapping plugin key to boolean, e.g. `{"weather":false}`, so they survive a
 restart. It is `enabled-plugins.json` in the working directory (`samples/ktor/enabled-plugins.json` under
 `:ktor:run`, git-ignored), or the path in the `CORDIS_SAMPLE_STORE` environment variable when it is set.
 
 > **Local use only.** The admin routes and page have no authentication, authorization or CSRF protection: anyone
-> who can reach the server can turn features off. The server binds to `127.0.0.1` for that reason; do not expose it.
+> who can reach the server can turn features off. The read-only `cordisSnapshot` routes have none either, and they
+> expose plugin names, keys and failure reasons. The server binds to `127.0.0.1` for that reason; do not expose it.
 
 Its tests alone:
 

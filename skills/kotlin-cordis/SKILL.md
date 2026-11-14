@@ -41,7 +41,7 @@ dependencies { implementation("io.github.amine2233:cordis:<version>") }
 | `cordis` | what apps depend on: re-exports the kernel, adds `ServicePlugin`, `ctx.after`, `ctx.every` |
 | `cordis-loader` | `LoadPlan`, `loadPlan { }`, `LoadPlan.fromJson`, `PluginFactoryRegistry`, `ctx.load(...)` (kotlinx-serialization JSON) |
 | `cordis-runtime` | `pluginCatalog { }`, `PluginMetadata`, `EnabledPluginsStore`, `PluginRuntimeDefault`: enable/disable plugins by key, observable `StateFlow<List<PluginState>>` |
-| `cordis-ktor` | JVM only: `install(Cordis) { runtime = { ctx -> ... } }`, `call.cordis`, `call.cordisRuntime`, `Route.requireService(key) { service -> }`, `Route.cordisAdmin(runtime)` (no auth: mount behind the host's) |
+| `cordis-ktor` | JVM only: `install(Cordis) { runtime = { ctx -> ... } }`, `call.cordis`, `call.cordisRuntime`, `Route.requireService(key) { service -> }`, `Route.cordisAdmin(runtime)`, `Route.cordisSnapshot(ctx)` (no auth: mount both behind the host's) |
 | `cordis-android` | Android only, opt-in, not published yet (project dependency): `ctx.installAppForeground()` provides `AppForegroundKey` while the app is `STARTED`; `DataStoreEnabledPluginsStore(dataStore)` for `PluginRuntimeDefault` |
 | `cordis-testing` | `withTestApp`, `settle`, `ManualClock` (test scope only) |
 | `cordis-kernel` | zero-sugar core; pulled in by `cordis` |
