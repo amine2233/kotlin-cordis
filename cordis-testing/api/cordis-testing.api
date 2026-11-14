@@ -18,6 +18,7 @@ public final class cordis/testing/RecordedEvents {
 
 public final class cordis/testing/RecordedEventsKt {
 	public static final fun withTestApp (Lkotlin/jvm/functions/Function3;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun withTestApp (Lkotlinx/coroutines/CoroutineDispatcher;Lkotlin/jvm/functions/Function3;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class cordis/testing/SettleKt {

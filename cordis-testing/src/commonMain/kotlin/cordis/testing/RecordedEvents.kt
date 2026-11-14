@@ -6,6 +6,8 @@ import cordis.kernel.PluginFailed
 import cordis.kernel.PluginStatusChanged
 import cordis.kernel.ServiceChanged
 import cordis.kernel.TeardownFailed
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlin.concurrent.Volatile
 import kotlin.reflect.KClass
 
@@ -40,8 +42,19 @@ public class RecordedEvents {
 /**
  * Runs [body] against a fresh root context, always disposes it, and returns the recorded events.
  */
-public suspend fun withTestApp(body: suspend (Context, RecordedEvents) -> Unit): RecordedEvents {
-    val ctx = Context.root()
+public suspend fun withTestApp(body: suspend (Context, RecordedEvents) -> Unit): RecordedEvents =
+    withTestApp(Dispatchers.Default.limitedParallelism(1), body)
+
+/**
+ * Runs [body] against a fresh root context whose graph runs on [dispatcher], always disposes it,
+ * and returns the recorded events. Pass `StandardTestDispatcher(testScheduler)` to settle the graph
+ * deterministically with `advanceUntilIdle()`.
+ */
+public suspend fun withTestApp(
+    dispatcher: CoroutineDispatcher,
+    body: suspend (Context, RecordedEvents) -> Unit,
+): RecordedEvents {
+    val ctx = Context.root(dispatcher)
     val events = RecordedEvents()
     ctx.on<PluginFailed> { events.record(it) }
     ctx.on<PluginStatusChanged> { events.record(it) }
