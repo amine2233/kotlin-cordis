@@ -256,6 +256,11 @@ All logic lives in `mise.toml`:
 - `mise run test` (`./gradlew allTests`) / `mise run lint` — what the `CI` workflow runs on pull requests.
   CI runs on Linux (`ubuntu-latest`) only, covering JVM, Linux native and JS; the macOS/iOS targets
   are verified locally on a Mac (`./gradlew macosArm64Test` and a build that compiles the Apple targets).
+- `mise run build_documentations` (`./gradlew dokkaGenerate`) writes the aggregated Dokka API docs of the six
+  published modules to `build/dokka/html/`.
+- `mise run test-coverage` (`./gradlew allTests koverHtmlReport koverXmlReport`) runs all tests and writes the
+  aggregated Kover coverage reports (JVM tests only) to `build/reports/kover/`. CI's Test job runs `test-coverage`
+  on Linux in place of `test`; it only reports (no thresholds) and uploads the report as the `reports` artifact.
 - **Actions → Release → Run workflow** runs semantic-release (or automatically
   on every push to `main` when the repo variable `AUTO_RELEASE=true` is set): it tags
   `vX.Y.Z`, updates `CHANGELOG.md`, publishes `io.github.amine2233:cordis-kernel`, `cordis`,
