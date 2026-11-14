@@ -1,7 +1,14 @@
 package cordis.kernel
 
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+
+object VisitorDbKey : ServiceKey<String>
+
+object VisitorLoggerKey : ServiceKey<String>
 
 private fun pluginInfo(
     name: String,
@@ -66,6 +73,12 @@ private class RecordingVisitor : SnapshotVisitor {
 }
 
 private fun RuntimeSnapshot.recordedCalls(): List<String> = RecordingVisitor().also { accept(it) }.calls
+
+private fun RuntimeSnapshot.textTree(): String = TextTreeVisitor().also { accept(it) }.render()
+
+private fun RuntimeSnapshot.mermaid(): String = MermaidVisitor().also { accept(it) }.render()
+
+private fun RuntimeSnapshot.health(): HealthReport = HealthVisitor().also { accept(it) }.report()
 
 class SnapshotVisitorTests {
     @Test
@@ -174,4 +187,188 @@ class SnapshotVisitorTests {
 
         assertEquals(listOf("enter db 0", "slot DbKey@shared db", "exit db 0"), snapshot.recordedCalls())
     }
+
+    @Test
+    fun textTreeRendersRootsAsSiblingsWithStatusAndMissing() {
+        val snapshot =
+            RuntimeSnapshot(
+                plugins =
+                    listOf(
+                        pluginInfo("db"),
+                        pluginInfo("repo", status = Fork.Status.Pending, parent = "db", missing = listOf("LoggerKey")),
+                        pluginInfo("api", status = Fork.Status.Failed("boom")),
+                    ),
+                slots = emptyList(),
+            )
+
+        assertEquals(
+            """
+            ├─ db [Active]
+            │  └─ repo [Pending] missing: LoggerKey
+            └─ api [Failed: boom]
+            """.trimIndent(),
+            snapshot.textTree(),
+        )
+    }
+
+    @Test
+    fun textTreeUsesSpacesUnderLastSibling() {
+        val snapshot =
+            RuntimeSnapshot(
+                plugins =
+                    listOf(
+                        pluginInfo("app"),
+                        pluginInfo("loading", status = Fork.Status.Loading, parent = "app"),
+                        pluginInfo("last", status = Fork.Status.Disposed, parent = "app"),
+                        pluginInfo("leaf", parent = "last", missing = listOf("AKey", "BKey")),
+                        pluginInfo("loop", parent = "loop"),
+                    ),
+                slots = emptyList(),
+            )
+
+        assertEquals(
+            """
+            ├─ app [Active]
+            │  ├─ loading [Loading]
+            │  └─ last [Disposed]
+            │     └─ leaf [Active] missing: AKey, BKey
+            └─ loop [Active]
+            """.trimIndent(),
+            snapshot.textTree(),
+        )
+    }
+
+    @Test
+    fun textTreeOfEmptySnapshotIsEmpty() {
+        assertEquals("", RuntimeSnapshot(plugins = emptyList(), slots = emptyList()).textTree())
+    }
+
+    @Test
+    fun mermaidRendersNodesParentEdgesAndServiceEdges() {
+        val snapshot =
+            RuntimeSnapshot(
+                plugins =
+                    listOf(
+                        pluginInfo("db \"main\" <x> #1"),
+                        pluginInfo(
+                            "repo",
+                            status = Fork.Status.Pending,
+                            parent = "db \"main\" <x> #1",
+                            inject = Inject(required = listOf(ServiceId("Key")), optional = listOf(ServiceId("Other"))),
+                        ),
+                        pluginInfo(
+                            "api",
+                            status = Fork.Status.Failed("boom\nagain"),
+                            inject = Inject(required = listOf(ServiceId("Other"))),
+                        ),
+                    ),
+                slots =
+                    listOf(
+                        slotInfo("Key", "db \"main\" <x> #1", realm = "tenant"),
+                        slotInfo("Other", "db \"main\" <x> #1"),
+                        slotInfo("Key", null),
+                    ),
+            )
+
+        assertEquals(
+            """
+            flowchart TD
+              p0["db #quot;main#quot; #lt;x#gt; #35;1 [Active]"]
+              p1["repo [Pending]"]
+              p2["api [Failed: boom again]"]
+              p0 --> p1
+              p0 -.->|"Key@tenant"| p1
+              p0 -.->|"Other"| p1
+              p0 -.->|"Other"| p2
+            """.trimIndent(),
+            snapshot.mermaid(),
+        )
+    }
+
+    @Test
+    fun mermaidOfEmptySnapshotIsHeaderOnly() {
+        assertEquals("flowchart TD", RuntimeSnapshot(plugins = emptyList(), slots = emptyList()).mermaid())
+    }
+
+    @Test
+    fun mermaidSkipsEdgeToCyclicParent() {
+        val snapshot =
+            RuntimeSnapshot(
+                plugins = listOf(pluginInfo("x", parent = "y"), pluginInfo("y", parent = "x")),
+                slots = emptyList(),
+            )
+
+        assertEquals(
+            """
+            flowchart TD
+              p0["x [Active]"]
+              p1["y [Active]"]
+              p0 --> p1
+            """.trimIndent(),
+            snapshot.mermaid(),
+        )
+    }
+
+    @Test
+    fun healthReportIsHealthyWhenAllActive() {
+        val snapshot =
+            RuntimeSnapshot(
+                plugins = listOf(pluginInfo("a"), pluginInfo("b", parent = "a")),
+                slots = emptyList(),
+            )
+
+        val report = snapshot.health()
+
+        assertTrue(report.healthy)
+        assertEquals(HealthReport(failed = emptyList(), missingServices = emptyList(), pending = emptyList()), report)
+    }
+
+    @Test
+    fun healthReportListsFailedMissingAndPendingInVisitOrder() {
+        val failed = pluginInfo("failed", status = Fork.Status.Failed("boom"))
+        val waiting = pluginInfo("waiting", status = Fork.Status.Pending, missing = listOf("LoggerKey"))
+        val active = pluginInfo("active")
+        val loading = pluginInfo("loading", status = Fork.Status.Loading)
+        val child = pluginInfo("child", status = Fork.Status.Pending, parent = "failed")
+        val snapshot = RuntimeSnapshot(plugins = listOf(failed, waiting, active, loading, child), slots = emptyList())
+
+        val report = snapshot.health()
+
+        assertFalse(report.healthy)
+        assertEquals(listOf(failed), report.failed)
+        assertEquals(listOf(waiting), report.missingServices)
+        assertEquals(listOf(child, waiting), report.pending)
+    }
+
+    @Test
+    fun walksRealGraph() =
+        runTest {
+            withRoot { app ->
+                app.plugin("db") { it.provide(VisitorDbKey, "db") }
+                app.plugin("repo", inject = Inject.of(required = listOf(VisitorDbKey, VisitorLoggerKey))) {}
+                app.plugin("parent") { it.plugin("child") {} }
+                app.plugin("api") { throw IllegalStateException("boom") }
+
+                val snapshot = app.snapshot()
+                val logger = VisitorLoggerKey.serviceId.description
+
+                assertEquals(
+                    """
+                    ├─ db [Active]
+                    ├─ repo [Pending] missing: $logger
+                    ├─ parent [Active]
+                    │  └─ child [Active]
+                    └─ api [Failed: boom]
+                    """.trimIndent(),
+                    snapshot.textTree(),
+                )
+                assertTrue(
+                    "  p0 -.->|\"${VisitorDbKey.serviceId.description}\"| p1" in snapshot.mermaid().lines(),
+                )
+                val report = snapshot.health()
+                assertEquals(listOf("api"), report.failed.map { it.name })
+                assertEquals(listOf("repo"), report.missingServices.map { it.name })
+                assertEquals(listOf("repo"), report.pending.map { it.name })
+            }
+        }
 }
