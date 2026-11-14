@@ -15,6 +15,8 @@ sealed interface Destination {
     ) : Destination
 
     data object Settings : Destination
+
+    data object Debug : Destination
 }
 
 data class DrawerState(
@@ -26,10 +28,12 @@ data class DrawerState(
             when (selected) {
                 is Destination.Feature -> entries.firstOrNull { it.id == selected.id }?.title.orEmpty()
                 Destination.Settings -> SETTINGS_TITLE
+                Destination.Debug -> DEBUG_TITLE
             }
 
     companion object {
         const val SETTINGS_TITLE = "Settings"
+        const val DEBUG_TITLE = "Debug"
     }
 }
 
