@@ -45,3 +45,6 @@ includeBuild("..")
 
 include("shared")
 include("ktor")
+if (androidSdkAvailable) {
+    include("android")
+}
