@@ -10,6 +10,7 @@ out/
 kotlin-js-store/
 .kotlin/
 .env.local
+local.properties
 node_modules/
 /factory/jobs/
 /.worktrees/

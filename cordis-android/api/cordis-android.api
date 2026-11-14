@@ -1,0 +1,31 @@
+public final class cordis/android/AppForeground {
+	public static final field INSTANCE Lcordis/android/AppForeground;
+}
+
+public final class cordis/android/AppForegroundKey : cordis/kernel/ServiceKey {
+	public static final field INSTANCE Lcordis/android/AppForegroundKey;
+	public fun getServiceId ()Lcordis/kernel/ServiceId;
+}
+
+public final class cordis/android/AppForegroundKt {
+	public static final fun installAppForeground (Lcordis/kernel/Context;Landroidx/lifecycle/LifecycleOwner;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun installAppForeground$default (Lcordis/kernel/Context;Landroidx/lifecycle/LifecycleOwner;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class cordis/android/AppForegroundPlugin : cordis/kernel/Plugin {
+	public static final field INSTANCE Lcordis/android/AppForegroundPlugin;
+	public fun apply (Lcordis/kernel/Context;Landroidx/lifecycle/LifecycleOwner;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public synthetic fun apply (Lcordis/kernel/Context;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getInject ()Lcordis/kernel/Inject;
+	public fun getName ()Ljava/lang/String;
+	public fun getPluginKey-7FvoLxY ()Ljava/lang/String;
+	public fun validate (Landroidx/lifecycle/LifecycleOwner;)V
+	public synthetic fun validate (Ljava/lang/Object;)V
+}
+
+public final class cordis/android/DataStoreEnabledPluginsStore : cordis/runtime/EnabledPluginsStore {
+	public fun <init> (Landroidx/datastore/core/DataStore;)V
+	public fun load (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun save (Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+

@@ -31,6 +31,7 @@ Cordis' core idea: **everything is a plugin**, and plugins compose along two ort
 - `cordis-testing`: Test support module (`ManualClock`, `settle(until = ...)`, `withTestApp`, `RecordedEvents`).
 - `cordis-runtime`: Enables and disables catalog plugins by key at runtime (`pluginCatalog { }`, `EnabledPluginsStore`, `PluginRuntimeDefault`) with an observable `StateFlow<List<PluginState>>`.
 - `cordis-ktor`: Ktor 3 server integration, JVM only (`install(Cordis)`, `call.cordis`, `Route.requireService`, `Route.cordisAdmin`).
+- `cordis-android`: Android integration, opt-in and not published (`AppForegroundPlugin` / `installAppForeground()`, `AppForegroundKey`, `DataStoreEnabledPluginsStore`).
 - `cordis-demo`: Executable walkthrough showing the 6 core scenarios.
 
 ---
@@ -139,6 +140,14 @@ fun Application.module() {
 }
 ```
 
+### Android
+`cordis-android` is included in the build only when an Android SDK is found (`sdk.dir` in `local.properties`, or `ANDROID_HOME`). `installAppForeground()` provides `AppForegroundKey` while `ProcessLifecycleOwner` (or the `LifecycleOwner` you pass) is at least `STARTED`, so plugins that require it pause in the background and resume in the foreground. `DataStoreEnabledPluginsStore` persists `PluginRuntimeDefault` overrides in a Preferences `DataStore`, touching only its own `cordis.enabled.*` keys. The module is not published yet: depend on it as a project dependency.
+
+```kotlin
+cordis.installAppForeground()
+val runtime = PluginRuntimeDefault(cordis, catalog, DataStoreEnabledPluginsStore(context.dataStore))
+```
+
 ### Deterministic Testing
 `cordis-testing` offers `ManualClock` for controlling virtual time without sleeping real wall-clock time, `settle { condition }` for bounded yielding, and `withTestApp { ctx, events -> ... }` which captures lifecycle and failure events in order and guarantees root disposal. Inside `runTest`, `withTestApp(StandardTestDispatcher(testScheduler)) { ctx, events -> ... }` runs the graph on the test scheduler, so `advanceUntilIdle()` settles it deterministically.
 
@@ -211,5 +220,5 @@ All logic lives in `mise.toml`:
   on every push to `main` when the repo variable `AUTO_RELEASE=true` is set): it tags
   `vX.Y.Z`, updates `CHANGELOG.md`, publishes `io.github.amine2233:cordis-kernel`, `cordis`,
   `cordis-loader`, `cordis-testing`, `cordis-runtime` and `cordis-ktor` to GitHub Packages and creates the GitHub release
-  with the jars attached.
+  with the jars attached. `cordis-android` is not published.
 - `mise run release --dry-run` previews the next version locally.
