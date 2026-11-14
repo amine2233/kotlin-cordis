@@ -31,6 +31,7 @@ Heavy asynchronous workloads belong inside the services themselves, not in the p
 | `Plugin.kt` | `Plugin`, `Fork`, `PluginHandle`, `UpdateOutcome` | Plugin definition and its reactive lifecycle (`Pending`, `Loading`, `Active`, `Failed`, `Disposed`). |
 | `Context.kt` | `Context` | The primary API plugins interact with: service lookup, provision, contributions, events, isolation, interceptors. |
 | `Snapshot.kt` | `RuntimeSnapshot`, `PluginInfo`, `SlotInfo`, `PluginId`, `PluginKey` | Read-only point-in-time snapshot of the graph structure and statuses, also published live through `Context.snapshotFlow()`. |
+| `SnapshotVisitor.kt`, `SnapshotVisitors.kt` | `SnapshotVisitor`, `RuntimeSnapshot.accept`, `TextTreeVisitor`, `MermaidVisitor`, `HealthVisitor`, `HealthReport` | Depth-first walk of a snapshot's plugin tree (roots in plugin order, cycle members as extra roots, each plugin once) and the built-in text tree, Mermaid flowchart and health report visitors. |
 
 ## 3. Reactivity and Cascade Reconciler
 

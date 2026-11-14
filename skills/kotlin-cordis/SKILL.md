@@ -85,6 +85,7 @@ Reading and reacting:
 - `ctx.events<E>(): Flow<E>`; emit with `ctx.emit(event)`; events implement `CordisEvent`.
 - Both `events()` and `serviceFlow()` complete normally when their context is disposed.
 - `ctx.snapshotFlow(): StateFlow<RuntimeSnapshot>` — the live `snapshot()` of the whole graph (same instance from every context, ignores zones), updated before the matching event. `PluginInfo.missing` lists the required services a plugin is waiting for.
+- `snapshot.accept(visitor: SnapshotVisitor)` walks the plugin tree depth-first: roots (no or unknown parent) in plugin order, and per plugin `enterPlugin(plugin, depth)`, `visitProvidedSlot` per slot it provides, `visitMissing` per missing service, its children, then `exitPlugin`. Cycle members are walked as extra roots, each plugin once. Built-ins: `TextTreeVisitor().render()` (box-drawing tree), `MermaidVisitor().render()` (`flowchart TD`) and `HealthVisitor().report()` (`failed`, `missingServices`, `pending`, `healthy`). They accumulate, so use a fresh one per snapshot.
 - Give a plugin a stable, obfuscation-proof identity with `override val pluginKey = PluginKey("db")` (lambda plugins: `ctx.plugin("db", key = PluginKey("db")) { }`). It is optional and not unique, and shows up as `PluginInfo.key`, `SlotInfo.providerKey` and the `key` of the plugin events.
 - Built-in events: `ServiceChanged`, `PluginStatusChanged`, `PluginFailed`, `TeardownFailed`, `ListenerFailed`, `TaskFailed`.
 
