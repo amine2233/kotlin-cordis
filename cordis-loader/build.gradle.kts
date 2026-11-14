@@ -7,7 +7,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(project(":cordis"))
-            implementation(libs.kotlinx.serialization.json)
+            api(libs.kotlinx.serialization.json)
         }
         commonTest.dependencies {
             implementation(project(":cordis-testing"))
