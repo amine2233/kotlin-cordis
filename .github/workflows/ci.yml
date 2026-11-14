@@ -15,6 +15,7 @@ jobs:
     with:
       enable-lint: true
       enable-title-check: true
+      enable-coverage: true
 
   samples-ktor:
     runs-on: ubuntu-latest
