@@ -6,7 +6,7 @@ binary-compatibility-validator = "0.16.3"
 dokka = "2.3.0"
 kover = "0.9.11"
 ktor = "3.6.1"
-android-gradle-plugin = "8.13.2"
+android-gradle-plugin = "9.5.1"
 androidx-lifecycle = "2.9.4"
 androidx-datastore = "1.3.0"
 compose-bom = "2026.06.01"
@@ -17,6 +17,7 @@ kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-c
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
 ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor" }

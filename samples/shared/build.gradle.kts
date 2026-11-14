@@ -6,19 +6,13 @@ plugins {
 
 val androidSdkAvailable = gradle.extra["androidSdkAvailable"] == true
 
-// AGP is only on the classpath when an SDK is found, so its extension is configured without its types.
+// AGP is only on the classpath when an SDK is found, so its KMP Android target is configured without its types.
 if (androidSdkAvailable) {
-    apply(plugin = "com.android.library")
-    extensions.getByName("android").withGroovyBuilder {
+    apply(plugin = "com.android.kotlin.multiplatform.library")
+    (kotlin as ExtensionAware).extensions.getByName("android").withGroovyBuilder {
         setProperty("namespace", "cordis.samples.shared")
         setProperty("compileSdk", 36)
-        "defaultConfig" {
-            setProperty("minSdk", 23)
-        }
-        "compileOptions" {
-            setProperty("sourceCompatibility", JavaVersion.VERSION_17)
-            setProperty("targetCompatibility", JavaVersion.VERSION_17)
-        }
+        setProperty("minSdk", 23)
     }
 }
 
@@ -31,12 +25,6 @@ kotlin {
             executionTask.configure {
                 useJUnitPlatform()
             }
-        }
-    }
-
-    if (androidSdkAvailable) {
-        androidTarget {
-            compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
         }
     }
 
