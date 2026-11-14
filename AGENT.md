@@ -19,6 +19,7 @@ with spatiotemporal composability), ported from `swift-cordis`.
 
 ## CI
 - CI (GitHub Actions via `kotlin-ci-shared`) runs `mise run lint` and `mise run test` (`./gradlew allTests`) on `ubuntu-latest` only, covering JVM, Linux native and JS.
+- A second CI job, `samples-ktor`, runs `./gradlew -p samples :ktor:check` on `ubuntu-latest`: only the Ktor sample's tasks, so it works with or without the runner's Android SDK. The rest of the samples build is not run in CI.
 - The macOS and iOS targets are not built or tested in CI. Verify them locally on a Mac with `./gradlew macosArm64Test` (also run by `factory/checks.sh`) and a build that compiles the Apple targets (e.g. `./gradlew build -x check`).
 
 ## Conventions
@@ -35,5 +36,5 @@ with spatiotemporal composability), ported from `swift-cordis`.
   - `cordis-ktor`: Ktor 3 server integration, JVM only: `install(Cordis)` owns the root context and an optional runtime, `Route.requireService` gates a handler on a service slot, `Route.cordisAdmin` mounts unauthenticated JSON admin routes.
   - `cordis-android`: opt-in Android library (needs an Android SDK, not published): `AppForegroundPlugin` / `installAppForeground()` provide `AppForegroundKey` while a `LifecycleOwner` (by default `ProcessLifecycleOwner`) is at least `STARTED`; `DataStoreEnabledPluginsStore` is an `EnabledPluginsStore` on a Preferences `DataStore`.
   - `cordis-demo`: 6-scenario walkthrough.
-- Samples: `samples/` is a separate Gradle build (not part of the root build or CI) that consumes the library through `includeBuild("..")`; its `shared` module holds the sample feature plugins and `sampleCatalog()`, see `samples/README.md`. Its tests run with `./gradlew -p samples check`, which `factory/checks.sh` runs too.
+- Samples: `samples/` is a separate Gradle build (not part of the root build; CI runs only its `ktor` module, in the `samples-ktor` job) that consumes the library through `includeBuild("..")`; its `shared` module holds the sample feature plugins and `sampleCatalog()`, and its `ktor` module is a Ktor server running that catalog with gated feature routes, the admin routes, an SSE stream and an admin page (`./gradlew -p samples :ktor:run`, then `http://127.0.0.1:8080/admin`), see `samples/README.md`. Its tests run with `./gradlew -p samples check`, which `factory/checks.sh` runs too.
 - Tests: Pure Kotlin test suite (`kotlin.test` + `kotlinx.coroutines.test.runTest`). Every root a test creates must be disposed, even when the test fails: kernel tests create roots through `withRoot` (`cordis-kernel/src/commonTest/kotlin/cordis/kernel/TestRoot.kt`), other modules' tests through `withTestApp`.
